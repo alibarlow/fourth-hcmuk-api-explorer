@@ -67,7 +67,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .api-card.open .api-body{display:block}
 
 /* ── Groups ── */
-.group-heading{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;padding:12px 0 5px;border-bottom:1px solid #f3f4f6;margin-bottom:2px}
+.group-heading{font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:#374151;padding:12px 0 5px;border-bottom:1px solid #e5e7eb;margin-bottom:2px}
+/* ── Section header ── */
+.section-header{padding:18px 0 10px;font-size:20px;font-weight:700;color:#111827;border-bottom:2px solid #e5e7eb;margin-bottom:16px}
 
 /* ── Endpoints ── */
 .endpoint{padding:8px 0;border-bottom:1px solid #f9fafb}
@@ -2513,7 +2515,7 @@ function render(){
         <div class="no-results-text">No APIs match your search or filter.</div>
       </div>`;
   } else {
-    content.innerHTML=visible.map(a=>renderApi(a,autoOpen)).join('');
+    content.innerHTML=`<div class="section-header">HCM UK</div>`+visible.map(a=>renderApi(a,autoOpen)).join('');
   }
 }
 
