@@ -5,460 +5,2563 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fourth API Explorer</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fff;color:#1a1a2e;font-size:14px;line-height:1.5}
 
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #f8f9fa;
-    color: #1a1a2e;
-    min-height: 100vh;
-  }
+/* ── Header ── */
+.header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.07);padding:10px 24px;display:flex;align-items:center;gap:16px}
+.header-brand{display:flex;align-items:center;gap:9px;white-space:nowrap}
+.header-logo{width:30px;height:30px;background:#0f4c81;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:800;flex-shrink:0}
+.header-title{font-size:16px;font-weight:700;color:#111827}
+.search-wrap{flex:1;max-width:420px;position:relative}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9ca3af;pointer-events:none}
+.search-input{width:100%;padding:7px 12px 7px 34px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;transition:border-color .15s,box-shadow .15s;color:#111827}
+.search-input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.search-input::placeholder{color:#9ca3af}
 
-  header {
-    background: #fff;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 20px 0 16px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  }
+/* ── Filters ── */
+.filters{padding:10px 24px;border-bottom:1px solid #f3f4f6;display:flex;flex-wrap:wrap;gap:6px;background:#fafafa}
+.filter-btn{padding:4px 12px;border:1px solid #e5e7eb;border-radius:20px;background:#fff;color:#6b7280;font-size:12px;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:inherit}
+.filter-btn:hover{border-color:#3b82f6;color:#3b82f6}
+.filter-btn.active{background:#3b82f6;border-color:#3b82f6;color:#fff}
 
-  .container {
-    max-width: 940px;
-    margin: 0 auto;
-    padding: 0 24px;
-  }
+/* ── Stats ── */
+.stats{padding:8px 24px;border-bottom:1px solid #f3f4f6;display:flex;gap:18px;flex-wrap:wrap;align-items:center;background:#fafafa}
+.stat-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#6b7280}
+.stat-count{font-weight:700;color:#111827;font-size:14px}
+.stat-sep{color:#d1d5db}
 
-  .header-top {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 14px;
-  }
+/* ── Content ── */
+.content{padding:18px 24px;max-width:1060px;margin:0 auto}
 
-  .logo {
-    font-size: 17px;
-    font-weight: 700;
-    color: #111827;
-    letter-spacing: -0.4px;
-    white-space: nowrap;
-  }
+/* ── API Card ── */
+.api-card{border:1px solid #e5e7eb;border-radius:10px;margin-bottom:10px;overflow:hidden;transition:box-shadow .15s}
+.api-card:hover{box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.api-card.exp-open{border-left:3px solid #22c55e}
+.api-card.exp-emp{border-left:3px solid #3b82f6}
+.api-card.exp-int{border-left:3px solid #9ca3af}
+.api-card.exp-client{border-left:3px solid #f59e0b}
 
-  .logo span { color: #4f46e5; }
+.api-header{padding:13px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;background:#fafafa;user-select:none;transition:background .12s}
+.api-header:hover{background:#f3f4f6}
+.api-icon{font-size:22px;flex-shrink:0;width:34px;text-align:center}
+.api-meta{flex:1;min-width:0}
+.api-title-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.api-title{font-size:14px;font-weight:700;color:#111827}
+.api-subtitle{font-size:12px;color:#6b7280;margin-top:2px}
+.api-expose-note{font-size:11px;color:#9ca3af;margin-top:1px}
+.api-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.ep-count{font-size:12px;color:#9ca3af;white-space:nowrap}
+.chevron{width:16px;height:16px;color:#9ca3af;transition:transform .2s;flex-shrink:0}
+.api-card.open .chevron{transform:rotate(180deg)}
 
-  .search-wrap {
-    flex: 1;
-    position: relative;
-  }
+/* ── Exposure badges ── */
+.badge-exp{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
+.exp-open-badge{background:#dcfce7;color:#166534}
+.exp-emp-badge{background:#dbeafe;color:#1e40af}
+.exp-int-badge{background:#f3f4f6;color:#4b5563}
+.exp-client-badge{background:#fef3c7;color:#92400e}
 
-  .search-icon {
-    position: absolute;
-    left: 11px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 13px;
-    pointer-events: none;
-    opacity: 0.5;
-  }
+/* ── API Body ── */
+.api-body{display:none;padding:0 16px 14px 16px}
+.api-card.open .api-body{display:block}
 
-  #search {
-    width: 100%;
-    padding: 9px 12px 9px 34px;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 13.5px;
-    outline: none;
-    transition: border-color 0.15s, background 0.15s;
-    background: #fafafa;
-    color: #111827;
-  }
+/* ── Groups ── */
+.group-heading{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;padding:12px 0 5px;border-bottom:1px solid #f3f4f6;margin-bottom:2px}
 
-  #search:focus {
-    border-color: #4f46e5;
-    background: #fff;
-  }
+/* ── Endpoints ── */
+.endpoint{padding:8px 0;border-bottom:1px solid #f9fafb}
+.endpoint:last-child{border-bottom:none}
+.ep-row{display:flex;align-items:flex-start;gap:9px}
+.ep-info{flex:1;min-width:0}
+.ep-name{font-size:13px;font-weight:600;color:#111827}
+.ep-desc{font-size:12px;color:#6b7280;margin-top:1px}
+.ep-path{font-family:'SF Mono',Consolas,monospace;font-size:11px;color:#9ca3af;margin-top:3px}
 
-  #search::placeholder { color: #9ca3af; }
+/* ── Method badges ── */
+.method{display:inline-flex;align-items:center;justify-content:center;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:.04em;flex-shrink:0;min-width:52px;margin-top:2px}
+.m-GET{background:#dcfce7;color:#166534}
+.m-POST{background:#dbeafe;color:#1e40af}
+.m-PATCH{background:#fef3c7;color:#92400e}
+.m-PUT{background:#ccfbf1;color:#134e4a}
+.m-DELETE{background:#fee2e2;color:#991b1b}
+.m-EVENT{background:#ede9fe;color:#5b21b6}
+.m-QUERY{background:#fce7f3;color:#9d174d}
 
-  .filters {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
+/* ── Show fields toggle ── */
+.toggle-fields{margin-top:6px;padding:3px 10px;border:1px solid #e5e7eb;border-radius:4px;background:#fff;font-size:11px;color:#6b7280;cursor:pointer;font-family:inherit;transition:all .15s}
+.toggle-fields:hover{border-color:#3b82f6;color:#3b82f6}
 
-  .filter-btn {
-    padding: 5px 12px;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 20px;
-    background: #fff;
-    font-size: 12px;
-    font-weight: 500;
-    color: #6b7280;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-    line-height: 1.4;
-  }
+/* ── Fields table ── */
+.fields-wrap{display:none;margin-top:8px}
+.fields-wrap.open{display:block}
+.fields-table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden}
+.fields-table th{background:#f9fafb;padding:5px 10px;text-align:left;font-weight:600;color:#6b7280;border-bottom:1px solid #e5e7eb;font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+.fields-table th:first-child{width:28%}
+.fields-table th:nth-child(2){width:14%}
+.fields-table td{padding:5px 10px;border-bottom:1px solid #f3f4f6;vertical-align:top;color:#374151}
+.fields-table tr:last-child td{border-bottom:none}
+.fields-table tr:hover td{background:#fafafa}
+.field-name{font-family:'SF Mono',Consolas,monospace;font-size:11px;color:#1f2937}
+.field-desc{font-size:12px;color:#6b7280}
 
-  .filter-btn:hover { border-color: #4f46e5; color: #4f46e5; }
-  .filter-btn.active { background: #4f46e5; border-color: #4f46e5; color: #fff; }
+/* ── Field badges ── */
+.badge-field{display:inline-flex;align-items:center;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;white-space:nowrap}
+.f-required{background:#dcfce7;color:#166534}
+.f-optional{background:#f3f4f6;color:#6b7280}
+.f-readonly{background:#dbeafe;color:#1e40af}
+.f-system{background:#e2e8f0;color:#475569}
 
-  main { padding: 22px 0 56px; }
+/* ── No results ── */
+.no-results{text-align:center;padding:56px 0;color:#9ca3af}
+.no-results-icon{font-size:40px;margin-bottom:14px}
+.no-results-text{font-size:14px}
 
-  .summary {
-    display: flex;
-    gap: 14px;
-    margin-bottom: 16px;
-    align-items: center;
-    min-height: 22px;
-  }
-
-  .summary-stat { font-size: 12.5px; color: #6b7280; }
-  .summary-stat strong { color: #374151; font-weight: 600; }
-  .summary-divider { width: 1px; height: 12px; background: #e5e7eb; }
-
-  .no-results {
-    text-align: center;
-    padding: 56px 0;
-    color: #9ca3af;
-    font-size: 14px;
-  }
-
-  .api-card {
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    margin-bottom: 8px;
-    overflow: hidden;
-    transition: box-shadow 0.15s;
-  }
-
-  .api-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
-
-  .api-header {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    padding: 14px 18px;
-    cursor: pointer;
-    user-select: none;
-  }
-
-  .api-icon {
-    font-size: 18px;
-    width: 34px;
-    height: 34px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f3f4f6;
-    border-radius: 8px;
-    flex-shrink: 0;
-  }
-
-  .api-title {
-    font-size: 14.5px;
-    font-weight: 600;
-    color: #111827;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .badge {
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 10.5px;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .badge-open   { background: #d1fae5; color: #065f46; }
-  .badge-emp    { background: #dbeafe; color: #1e40af; }
-  .badge-int    { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
-  .badge-client { background: #fef3c7; color: #92400e; }
-
-  .endpoint-count {
-    font-size: 12px;
-    color: #9ca3af;
-    font-weight: 500;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .chevron {
-    color: #d1d5db;
-    font-size: 11px;
-    transition: transform 0.2s;
-    flex-shrink: 0;
-  }
-
-  .api-card.open .chevron { transform: rotate(180deg); }
-
-  .api-body {
-    display: none;
-    border-top: 1px solid #f3f4f6;
-    padding: 0 18px 16px;
-  }
-
-  .api-card.open .api-body { display: block; }
-
-  .api-subtitle {
-    font-size: 13px;
-    color: #4b5563;
-    margin: 13px 0 3px;
-    line-height: 1.5;
-  }
-
-  .api-expose-note {
-    font-size: 11.5px;
-    color: #9ca3af;
-    margin-bottom: 16px;
-    font-style: italic;
-  }
-
-  .endpoint-group { margin-bottom: 16px; }
-  .endpoint-group:last-child { margin-bottom: 0; }
-
-  .group-name {
-    font-size: 10.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.9px;
-    color: #9ca3af;
-    padding-bottom: 7px;
-    border-bottom: 1px solid #f3f4f6;
-    margin-bottom: 2px;
-  }
-
-  .endpoint {
-    display: grid;
-    grid-template-columns: 56px 1fr;
-    gap: 10px;
-    padding: 8px 0;
-    border-bottom: 1px solid #fafafa;
-    align-items: start;
-  }
-
-  .endpoint:last-child { border-bottom: none; }
-
-  .method-col {
-    display: flex;
-    padding-top: 2px;
-  }
-
-  .method-badge {
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    white-space: nowrap;
-    display: inline-block;
-  }
-
-  .method-GET    { background: #d1fae5; color: #065f46; }
-  .method-POST   { background: #dbeafe; color: #1e40af; }
-  .method-PATCH  { background: #fef3c7; color: #92400e; }
-  .method-PUT    { background: #ccfbf1; color: #115e59; }
-  .method-DELETE { background: #fee2e2; color: #991b1b; }
-  .method-EVENT  { background: #ede9fe; color: #5b21b6; }
-  .method-QUERY  { background: #fce7f3; color: #9d174d; }
-
-  .endpoint-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: #111827;
-    margin-bottom: 2px;
-  }
-
-  .endpoint-desc {
-    font-size: 12px;
-    color: #6b7280;
-    margin-bottom: 4px;
-    line-height: 1.45;
-  }
-
-  .endpoint-path {
-    font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace;
-    font-size: 10.5px;
-    color: #9ca3af;
-    background: #f9fafb;
-    padding: 2px 6px;
-    border-radius: 4px;
-    display: inline-block;
-    border: 1px solid #f3f4f6;
-  }
-
-  .hidden { display: none !important; }
+@media(max-width:640px){
+  .header{padding:8px 12px}
+  .filters,.stats,.content{padding-left:12px;padding-right:12px}
+  .ep-path{display:none}
+}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="container">
-    <div class="header-top">
-      <div class="logo">Fourth <span>API Explorer</span></div>
-      <div class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="search" placeholder="Search APIs, endpoints, paths, descriptions…" autocomplete="off" spellcheck="false">
-      </div>
-    </div>
-    <div class="filters" id="filters">
-      <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="open">Open APIs only</button>
-      <button class="filter-btn" data-filter="int">Internal only</button>
-      <button class="filter-btn" data-filter="area-onboarding">Onboarding</button>
-      <button class="filter-btn" data-filter="area-people">People &amp; HR</button>
-      <button class="filter-btn" data-filter="area-ess">Employee self-service</button>
-      <button class="filter-btn" data-filter="area-iq">iQ &amp; Alerts</button>
-      <button class="filter-btn" data-filter="area-auth">Auth</button>
-      <button class="filter-btn" data-filter="area-hmrc">HMRC</button>
-      <button class="filter-btn" data-filter="area-infra">Audit &amp; infra</button>
-    </div>
+<header class="header">
+  <div class="header-brand">
+    <div class="header-logo">4</div>
+    <span class="header-title">Fourth API Explorer</span>
+  </div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/>
+    </svg>
+    <input class="search-input" id="search" type="search" placeholder="Search APIs, endpoints, fields…" autocomplete="off">
   </div>
 </header>
 
-<main>
-  <div class="container">
-    <div class="summary" id="summary"></div>
-    <div id="api-list"></div>
-    <div class="no-results hidden" id="no-results">No APIs or endpoints match your search.</div>
-  </div>
-</main>
+<div class="filters" id="filters"></div>
+<div class="stats" id="stats"></div>
+<main class="content" id="content"></main>
 
 <script>
-const DATA = {"apis":[{"id":"onboarding-public","area":"onboarding","exposure":"open","icon":"👤","title":"Onboarding Public API","subtitle":"Brand management and short URL redirects - the externally accessible part of Onboarding","exposeNote":"Open via Layer7 API gateway - accessible to customers and partners","groups":[{"name":"Brands and links","endpoints":[{"method":"GET","name":"Follow a short link","desc":"Redirects a shortened onboarding URL to its destination","path":"GET /sl/{shortenCode}"},{"method":"POST","name":"Create brand","desc":"Set up a branded onboarding experience for a business unit","path":"POST /Brand/{org}/Create"},{"method":"POST","name":"Update brand","desc":"Update branding for an organisation","path":"POST /Brand/{org}/update"},{"method":"POST","name":"Upload brand logo","desc":"Add a logo image to a brand","path":"POST /Brand/{org}/{alias}/UploadLogo"},{"method":"GET","name":"Get all brands","desc":"List all brands for an organisation","path":"GET /Brand/{org}/GetAll"}]}]},{"id":"ess","area":"ess","exposure":"emp","icon":"📱","title":"Employee Self Service API","subtitle":"What employees see and do themselves - payslips, holidays, personal details","exposeNote":"Employee-facing - called directly from the employee app using a Salesforce identity token","groups":[{"name":"My details","endpoints":[{"method":"GET","name":"Get my profile","desc":"Fetch your own employee record","path":"GET /employees/{id}"},{"method":"PUT","name":"Update my profile","desc":"Update your own employee details","path":"PUT /employees/{id}"},{"method":"GET","name":"My employment details","desc":"See your contract type, start date, and termination date if applicable","path":"GET /employees/{empId}/mainemployment"},{"method":"GET","name":"My line manager","desc":"Look up who your line manager is","path":"GET /employees/{empId}/linemanager"}]},{"name":"Holidays","endpoints":[{"method":"GET","name":"Holiday balance","desc":"How many days holiday do I have left this year?","path":"GET /employees/{empId}/holidaybalance"},{"method":"GET","name":"My holiday list","desc":"See all holidays booked for a given year","path":"GET /employees/{empId}/holidayList/{yearid}"},{"method":"PUT","name":"Book holiday","desc":"Submit a holiday request","path":"PUT /employees/{empId}/holidayrequest"},{"method":"DELETE","name":"Cancel holiday","desc":"Cancel a holiday that has been requested","path":"DELETE /employees/{empId}/holidayrequest"},{"method":"PUT","name":"Approve or reject holiday","desc":"A manager approves or rejects a holiday request","path":"PUT /employees/{empId}/holidayapproval"}]},{"name":"Rotas","endpoints":[{"method":"GET","name":"My rota","desc":"View your upcoming shifts and schedule","path":"GET /employees/{empId}/rotaschedules"},{"method":"GET","name":"Who else is off","desc":"See which colleagues are off at the same time","path":"GET /employees/{empId}/employeeofflist/{id}"}]},{"name":"Payslips","endpoints":[{"method":"GET","name":"List payslips","desc":"See all payslips available to view","path":"GET /employees/{empId}/payslips"},{"method":"GET","name":"View a payslip","desc":"Open a specific payslip as a document or PDF","path":"GET /employees/{empId}/payslips/{id}"},{"method":"GET","name":"Download payslip PDF","desc":"Download a payslip as a PDF file","path":"GET /employees/{empId}/payslips/{id}.pdf"}]},{"name":"Tax documents","endpoints":[{"method":"GET","name":"P45 documents","desc":"See and download your P45","path":"GET /employees/{empId}/p45"},{"method":"GET","name":"P60 documents","desc":"See and download your annual tax summary","path":"GET /employees/{empId}/p60"},{"method":"GET","name":"P11D documents","desc":"See and download your benefits-in-kind forms","path":"GET /employees/{empId}/p11d"}]},{"name":"Personal details","endpoints":[{"method":"GET","name":"Bank details","desc":"View the bank account your pay is sent to","path":"GET /employees/{empId}/bankdetails"},{"method":"PUT","name":"Update bank details","desc":"Change which account your pay goes to","path":"PUT /employees/{empId}/bankdetails"},{"method":"GET","name":"Next of kin","desc":"View your emergency contacts","path":"GET /employees/{empId}/nextofkins"},{"method":"PUT","name":"Update next of kin","desc":"Add or change your emergency contacts","path":"PUT /employees/{empId}/nextofkins"},{"method":"GET","name":"Diversity information","desc":"View diversity data including ethnicity and disability","path":"GET /employees/{empId}/sensitiveinfo"},{"method":"PUT","name":"Update diversity information","desc":"Update your equality and diversity information","path":"PUT /employees/{empId}/sensitiveinfo"},{"method":"GET","name":"Right to work expiry","desc":"See when your right-to-work document expires","path":"GET /employees/{empId}/rtw"}]}]},{"id":"people-integration","area":"people","exposure":"open","icon":"🔗","title":"PeopleSystem Integration API","subtitle":"The main data exchange layer - syncs HR data in and out of PeopleSystem","exposeNote":"Open - used by Informatica and other third-party integration partners","groups":[{"name":"Employee records","endpoints":[{"method":"GET","name":"Get employees","desc":"Retrieve employee records","path":"GET /organisations/{id}/Employees"},{"method":"POST","name":"Create or update employees","desc":"Add new employees or update existing records in bulk","path":"POST /organisations/{id}/Employees"},{"method":"GET","name":"Absences","desc":"Get, create, update and delete absence records","path":"GET /organisations/{id}/Employees/Absences"},{"method":"GET","name":"Employment records","desc":"Full employment history and details","path":"GET /organisations/{id}/Employees/Employments"},{"method":"GET","name":"Right to work","desc":"Verification documents and status","path":"GET /organisations/{id}/Employees/RightToWorkDetails"},{"method":"GET","name":"Probation periods","desc":"Track who is in their probation period","path":"GET /organisations/{id}/Employees/ProbationPeriod"},{"method":"GET","name":"Addresses","desc":"Employee home and contact addresses","path":"GET /organisations/{id}/Employees/Addresses"}]},{"name":"Payments and payroll","endpoints":[{"method":"GET","name":"Payments","desc":"Get payment records","path":"GET /organisations/{id}/Employees/Payments"},{"method":"POST","name":"Submit payment batch","desc":"Send multiple payment records at once","path":"POST /organisations/{id}/Employees/Payments/batch"},{"method":"GET","name":"Payslips","desc":"Employee payslips","path":"GET /organisations/{id}/Payslips"},{"method":"GET","name":"Labour costs","desc":"Actual, forecast, and approved labour cost data","path":"GET /organisations/{id}/LabourCost"}]},{"name":"Organisation structure","endpoints":[{"method":"GET","name":"Companies","desc":"Company and employer pay basis data","path":"GET /organisations/{id}/Company"},{"method":"GET","name":"Locations","desc":"Work locations and sites","path":"GET /organisations/{id}/Locations"},{"method":"GET","name":"Job titles","desc":"All job title definitions","path":"GET /organisations/{id}/JobTitles"}]}]},{"id":"onboarding-main","area":"onboarding","exposure":"int","icon":"⚙️","title":"Onboarding API","subtitle":"The internal engine powering the new hire journey","exposeNote":"Internal - not externally accessible","groups":[{"name":"New hire journey","endpoints":[{"method":"POST","name":"Create candidate","desc":"Start a new hire record when someone is offered a job","path":"POST /"},{"method":"PATCH","name":"Update candidate","desc":"Update a new hire's details","path":"PATCH /"},{"method":"GET","name":"Get candidate","desc":"Fetch a new hire's current status","path":"GET /"},{"method":"POST","name":"Publish employee","desc":"Push the completed employee record to downstream systems","path":"POST /PublishEmployee"}]},{"name":"E-sign","endpoints":[{"method":"GET","name":"Check e-sign started","desc":"Has the new hire opened their documents to sign?","path":"GET /HasStartedESign"},{"method":"GET","name":"Check e-sign complete","desc":"Has the new hire finished signing everything?","path":"GET /HasCompletedESign"},{"method":"GET","name":"Get signing URL","desc":"Get the link to send a new hire to their documents","path":"GET /DocuSignURL"},{"method":"POST","name":"DocuSign callback","desc":"DocuSign notifies us when someone has finished signing","path":"POST /ESignCompleteNotification"}]},{"name":"Registration","endpoints":[{"method":"GET","name":"Get registration link","desc":"Generate the link sent to a new hire to begin onboarding","path":"GET /OnBoardingRequestLink"},{"method":"POST","name":"Verify OTP","desc":"Check the one-time password a new hire entered","path":"POST /OnBoardingOTPVerification"},{"method":"POST","name":"Send SMS","desc":"Send a text message notification to a candidate","path":"POST /OnBoardingShortMessageService"}]}]},{"id":"people-gateway","area":"people","exposure":"int","icon":"🏢","title":"PeopleSystem Gateway","subtitle":"Internal routing layer between the web tier and backend services","exposeNote":"Internal - acts as a router and auth validator","groups":[{"name":"Authentication","endpoints":[{"method":"GET","name":"Validate token","desc":"Check that a user's login token is valid","path":"GET /Authenticate"}]},{"name":"Employees","endpoints":[{"method":"GET","name":"Employee summary","desc":"Get a summary of employees for a company or group","path":"GET /Employee/Summary"},{"method":"GET","name":"List companies","desc":"Get all companies in the system","path":"GET /Employer/ListOfCompanies"}]},{"name":"Documents","endpoints":[{"method":"POST","name":"Create and send document batch","desc":"Create a set of documents and send them in one step","path":"POST /api/DocumentBatch/CreateAndSend"},{"method":"GET","name":"Document check status","desc":"What is the current status of a right-to-work check?","path":"GET /DocumentCheck/GetDocumentStatusAsync"},{"method":"POST","name":"Start document check","desc":"Begin a right-to-work verification for an employee","path":"POST /DocumentCheck/StartDocumentCheckAsync"}]}]},{"id":"auth-token","area":"auth","exposure":"int","icon":"🔑","title":"Auth Token Service","subtitle":"Issues and validates the login tokens used across the whole platform","exposeNote":"Used only by Onboarding App integrators","groups":[{"name":"Token management","endpoints":[{"method":"POST","name":"Generate token","desc":"Create a login token for a service or application","path":"POST /api/Auth"},{"method":"POST","name":"Generate token with custom claims","desc":"Same as above but lets you embed additional information inside the token","path":"POST /api/Auth/GetToken"},{"method":"POST","name":"Validate token","desc":"Check whether a token is still valid and has not expired","path":"POST /api/Auth/Validate"}]}]},{"id":"iq-service","area":"iq","exposure":"int","icon":"💡","title":"iQ HCM UK Service","subtitle":"The intelligent layer - proactive alerts, insights and actions for managers","exposeNote":"Internal - event-driven via Azure Service Bus","groups":[{"name":"Alerts","endpoints":[{"method":"EVENT","name":"Work anniversary alert","desc":"Notifies when an employee reaches a work anniversary","path":"Azure Service Bus"},{"method":"EVENT","name":"Birthday alert","desc":"Notifies of upcoming employee birthdays","path":"Azure Service Bus"},{"method":"EVENT","name":"Right to work expiry","desc":"Warns when a right-to-work document is about to expire","path":"Azure Service Bus"},{"method":"EVENT","name":"Probation period alert","desc":"Notifies as an employee approaches the end of probation","path":"Azure Service Bus"},{"method":"EVENT","name":"Rota overdue","desc":"Flags when a rota has not been published on time","path":"Azure Service Bus"}]},{"name":"Actions","endpoints":[{"method":"QUERY","name":"Get action","desc":"Look up a specific recommended action for a manager","path":"MediatR query"},{"method":"POST","name":"Create action","desc":"Create a new recommended action from an event","path":"MediatR command"},{"method":"POST","name":"Update action","desc":"Update or create an action record","path":"MediatR command"}]}]},{"id":"iq360","area":"iq","exposure":"client","icon":"📊","title":"iQ360 Events API","subtitle":"Tracks which features people are using - feeds usage analytics","exposeNote":"Client library - Fourth calls an external iQ360 server; Fourth does not host this API","groups":[{"name":"Feature usage","endpoints":[{"method":"POST","name":"Submit feature usage event","desc":"Record that a user accessed or used a particular feature","path":"POST /api/events/feature-usage"},{"method":"POST","name":"Submit feature usage batch","desc":"Record multiple feature usage events in one go","path":"POST /api/events/feature-usage/batch"}]}]},{"id":"reporting","area":"reporting","exposure":"int","icon":"📋","title":"Reporting API","subtitle":"Generates PDF and CSV reports from PeopleSystem data","exposeNote":"Internal - not exposed through an external gateway","groups":[{"name":"Reports","endpoints":[{"method":"GET","name":"Generate PDF report","desc":"Run a report and get it back as a PDF file","path":"GET /api/reports/ReportPDF"},{"method":"GET","name":"Generate CSV report","desc":"Run a report and get the data as a spreadsheet","path":"GET /api/reports/ReportCSV"}]}]},{"id":"hmrc","area":"hmrc","exposure":"int","icon":"🏛️","title":"HMRC Submission API","subtitle":"Sends payroll data to HMRC - RTI submissions and error handling","exposeNote":"Internal - submissions go outbound to HMRC; this service is not externally accessible","groups":[{"name":"Submissions","endpoints":[{"method":"POST","name":"Submit to HMRC","desc":"Send a payroll XML submission to HMRC","path":"POST /api/submission/submit-xml/..."},{"method":"POST","name":"Poll submission status","desc":"Check whether HMRC has processed a submission yet","path":"POST /api/submission/.../Poll"},{"method":"GET","name":"Get submission errors","desc":"Find out why a submission was rejected by HMRC","path":"GET /api/submission/.../Errors"}]}]},{"id":"audit","area":"infra","exposure":"int","icon":"🔍","title":"Audit APIs","subtitle":"Track every change made across PeopleSystem for compliance","exposeNote":"Internal - not exposed externally","groups":[{"name":"Audit control","endpoints":[{"method":"POST","name":"Start audit collection","desc":"Begin capturing a record of changes","path":"POST /api/audit-control/start"},{"method":"POST","name":"Stop audit collection","desc":"Stop capturing changes","path":"POST /api/audit-control/stop"},{"method":"GET","name":"Audit status","desc":"Is audit collection currently running?","path":"GET /api/audit-control/status"}]}]},{"id":"legacy","area":"people","exposure":"int","icon":"📦","title":"Legacy PeopleSystem API","subtitle":"The older version of the PeopleSystem API - still active, being phased out","exposeNote":"Internal - legacy header-based auth; not exposed through the external gateway","groups":[{"name":"Employee and HR","endpoints":[{"method":"GET","name":"Employee summary","desc":"Get a summary of employees for a company","path":"GET /api/employee/summary/{groupId}/{clientId}"},{"method":"POST","name":"Terminate benefits","desc":"Stop an employee's benefits when they leave","path":"POST /api/hr/employment/TerminateEmployeeBenefits/..."},{"method":"POST","name":"Save employment change","desc":"Save a pending change to an employee's record","path":"POST /api/hr/employment/Save/..."}]},{"name":"Payroll","endpoints":[{"method":"GET","name":"Student loan data","desc":"Student Loan and Council Tax deduction records","path":"GET /api/payroll/scl/..."},{"method":"POST","name":"RTI post-processing","desc":"Post-process an HMRC Real Time Information payrun","path":"POST /api/rti/postprocess..."}]},{"name":"SSO","endpoints":[{"method":"POST","name":"Update SSO account","desc":"Sync changes to a user's single sign-on account","path":"POST /api/hr/SSOMessage/UpdateAccount/..."},{"method":"POST","name":"Reactivate SSO account","desc":"Re-enable an account that was deactivated","path":"POST /api/hr/SSOMessage/ReactivateAccount/..."}]}]}]};
+// ─────────────────────────────────────────────
+// CONSTANTS
+// ─────────────────────────────────────────────
 
-const EXPOSURE_BADGE = {
-  open:   ['badge-open',   'Open'],
-  emp:    ['badge-emp',    'Employee-facing'],
-  int:    ['badge-int',    'Internal'],
-  client: ['badge-client', 'Client library'],
+const EXPOSURE_META = {
+  open:   { label:'Open',            cardCls:'exp-open',   badgeCls:'exp-open-badge'   },
+  emp:    { label:'Employee-facing', cardCls:'exp-emp',    badgeCls:'exp-emp-badge'    },
+  int:    { label:'Internal',        cardCls:'exp-int',    badgeCls:'exp-int-badge'    },
+  client: { label:'Client library',  cardCls:'exp-client', badgeCls:'exp-client-badge' },
 };
 
-function countEndpoints(api) {
-  return api.groups.reduce((s, g) => s + g.endpoints.length, 0);
+const FILTERS = [
+  {id:'all',        label:'All'},
+  {id:'open',       label:'Open APIs only'},
+  {id:'int',        label:'Internal only'},
+  {id:'onboarding', label:'Onboarding'},
+  {id:'people',     label:'People & HR'},
+  {id:'ess',        label:'Employee self-service'},
+  {id:'iq',         label:'iQ & Alerts'},
+  {id:'auth',       label:'Auth'},
+  {id:'hmrc',       label:'HMRC'},
+  {id:'infra',      label:'Audit & infra'},
+  {id:'reporting',  label:'Reporting'},
+];
+
+const R='required', O='optional', RO='readonly', S='system';
+function f(name,type,desc){return{name,type,desc};}
+
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+
+const APIS = [
+
+  // ── API 1: Onboarding Public API ──────────
+  {
+    id:'onboarding-public',
+    title:'Onboarding Public API',
+    area:'onboarding',
+    exposure:'open',
+    icon:'👤',
+    subtitle:'Brand management and short URL redirects — the externally accessible part of Onboarding',
+    exposeNote:'Open via Layer7 API gateway — accessible to customers and partners',
+    groups:[
+      {
+        name:'Brands and links',
+        endpoints:[
+          {
+            method:'GET',name:'Follow a short link',
+            desc:'Redirects a shortened onboarding URL to its destination',
+            path:'GET /sl/{shortenCode}',
+            fields:[f('shortenCode',R,'The unique code from the shortened URL')]
+          },
+          {
+            method:'POST',name:'Create brand',
+            desc:'Set up a branded onboarding experience for a business unit',
+            path:'POST /Brand/{org}/Create',
+            fields:[
+              f('OrgAlias',R,'Short name identifying the organisation'),
+              f('BrandName',R,'Full display name shown to candidates'),
+              f('PrimaryColour',R,'Main brand colour used throughout onboarding'),
+              f('SmsSenderName',R,'Name that appears when SMS messages are sent to candidates'),
+              f('Logo',O,'URL or path to the brand logo image'),
+              f('IsActive',O,'Whether this brand is live and in use — defaults to active'),
+              f('BothEmergencyContactsMandatory',O,'Whether candidates must provide two emergency contacts'),
+              f('ReferencesMandatory',O,'How many references candidates must provide: 0, 1, or 2'),
+              f('IsDiversityandInclusionRequired',O,'Whether candidates must complete the diversity section'),
+            ]
+          },
+          {
+            method:'POST',name:'Update brand',
+            desc:'Update branding for an organisation',
+            path:'POST /Brand/{org}/update',
+            fields:[
+              f('OrgAlias',R,'Short name identifying the organisation'),
+              f('BrandName',R,'Full display name shown to candidates'),
+              f('PrimaryColour',R,'Main brand colour used throughout onboarding'),
+              f('SmsSenderName',R,'Name that appears when SMS messages are sent to candidates'),
+              f('Logo',O,'URL or path to the brand logo image'),
+              f('IsActive',O,'Whether this brand is live and in use — defaults to active'),
+              f('BothEmergencyContactsMandatory',O,'Whether candidates must provide two emergency contacts'),
+              f('ReferencesMandatory',O,'How many references candidates must provide: 0, 1, or 2'),
+              f('IsDiversityandInclusionRequired',O,'Whether candidates must complete the diversity section'),
+            ]
+          },
+          {
+            method:'POST',name:'Upload brand logo',
+            desc:'Add a logo image to a brand',
+            path:'POST /Brand/{org}/{alias}/UploadLogo',
+            fields:[f('file',R,'The logo image file to upload')]
+          },
+          {
+            method:'GET',name:'Get all brands',
+            desc:'List all brands for an organisation',
+            path:'GET /Brand/{org}/GetAll',
+            fields:[f('OrgAlias',R,'Which organisation to list brands for')]
+          },
+        ]
+      }
+    ]
+  },
+
+  // ── API 2: Employee Self Service API ──────
+  {
+    id:'ess',
+    title:'Employee Self Service API',
+    area:'ess',
+    exposure:'emp',
+    icon:'📱',
+    subtitle:'What employees see and do themselves — payslips, holidays, personal details',
+    exposeNote:'Employee-facing — called directly from the employee app using a Salesforce identity token',
+    groups:[
+      {
+        name:'My details',
+        endpoints:[
+          {
+            method:'GET',name:'Get my profile',
+            desc:'Fetch your own employee record',
+            path:'GET /employees/{id}',
+            fields:[
+              f('Id',R,'Your employee ID number'),
+              f('FirstNames / Surname',RO,'Your full name'),
+              f('PreferredName',RO,'The name you prefer to go by'),
+              f('DateOfBirth',RO,'Your date of birth'),
+              f('Gender',RO,'Your gender'),
+              f('Address fields',RO,'Your home address'),
+              f('HomeTel / MobileTel',RO,'Your phone numbers'),
+              f('WorkEmail / HomeEmail',RO,'Your email addresses'),
+              f('NationalInsuranceNumber',RO,'Your National Insurance number'),
+              f('EmployeeNumber',RO,'Your unique HR reference number'),
+              f('StartDate',RO,'When you joined the company'),
+              f('LengthOfService',RO,'How long you have worked here'),
+              f('CanBookHalfDay',S,'Whether you can book half-day holidays'),
+              f('CasualStaff',S,'Whether you are on a casual contract'),
+              f('IfLeaver',S,'Whether you have left or are leaving'),
+            ]
+          },
+          {
+            method:'PUT',name:'Update my profile',
+            desc:'Update your own employee details',
+            path:'PUT /employees/{id}',
+            fields:[
+              f('Address fields',O,'Your home address'),
+              f('HomeTel / MobileTel',O,'Your phone numbers'),
+              f('WorkEmail / HomeEmail',O,'Your email addresses'),
+              f('PreferredName',O,'The name you prefer to go by'),
+            ]
+          },
+          {
+            method:'GET',name:'My employment details',
+            desc:'See your contract type, start date, and termination date if applicable',
+            path:'GET /employees/{empId}/mainemployment',
+            fields:[
+              f('JobTitle',RO,'Your current job title'),
+              f('CompanyName',RO,'The company you work for'),
+              f('LocationName',RO,'Your work location'),
+              f('Division',RO,'Your division or department'),
+              f('Manager',RO,'Your line manager'),
+              f('PayType',RO,'Whether you are paid hourly or on a salary'),
+              f('IsLeaver',RO,'Whether you have left'),
+              f('TerminationDate',RO,'Your leaving date if applicable'),
+              f('PAYEReference',RO,'Your employer PAYE reference number'),
+            ]
+          },
+          {
+            method:'GET',name:'My line manager',
+            desc:'Look up who your line manager is',
+            path:'GET /employees/{empId}/linemanager',
+            fields:[
+              f('LineManagerName',RO,'Your line manager name'),
+              f('LineManagerFAID',RO,'Your line manager Fourth account ID'),
+              f('PrimaryAbsenceManagerName',RO,'Who approves your absence requests'),
+              f('PrimaryHolidayManagerName',RO,'Who approves your holiday requests'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Holidays',
+        endpoints:[
+          {
+            method:'GET',name:'Holiday balance',
+            desc:'How many days holiday do I have left this year?',
+            path:'GET /employees/{empId}/holidaybalance',
+            fields:[
+              f('Allowed',RO,'Total holiday days you are entitled to this year'),
+              f('Taken',RO,'Days already taken'),
+              f('Booked',RO,'Days booked but not yet taken'),
+              f('Remaining',RO,'Days still available to book'),
+              f('Accrued',RO,'Days earned so far this year'),
+              f('HolidayYearStartDate',RO,'When your holiday year begins'),
+              f('AvgHoursPerWeek',RO,'Your average working hours — used to calculate entitlement'),
+              f('TotalHolidayAllowance',RO,'Your full annual entitlement in hours'),
+            ]
+          },
+          {
+            method:'GET',name:'My holiday list',
+            desc:'See all holidays booked for a given year',
+            path:'GET /employees/{empId}/holidayList/{yearid}',
+            fields:[
+              f('yearid',R,'Which holiday year to show'),
+              f('RequestDate',RO,'The date of each holiday'),
+              f('Status',RO,'Whether each holiday is approved, pending, or rejected'),
+              f('Value',RO,'How much holiday was taken on each date'),
+              f('HalfDay',RO,'Whether any dates are half days'),
+              f('Unpaid',RO,'Whether any dates are unpaid leave'),
+            ]
+          },
+          {
+            method:'GET',name:'Get a holiday request',
+            desc:'See the details of a specific holiday booking',
+            path:'GET /employees/{empId}/holidayrequest/{id}',
+            fields:[
+              f('id',R,'The ID of the holiday request to view'),
+              f('RequestDate',RO,'The date requested'),
+              f('Status',RO,'Current approval status'),
+              f('Notes',RO,'Any notes added to the request'),
+              f('HalfDay',RO,'Whether this is a half day'),
+              f('Value',RO,'Amount of holiday taken'),
+            ]
+          },
+          {
+            method:'PUT',name:'Book holiday',
+            desc:'Submit a holiday request for one or more days',
+            path:'PUT /employees/{empId}/holidayrequest',
+            fields:[
+              f('RequestDate',R,'The date you want to book'),
+              f('Unpaid',R,'Whether this should be unpaid leave — yes or no'),
+              f('HalfDay',O,'Whether this is a half day'),
+              f('RequestValue',R,'How much holiday to take on this date — e.g. 1 for a full day or 0.5 for half'),
+            ]
+          },
+          {
+            method:'DELETE',name:'Cancel holiday',
+            desc:'Cancel a holiday that has been requested',
+            path:'DELETE /employees/{empId}/holidayrequest',
+            fields:[f('RequestDate',R,'The date of the holiday to cancel')]
+          },
+          {
+            method:'PUT',name:'Approve or reject holiday',
+            desc:'A manager approves or rejects a holiday request',
+            path:'PUT /employees/{empId}/holidayapproval',
+            fields:[
+              f('EmployeeId',R,'The employee whose holiday is being decided'),
+              f('HolidayRequests',R,'The list of holiday dates being approved or rejected'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Rotas',
+        endpoints:[
+          {
+            method:'GET',name:'My rota',
+            desc:'View your upcoming shifts and schedule',
+            path:'GET /employees/{empId}/rotaschedules',
+            fields:[
+              f('ShiftDate',RO,'The date of each shift'),
+              f('Location',RO,'Where the shift is'),
+              f('Department',RO,'Which department'),
+              f('JobTitle',RO,'The role for this shift'),
+              f('ShiftTimes',RO,'Start and end times'),
+              f('IsMain',RO,'Whether this is your main job shift'),
+              f('RotaStart',RO,'When the rota week begins'),
+            ]
+          },
+          {
+            method:'GET',name:'Who else is off?',
+            desc:'See which colleagues are off at the same time as a holiday request',
+            path:'GET /employees/{empId}/employeeofflist/{id}',
+            fields:[f('id',R,'The holiday request ID to check against')]
+          },
+        ]
+      },
+      {
+        name:'Payslips',
+        endpoints:[
+          {
+            method:'GET',name:'List payslips',
+            desc:'See all payslips available to view',
+            path:'GET /employees/{empId}/payslips',
+            fields:[
+              f('ProcessingDate',RO,'When this payslip was generated'),
+              f('NetPay',RO,'Take home pay for this period'),
+              f('PayPeriod',RO,'Which pay period this covers'),
+              f('TaxYear',RO,'Which tax year'),
+            ]
+          },
+          {
+            method:'GET',name:'View a payslip',
+            desc:'Open a specific payslip as a document or PDF',
+            path:'GET /employees/{empId}/payslips/{id}',
+            fields:[
+              f('id',R,'The payslip ID to view'),
+              f('CurrentGrossPay',RO,'Total gross pay before deductions'),
+              f('NetPay',RO,'Amount paid after all deductions'),
+              f('TaxCode',RO,'HMRC tax code applied'),
+              f('TaxDueToDate',RO,'Total tax paid this tax year'),
+              f('EmployeePension',RO,'Pension contribution this period'),
+              f('EmployerPensionContribution',RO,'Employer pension contribution'),
+              f('StudentLoanDeduction',RO,'Student loan repayment this period'),
+              f('GrossNIContribution',RO,'National Insurance contribution'),
+              f('TotalDeductions',RO,'Total of all deductions'),
+              f('TotalPayments',RO,'Total of all payments'),
+              f('TotalGrossPayToDate',RO,'Cumulative gross pay since start of tax year'),
+              f('PayslipElements',RO,'Individual line items showing description, units, rate, and amount'),
+            ]
+          },
+          {
+            method:'GET',name:'Download payslip PDF',
+            desc:'Download a payslip as a PDF file',
+            path:'GET /employees/{empId}/payslips/{id}.pdf',
+            fields:[f('id',R,'The payslip ID to download')]
+          },
+          {
+            method:'GET',name:'Past payslips',
+            desc:'Access older payslips from previous employment periods',
+            path:'GET /employees/{empId}/pastPayslip',
+            fields:[
+              f('CompanyName',RO,'Which company issued this payslip'),
+              f('TaxYear',RO,'Which tax year'),
+              f('Payperiod',RO,'Which pay period'),
+              f('ProcessingDate',RO,'When it was generated'),
+              f('NetPay',RO,'Take home pay'),
+              f('FileName',RO,'The PDF filename'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Tax documents',
+        endpoints:[
+          {
+            method:'GET',name:'P45 documents',
+            desc:'See and download your P45 issued when you leave a job',
+            path:'GET /employees/{empId}/p45',
+            fields:[
+              f('TaxYear',RO,'Which tax year'),
+              f('CompanyName',RO,'Which employer issued this P45'),
+              f('TerminationDate',RO,'Your leaving date'),
+              f('IsPrimaryEmployment',RO,'Whether this was your main job'),
+              f('FileName',RO,'The PDF filename to use when downloading'),
+            ]
+          },
+          {
+            method:'GET',name:'Download P45',
+            desc:'Download your P45 as a PDF',
+            path:'GET /employees/{empId}/p45/{filename}',
+            fields:[f('filename',R,'P45.pdf or P45Additional.pdf')]
+          },
+          {
+            method:'GET',name:'P60 documents',
+            desc:'See and download your annual tax summary',
+            path:'GET /employees/{empId}/p60',
+            fields:[
+              f('TaxYear',RO,'Which tax year this covers'),
+              f('CompanyName',RO,'Which employer'),
+              f('TaxYearStart / TaxYearEnd',RO,'The dates this tax year covers'),
+              f('FileName',RO,'PDF filename for downloading'),
+            ]
+          },
+          {
+            method:'GET',name:'Download P60',
+            desc:'Download your P60 as a PDF',
+            path:'GET /employees/{empId}/p60/.../{filename}',
+            fields:[
+              f('taxyear',R,'Which tax year'),
+              f('companyid',R,'Which company'),
+              f('employeepaybasisid',R,'Which pay basis'),
+              f('filename',R,'The PDF filename'),
+            ]
+          },
+          {
+            method:'GET',name:'P11D documents',
+            desc:'See and download your benefits in kind forms',
+            path:'GET /employees/{empId}/p11d',
+            fields:[
+              f('TaxYear',RO,'Which tax year'),
+              f('FileName',RO,'PDF filename for downloading'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Personal details',
+        endpoints:[
+          {
+            method:'GET',name:'Bank details',
+            desc:'View the bank account your pay is sent to',
+            path:'GET /employees/{empId}/bankdetails',
+            fields:[
+              f('BankName',RO,'Your bank name'),
+              f('AccountName',RO,'Name on the account'),
+              f('AccountNumber',RO,'Your 8-digit account number'),
+              f('SortCode',RO,'Your 6-digit sort code'),
+              f('BSocRollNumber',RO,'Building society roll number if applicable'),
+              f('IBAN',RO,'International account number for overseas payments'),
+            ]
+          },
+          {
+            method:'PUT',name:'Update bank details',
+            desc:'Change which account your pay goes to',
+            path:'PUT /employees/{empId}/bankdetails',
+            fields:[
+              f('BankName',R,'Your bank name'),
+              f('AccountName',R,'Name on the account'),
+              f('AccountNumber',R,'Your 8-digit account number'),
+              f('SortCode',R,'Your 6-digit sort code'),
+              f('BSocRollNumber',O,'Building society roll number — only if applicable'),
+              f('IBAN',O,'International account number — only if applicable'),
+            ]
+          },
+          {
+            method:'GET',name:'Next of kin',
+            desc:'View your emergency contacts',
+            path:'GET /employees/{empId}/nextofkins',
+            fields:[
+              f('PersonTitle / FirstName / SurName',RO,'Your primary emergency contact name'),
+              f('Relationship',RO,'How they are related to you'),
+              f('Phone / Email',RO,'How to contact them'),
+              f('Title2 / Firstname2 / Surname2',RO,'Your secondary emergency contact if provided'),
+              f('Relationship2 / Phone2 / Email2',RO,'Secondary contact relationship and details'),
+            ]
+          },
+          {
+            method:'PUT',name:'Update next of kin',
+            desc:'Add or change your emergency contacts',
+            path:'PUT /employees/{empId}/nextofkins',
+            fields:[
+              f('PersonTitle / FirstName / SurName',R,'Primary emergency contact name'),
+              f('Relationship',R,'How they are related to you'),
+              f('Phone',R,'Their phone number'),
+              f('Email',O,'Their email address'),
+              f('Secondary contact fields',O,'Details for a second emergency contact'),
+            ]
+          },
+          {
+            method:'GET',name:'Diversity information',
+            desc:'View your equality and diversity data',
+            path:'GET /employees/{empId}/sensitiveinfo',
+            fields:[
+              f('EthnicOriginDisplay',RO,'Your ethnic origin'),
+              f('DisabilityDisplay',RO,'Whether you consider yourself disabled'),
+              f('DisabledNotes',RO,'Any notes about disability or adjustments needed'),
+              f('LanguageDisplay',RO,'Your preferred language'),
+              f('ReligionDisplay',RO,'Your religion or belief'),
+              f('HasDependents',RO,'Whether you have dependents'),
+              f('DependentChildren / DependentDisabled / DependentElderly',RO,'Number of each type of dependent'),
+              f('SexualOrientationDisplay',RO,'Your sexual orientation'),
+              f('GenderDisplay',RO,'Your gender identity'),
+            ]
+          },
+          {
+            method:'PUT',name:'Update diversity information',
+            desc:'Update your equality and diversity information',
+            path:'PUT /employees/{empId}/sensitiveinfo',
+            fields:[
+              f('EthnicOriginDisplay',O,'Your ethnic origin'),
+              f('DisabilityDisplay',O,'Whether you consider yourself disabled'),
+              f('DisabledNotes',O,'Any notes about disability or adjustments needed'),
+              f('LanguageDisplay',O,'Your preferred language'),
+              f('ReligionDisplay',O,'Your religion or belief'),
+              f('HasDependents',O,'Whether you have dependents'),
+              f('DependentChildren / DependentDisabled / DependentElderly',O,'Number of each type of dependent'),
+              f('SexualOrientationDisplay',O,'Your sexual orientation'),
+              f('GenderDisplay',O,'Your gender identity'),
+            ]
+          },
+          {
+            method:'GET',name:'Right to work expiry',
+            desc:'See when your right to work document expires',
+            path:'GET /employees/{empId}/rtw',
+            fields:[
+              f('PassportNumber / PassportExpiryDate',RO,'Passport details'),
+              f('SettledStatus',RO,'UK settled status'),
+              f('WorkPermit / PermitExpiryDate',RO,'Work permit details if applicable'),
+              f('TrustID_RTWStatus / TrustID_RTWExpiryDate',RO,'Trust ID right to work check status and expiry'),
+            ]
+          },
+          {
+            method:'GET',name:'My documents',
+            desc:'View documents shared with you',
+            path:'GET /employees/{empId}/documents',
+            fields:[
+              f('FileName',RO,'The document filename'),
+              f('DocumentType',RO,'What kind of document this is'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+  // ── API 3: PeopleSystem Integration API ───
+  {
+    id:'peoplesystem',
+    title:'PeopleSystem Integration API',
+    area:'people',
+    exposure:'open',
+    icon:'🔗',
+    subtitle:'The main data exchange layer — syncs HR data in and out of PeopleSystem',
+    exposeNote:'Open — used by Informatica and other third-party integration partners. Organisation-scoped authentication.',
+    groups:[
+      {
+        name:'Employee records',
+        endpoints:[
+          {
+            method:'GET',name:'Get employees',
+            desc:'Retrieve employee records — filter to only show changes since last sync',
+            path:'GET /organisations/{id}/Employees',
+            fields:[
+              f('showFormer',O,'Whether to include former employees'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+              f('dateFrom / dateTo',O,'Date range to filter records'),
+              f('EmployeeID',RO,'Internal numeric employee ID'),
+              f('FAID',RO,'Fourth Account ID — unique 18-character identifier used across all Fourth systems'),
+              f('PayrollNumber',RO,'Payroll reference number'),
+              f('CompanyName / Paybasis',RO,'Which company and pay schedule'),
+              f('FirstName / LastName',RO,'Employee name'),
+              f('DateOfBirth / Gender',RO,'Personal details'),
+              f('NationalInsuranceNumber',RO,'NI number'),
+              f('IR35',RO,'Whether this employee falls within IR35 tax rules'),
+              f('EthnicOrigin / IsDisabled / Religion / SexualOrientation',RO,'Diversity data — only included where the employee has provided it'),
+            ]
+          },
+          {
+            method:'POST',name:'Create or update employees',
+            desc:'Add new employees or update existing records in bulk',
+            path:'POST /organisations/{id}/Employees',
+            fields:[
+              f('ActionType',O,'What to do: CREATE, UPDATE, or DELETE'),
+              f('EmployeeNumber',O,'Unique reference number — max 49 characters'),
+              f('Title / FirstName / MiddleName / Surname',O,'Full name'),
+              f('PreferredName',O,'Preferred name'),
+              f('DateOfBirth / Gender / MaritalStatus',O,'Personal details'),
+              f('Address fields',O,'Home address'),
+              f('HomeTel / MobileTel / Email',O,'Contact details'),
+              f('NIN',O,'National Insurance number'),
+              f('Location / Division / JobTitle',O,'Where they work and what they do'),
+              f('StartDate / TerminationDate',O,'Employment start and end dates'),
+              f('PayType / RateOfPay / AnnualSalary',O,'Pay details'),
+              f('ContractHours / Contract',O,'Contract details'),
+              f('BankName / SortCode / BankAccountNumber',O,'Payment bank account'),
+              f('NOK1 and NOK2 fields',O,'Up to two emergency contacts'),
+              f('SettledStatus / PreSettledStatus',O,'UK immigration status — yes or no'),
+              f('WorkPermit fields',O,'Work permit type, number, and expiry'),
+              f('PassportNumber / PassportExpiryDate',O,'Passport details for right to work'),
+            ]
+          },
+          {
+            method:'GET',name:'Absences',
+            desc:'Get, create, update and delete absence records',
+            path:'GET /organisations/{id}/Employees/Absences',
+            fields:[
+              f('EmployeeNumber',R,'Which employee'),
+              f('StartDate / EndDate',R,'When the absence started and ended'),
+              f('Days',R,'Number of days — can be decimal for partial days'),
+              f('Type',O,'Whether measured in days, shifts, or hours'),
+              f('Reason',O,'Reason for absence'),
+              f('Paid',O,'Whether paid or unpaid — yes or no'),
+              f('Status',RO,'Current state: Added, Deleted, or Validation Error'),
+              f('MaternityDueDate / MaternityDeliveryDate',O,'For maternity absences'),
+              f('AbsenceInHoursDetails',O,'For hour-based absences — individual days with hours absent'),
+            ]
+          },
+          {
+            method:'GET',name:'Employment records',
+            desc:'Full employment history and details',
+            path:'GET /organisations/{id}/Employees/Employments',
+            fields:[
+              f('EmploymentStartDate / EmploymentEndDate',RO,'When employment started and ended'),
+              f('TerminationReason',RO,'Why employment ended'),
+              f('EmploymentType',RO,'Type of employment'),
+              f('JobDescription / JobCode',RO,'Role details'),
+              f('SiteDescription / SiteCode',RO,'Work location'),
+              f('RateOfPay / ContractedHours',RO,'Pay and hours'),
+              f('ReportsTo / ReportsToEmployeeNumber',RO,'Line manager details'),
+              f('ContinuousServiceDate',RO,'Date used for continuous service calculations'),
+              f('TUPE',RO,'Whether the employee transferred in under TUPE'),
+              f('IR35',RO,'Whether within IR35 rules'),
+            ]
+          },
+          {
+            method:'GET',name:'Right to work',
+            desc:'Verification documents and status',
+            path:'GET /organisations/{id}/Employees/RightToWorkDetails',
+            fields:[
+              f('EmployeeNumber',RO,'Employee reference'),
+              f('PassportNumber / PassportExpiryDate',RO,'Passport details'),
+              f('SettledStatus / PreSettledStatus',RO,'UK immigration status'),
+              f('WorkPermit / WorkPermitType / WorkPermitExpiry',RO,'Work permit details'),
+              f('DocumentsSeenAndCopied',RO,'Whether original documents have been verified'),
+            ]
+          },
+          {
+            method:'GET',name:'Probation periods',
+            desc:'Track who is in their probation period',
+            path:'GET /organisations/{id}/Employees/ProbationPeriod',
+            fields:[
+              f('EmployeeNumber',RO,'Employee reference'),
+              f('ProbationPeriodEnd',RO,'When probation ends'),
+              f('ProbationStatus',RO,'Current probation status'),
+            ]
+          },
+          {
+            method:'GET',name:'Fixed term contracts',
+            desc:'Contracts with a set end date',
+            path:'GET /organisations/{id}/Employees/FixedTermContractEnd',
+            fields:[
+              f('EmployeeNumber',RO,'Employee reference'),
+              f('FixedTermContractEnd',RO,'When the contract ends'),
+              f('JobTitle / Location',RO,'Role and location'),
+            ]
+          },
+          {
+            method:'GET',name:'Work anniversaries',
+            desc:'When did each employee join?',
+            path:'GET /organisations/{id}/Employees/WorkAnniversaries',
+            fields:[
+              f('EmployeeNumber',RO,'Employee reference'),
+              f('StartDate',RO,'Original start date'),
+              f('YearsEmployed',RO,'How many years they have been employed'),
+            ]
+          },
+          {
+            method:'GET',name:'Addresses',
+            desc:'Employee home and contact addresses',
+            path:'GET /organisations/{id}/Employees/Addresses',
+            fields:[
+              f('EffectiveDate',RO,'When this address became current'),
+              f('AddressLine1–4',RO,'Street address'),
+              f('AddressTown / AddressCode',RO,'Town and postcode'),
+              f('AddressCountry',RO,'Country'),
+              f('EmailWork / EmailHome',RO,'Email addresses'),
+              f('TelephoneWork / TelephoneHome / TelephoneMobile',RO,'Phone numbers'),
+            ]
+          },
+          {
+            method:'GET',name:'Next of kin',
+            desc:'Emergency contact details',
+            path:'GET /organisations/{id}/Employees/NextOfKin',
+            fields:[
+              f('Name',RO,'Contact name'),
+              f('Relationship',RO,'Relationship to employee'),
+              f('AddressLine1–3 / AddressTown / AddressCode',RO,'Contact address'),
+              f('TelephoneHome / TelephoneWork / TelephoneMobile',RO,'Contact phone numbers'),
+              f('EmailWork / EmailHome',RO,'Contact email addresses'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Payments and payroll',
+        endpoints:[
+          {
+            method:'GET',name:'Payments',
+            desc:'Get payment records — can also create, delete and cancel',
+            path:'GET /organisations/{id}/Employees/Payments',
+            fields:[
+              f('EmployerPaymentTypeID',R,'The type of payment — required when creating'),
+              f('EmployerPayBasisID',R,'Which pay basis this payment belongs to — required when creating'),
+              f('Units',R,'Number of units e.g. hours — required when creating'),
+              f('Amount',R,'Payment amount — required when creating'),
+              f('StartDate / EndDate',O,'Date range for the payment'),
+              f('LocationId / DivisionId / JobTitleId',O,'Where the payment is attributed to'),
+            ]
+          },
+          {
+            method:'POST',name:'Submit payment batch',
+            desc:'Send multiple payment records at once',
+            path:'POST /organisations/{id}/Employees/Payments/batch',
+            fields:[
+              f('EmployerPaymentTypeID',R,'The type of payment'),
+              f('EmployerPayBasisID',R,'Which pay basis this payment belongs to'),
+              f('Units',R,'Number of units e.g. hours'),
+              f('Amount',R,'Payment amount'),
+              f('StartDate / EndDate',O,'Date range for the payment'),
+              f('LocationId / DivisionId / JobTitleId',O,'Where the payment is attributed to'),
+            ]
+          },
+          {
+            method:'POST',name:'Book or cancel holiday',
+            desc:'Submit or remove holiday requests',
+            path:'POST /organisations/{id}/Holidays',
+            fields:[
+              f('EmployeeNumber',R,'Which employee'),
+              f('RequestDate',R,'The holiday date'),
+              f('Value',R,'How much holiday — e.g. 1 for a full day'),
+              f('Type',R,'Days, shifts, or hours'),
+              f('Unpaid',R,'Whether unpaid — yes or no'),
+            ]
+          },
+          {
+            method:'GET',name:'Payslips',
+            desc:'Employee payslips',
+            path:'GET /organisations/{id}/Payslips',
+            fields:[
+              f('PayslipDate / PaymentDate',RO,'When the payslip was generated and when payment was made'),
+              f('ElementName / ElementCode',RO,'Name and code of each pay element'),
+              f('Units / Rate / Value',RO,'Quantity, rate, and amount for each element'),
+              f('JobDescription / SiteDescription / Department',RO,'Where the pay is attributed'),
+            ]
+          },
+          {
+            method:'GET',name:'Payroll periods',
+            desc:'Pay period definitions',
+            path:'GET /organisations/{id}/PayrollPeriod',
+            fields:[
+              f('CompanyName',RO,'Which company'),
+              f('PeriodName / PeriodNumber',RO,'Name and number of the period'),
+              f('PeriodTaxYear',RO,'Which tax year'),
+              f('PayDate',RO,'When employees are paid'),
+              f('PeriodStartDate / PeriodEndDate',RO,'The dates this period covers'),
+            ]
+          },
+          {
+            method:'GET',name:'Deductions',
+            desc:'Payroll deductions such as pensions and loans',
+            path:'GET /organisations/{id}/Employees/Deductions',
+            fields:[
+              f('ElementName',RO,'Name of the deduction e.g. pension, student loan'),
+              f('StartDateTime / EndDateTime',RO,'When this deduction applies'),
+              f('Units / Rate / Value',RO,'Quantity, rate, and amount'),
+              f('Reference',RO,'Reference number for this deduction'),
+            ]
+          },
+          {
+            method:'GET',name:'Labour costs',
+            desc:'Actual, forecast, and approved labour cost data',
+            path:'GET /organisations/{id}/LabourCost',
+            fields:[
+              f('ShiftDate',R,'The date these costs relate to'),
+              f('basicpaytotal',RO,'Total basic pay cost'),
+              f('totalpay',RO,'Total pay including all elements'),
+              f('holidaypay',RO,'Cost of holiday pay'),
+              f('overtime',RO,'Overtime cost'),
+              f('employersnationalinsurance',RO,'Employer NI contribution'),
+              f('wagecost',RO,'Total wage cost including NI and pension'),
+              f('totalacthrs',RO,'Total actual hours worked'),
+              f('metrics1–20',RO,'20 configurable fields for custom business metrics such as covers or revenue per head'),
+            ]
+          },
+          {
+            method:'GET',name:'Accrual data',
+            desc:'Accrued pay and entitlement records',
+            path:'GET /organisations/{id}/Employees/Accrual',
+            fields:[
+              f('ElementName',RO,'Usually Holiday Balance'),
+              f('Units',RO,'Days or hours accrued'),
+              f('UnitType',RO,'Whether measured in days or hours'),
+              f('IsFlexible',RO,'Whether this is a flexible entitlement — yes or no'),
+              f('AvgSummary',RO,'Average hours per day — used in calculations'),
+              f('DayRate',RO,'The daily rate for this accrual'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Organisation structure',
+        endpoints:[
+          {
+            method:'GET',name:'Companies',
+            desc:'Company and employer pay basis data',
+            path:'GET /organisations/{id}/Company',
+            fields:[
+              f('CompanyName',RO,'The company name'),
+              f('Companyid',RO,'Internal company ID'),
+              f('EmployerPayBasisID',RO,'The pay basis identifier'),
+            ]
+          },
+          {
+            method:'GET',name:'Locations',
+            desc:'Work locations and sites',
+            path:'GET /organisations/{id}/Locations',
+            fields:[
+              f('LocationID',RO,'Internal location ID'),
+              f('Description',RO,'Location name — max 50 characters'),
+              f('Country',RO,'UK, Ireland, or Jersey'),
+              f('Area',RO,'Area within the country if applicable'),
+              f('AccountingSystemCode',RO,'Code used in accounting system'),
+              f('LocationGUID',RO,'Globally unique location identifier'),
+            ]
+          },
+          {
+            method:'GET',name:'Job titles',
+            desc:'All job title definitions',
+            path:'GET /organisations/{id}/JobTitles',
+            fields:[
+              f('JobTitleID / JobTitleName',RO,'ID and name of the job title'),
+              f('LocationName / DivisionName',RO,'Which location and division this title belongs to'),
+              f('PayMethod',RO,'How this role is paid'),
+              f('HourlyMinimum / HourlyMaximum',RO,'Hourly pay range if applicable'),
+              f('SalaryMinimum / SalaryMaximum',RO,'Salary range if applicable'),
+            ]
+          },
+          {
+            method:'GET',name:'Divisions',
+            desc:'Organisational divisions',
+            path:'GET /organisations/{id}/Division',
+            fields:[
+              f('DivisionId / DivisionName',RO,'ID and name of the division — max 50 characters'),
+              f('AccountingSystemCode',RO,'Code used in the accounting system'),
+              f('DivisionGUID',RO,'Globally unique division identifier'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Scheduling',
+        endpoints:[
+          {
+            method:'GET',name:'Rotas',
+            desc:'Work schedules and shift patterns',
+            path:'GET /organisations/{id}/Rotas',
+            fields:[
+              f('RotaID',RO,'Internal rota ID'),
+              f('RotaStartDate / RotaEndDate',RO,'The dates this rota covers'),
+              f('Status',RO,'Whether the rota is Open, Closed at Location, or Submitted'),
+              f('LocationName / LocationCanonicalID',RO,'Which location this rota is for'),
+            ]
+          },
+          {
+            method:'GET',name:'Approved hours',
+            desc:'Hours that have been approved for payment',
+            path:'GET /organisations/{id}/Employees/ApprovedHours',
+            fields:[
+              f('EmployeeNumber',RO,'Employee reference'),
+              f('ElementName',RO,'Type of hours e.g. basic, overtime'),
+              f('Units',RO,'Number of hours approved'),
+              f('Rate / Value',RO,'Pay rate and total value'),
+            ]
+          },
+          {
+            method:'GET',name:'Import logs',
+            desc:'A record of all data imports',
+            path:'GET /organisations/{id}/ImportLogs',
+            fields:[
+              f('XmlType',RO,'What type of data was imported'),
+              f('ReferenceNumber',RO,'Reference for this import'),
+              f('Status',RO,'Whether the import succeeded or failed'),
+              f('DateCreatedUtc',RO,'When the import was submitted'),
+              f('Error',RO,'Error message if the import failed'),
+              f('SubmissionID',RO,'The submission reference'),
+              f('Result',RO,'The outcome of the import'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Validation',
+        endpoints:[
+          {
+            method:'POST',name:'Validate employee data',
+            desc:'Check an employee record for errors before submitting',
+            path:'POST /EmployeeValidator',
+            fields:[
+              f('ActionType',O,'What to do: CREATE, UPDATE, or DELETE'),
+              f('EmployeeNumber',O,'Unique reference number — max 49 characters'),
+              f('Title / FirstName / MiddleName / Surname',O,'Full name'),
+              f('All employee fields',O,'Same fields as Create employees — returns a ValidationResult showing which fields have errors'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+  // ── API 4: Onboarding API (internal) ──────
+  {
+    id:'onboarding-internal',
+    title:'Onboarding API (internal)',
+    area:'onboarding',
+    exposure:'int',
+    icon:'⚙️',
+    subtitle:'The internal engine powering the new hire journey — e-sign, documents, candidates',
+    exposeNote:'Internal — not externally accessible. Handles DocuSign and Twilio webhook callbacks.',
+    groups:[
+      {
+        name:'New hire journey',
+        endpoints:[
+          {
+            method:'POST',name:'Create candidate',
+            desc:'Start a new hire record when someone is offered a job',
+            path:'POST /',
+            fields:[
+              f('OrgAlias',O,'Which organisation this candidate belongs to'),
+              f('ESignInProgress',S,'Whether signing has started — set automatically'),
+              f('ESignCompleted',S,'Whether signing is complete — set automatically'),
+              f('DocumentUploadCompleted',S,'Whether all documents have been uploaded — set automatically'),
+              f('PersonalInformation',O,"The new hire's personal details — see personal information fields"),
+              f('BankAccount',O,'Bank account for pay — see bank details fields'),
+              f('EmergencyContact1 / EmergencyContact2',O,'Up to two emergency contacts'),
+              f('Reference1 / Reference2',O,'Employment references'),
+              f('SensitiveInformation',O,'Diversity data provided voluntarily'),
+              f('ImmutData',O,'Job and employment details set by the employer that the candidate cannot change'),
+            ]
+          },
+          {
+            method:'PATCH',name:'Update candidate',
+            desc:"Update a new hire's details as they change",
+            path:'PATCH /',
+            fields:[
+              f('OrgAlias',O,'Which organisation this candidate belongs to'),
+              f('PersonalInformation',O,"The new hire's personal details"),
+              f('BankAccount',O,'Bank account for pay'),
+              f('EmergencyContact1 / EmergencyContact2',O,'Up to two emergency contacts'),
+              f('Reference1 / Reference2',O,'Employment references'),
+              f('SensitiveInformation',O,'Diversity data provided voluntarily'),
+              f('ImmutData',O,'Job and employment details set by the employer'),
+            ]
+          },
+          {
+            method:'GET',name:'Get candidate',
+            desc:"Fetch a new hire's current status and information",
+            path:'GET /',
+            fields:[
+              f('OrgAlias',R,'Organisation identifier'),
+              f('RequestId',R,'The onboarding request ID'),
+              f('Status',RO,'Current candidate status: NotStarted, Started, InProgress, ESignInProgress, CompletedOnboarding, EmployeeCreated, or EmployeeCreationFailed'),
+            ]
+          },
+          {
+            method:'POST',name:'Publish employee',
+            desc:'Push the completed employee record to downstream systems',
+            path:'POST /PublishEmployee',
+            fields:[
+              f('OrgAlias',R,'Organisation identifier'),
+              f('RequestId',R,'The onboarding request ID'),
+              f('CustomerCanonicalId',R,'Customer identifier'),
+              f('AppKey',R,'Application key for authorisation'),
+            ]
+          },
+          {
+            method:'POST',name:'Link employee',
+            desc:'Connect the employee record with their signing documents',
+            path:'POST /LinkEmployee',
+            fields:[
+              f('OrgAlias',R,'Organisation identifier'),
+              f('RequestId',R,'The onboarding request ID'),
+              f('EmployeeId',R,'The employee ID in the HR system'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'E-sign',
+        endpoints:[
+          {
+            method:'GET',name:'Check e-sign started',
+            desc:'Has the new hire opened their documents to sign?',
+            path:'GET /HasStartedESign',
+            fields:[
+              f('OrgAlias',R,'Organisation identifier'),
+              f('RequestId',R,'Onboarding request ID'),
+              f('HasStartedESign',RO,'True if the candidate has opened the signing envelope'),
+            ]
+          },
+          {
+            method:'GET',name:'Check e-sign complete',
+            desc:'Has the new hire finished signing everything?',
+            path:'GET /HasCompletedESign',
+            fields:[
+              f('OrgAlias',R,'Organisation identifier'),
+              f('RequestId',R,'Onboarding request ID'),
+              f('HasCompletedESign',RO,'True if the candidate has fully completed signing'),
+            ]
+          },
+          {
+            method:'PATCH',name:'Mark e-sign complete',
+            desc:'Manually mark signing as done',
+            path:'PATCH /ESignCompleted',
+            fields:[
+              f('OrgAlias',R,'Organisation identifier'),
+              f('RequestId',R,'Onboarding request ID'),
+            ]
+          },
+          {
+            method:'GET',name:'Get signing URL',
+            desc:'Get the link to send a new hire to their documents',
+            path:'GET /DocuSignURL',
+            fields:[
+              f('RequestId',R,'Onboarding request ID'),
+              f('OrgAlias',R,'Organisation identifier'),
+              f('ReturnUrl',R,'Where to send the candidate after they finish signing'),
+            ]
+          },
+          {
+            method:'POST',name:'DocuSign callback',
+            desc:'DocuSign notifies us when someone has finished signing',
+            path:'POST /ESignCompleteNotification',
+            fields:[
+              f('EnvelopeId',S,'DocuSign envelope identifier'),
+              f('Status',S,'The signing status reported by DocuSign'),
+              f('RecipientStatuses',S,'Status for each person who needed to sign'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Registration',
+        endpoints:[
+          {
+            method:'GET',name:'Get registration link',
+            desc:'Generate the link sent to a new hire to begin onboarding',
+            path:'GET /OnBoardingRequestLink',
+            fields:[
+              f('OrgAlias',R,'Organisation identifier'),
+              f('RequestId',R,'Onboarding request ID'),
+              f('Link',RO,'The registration URL to send to the candidate'),
+            ]
+          },
+          {
+            method:'GET',name:'Request one-time password',
+            desc:"Send a temporary code to verify a new hire's identity",
+            path:'GET /OnBoardingOTPRequest',
+            fields:[
+              f('OrgAlias',R,'Organisation identifier'),
+              f('RequestId',R,'Onboarding request ID'),
+            ]
+          },
+          {
+            method:'POST',name:'Verify OTP',
+            desc:'Check the one-time password a new hire entered',
+            path:'POST /OnBoardingOTPVerification',
+            fields:[
+              f('OrgAlias',R,'Organisation identifier'),
+              f('RequestId',R,'Onboarding request ID'),
+              f('OTP',R,'The one-time password the candidate entered'),
+            ]
+          },
+          {
+            method:'POST',name:'Send SMS',
+            desc:'Send a text message notification to a candidate',
+            path:'POST /OnBoardingShortMessageService',
+            fields:[
+              f('OrgAlias',R,'Organisation identifier'),
+              f('RequestId',R,'Onboarding request ID'),
+              f('AppKey',R,'Application key for authorisation'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Documents',
+        endpoints:[
+          {
+            method:'POST',name:'Upload document',
+            desc:'A new hire or admin uploads a file such as ID or proof of address',
+            path:'POST /UploadDocument',
+            fields:[
+              f('FileName',R,'The name of the file being uploaded'),
+              f('DocumentType',R,'What kind of document: CV, RighttoWork, Contracts, Image, OnboardingDocuments, or Other'),
+              f('File',R,'The actual file content'),
+            ]
+          },
+          {
+            method:'DELETE',name:'Delete documents',
+            desc:"Remove uploaded documents from a candidate's record",
+            path:'DELETE /DeleteDocuments',
+            fields:[
+              f('OrgAlias',R,'Organisation identifier'),
+              f('RequestId',R,'Onboarding request ID'),
+              f('DocumentType',R,'Which type of documents to delete'),
+            ]
+          },
+          {
+            method:'POST',name:'Mark upload complete',
+            desc:'Signal that all required documents have been submitted',
+            path:'POST /DocumentUploadCompleted',
+            fields:[
+              f('OrgAlias',R,'Organisation identifier'),
+              f('RequestId',R,'Onboarding request ID'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Requests and brands',
+        endpoints:[
+          {
+            method:'POST',name:'Create onboarding request',
+            desc:'Open a new onboarding case for a hire',
+            path:'POST / (Request)',
+            fields:[
+              f('OrgAlias',O,'Organisation identifier'),
+              f('BrandAlias',O,'Which brand to use for this onboarding'),
+              f('CallbackUrl',O,'URL to call when the status changes — used for integrations'),
+              f('IsActive',S,'Set to active automatically'),
+              f('IsPaused',S,'Set to false initially'),
+            ]
+          },
+          {
+            method:'PATCH',name:'Pause onboarding',
+            desc:'Put an onboarding case on hold',
+            path:'PATCH /Pause',
+            fields:[
+              f('OrgAlias',R,'Organisation identifier'),
+              f('RequestId',R,'Which request to pause'),
+            ]
+          },
+          {
+            method:'PATCH',name:'Resume onboarding',
+            desc:'Take an onboarding case off hold',
+            path:'PATCH /UnPause',
+            fields:[
+              f('OrgAlias',R,'Organisation identifier'),
+              f('RequestId',R,'Which request to resume'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+  // ── API 5: PeopleSystem Gateway ───────────
+  {
+    id:'peoplesystem-gateway',
+    title:'PeopleSystem Gateway',
+    area:'people',
+    exposure:'int',
+    icon:'🏢',
+    subtitle:'Internal routing layer between the web tier and backend services',
+    exposeNote:'Internal - acts as a router and auth validator. Not directly reachable from outside.',
+    groups:[
+      {
+        name:'Authentication',
+        endpoints:[
+          {
+            method:'GET',name:'Validate token',
+            desc:'Check that a users login token is valid before letting them through',
+            path:'GET /Authenticate',
+            fields:[
+              f('Authorization',R,'The token to validate - passed in the Authorization header or as a query parameter'),
+              f('Result',RO,'Whether the token is valid - returns cached result if recently validated'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Employees and companies',
+        endpoints:[
+          {
+            method:'GET',name:'Employee summary',
+            desc:'Get a summary of employees for a company or group',
+            path:'GET /Employee/Summary',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('ClientId',R,'The company identifier'),
+              f('EmployeeId',RO,'Employee ID'),
+              f('FirstNames/Surname',RO,'Employee name'),
+              f('Email',RO,'Employee email'),
+              f('FourthAccountId',RO,'The employees unique Fourth account identifier'),
+            ]
+          },
+          {
+            method:'GET',name:'Pay date ranges',
+            desc:'Get pay period dates for a specific pay basis',
+            path:'GET /Employee/EmployerPayBasisPayDateRange',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('employerPaybasisId',R,'Which pay basis to get dates for'),
+              f('ProcessingDate',RO,'When payroll is processed'),
+              f('StartRange/EndRange',RO,'Start and end of the pay period'),
+              f('TaxYear/PayPeriod',RO,'Which tax year and period number'),
+            ]
+          },
+          {
+            method:'GET',name:'Refresh employee cache',
+            desc:'Force a refresh of cached employee data',
+            path:'GET /Employee/RefreshCache',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('ClientId',R,'The company identifier'),
+            ]
+          },
+          {
+            method:'GET',name:'List companies',
+            desc:'Get all companies in the system',
+            path:'GET /Employer/ListOfCompanies',
+            fields:[
+              f('CompanyName',RO,'Company name'),
+              f('CompanyId',RO,'Internal company ID'),
+              f('Description',RO,'Company description'),
+              f('EmployerPayBasisID',RO,'Pay basis identifier'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'File uploads and data loads',
+        endpoints:[
+          {
+            method:'POST',name:'Get unique upload ID',
+            desc:'Generate a unique ID before uploading a file',
+            path:'POST /FileUpload/GetUniqueID',
+            fields:[
+              f('FileIdentifier',RO,'The unique ID generated for this upload - use this when submitting the file'),
+            ]
+          },
+          {
+            method:'GET',name:'Validate data load',
+            desc:'Check a file is valid before processing it',
+            path:'GET /FileUpload/ValidateDataload',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('FileName',RO,'Name of the file being validated'),
+              f('Status',RO,'Whether the file passed validation'),
+              f('Errors',RO,'Any validation errors found'),
+            ]
+          },
+          {
+            method:'GET',name:'Process data load',
+            desc:'Import the data from a validated file',
+            path:'GET /FileUpload/ProcessDataLoad',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('FileIdentifier',R,'The unique ID from the upload step'),
+            ]
+          },
+          {
+            method:'GET',name:'List file types',
+            desc:'What kinds of files can be uploaded?',
+            path:'GET /FileUpload/GetFileTypes',
+            fields:[
+              f('FileType',RO,'The name of each supported file type'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Document batches',
+        endpoints:[
+          {
+            method:'POST',name:'Create and send document batch',
+            desc:'Create a set of documents and send them in one step',
+            path:'POST /api/DocumentBatch/CreateAndSend',
+            fields:[
+              f('Documents',R,'The list of documents to include in this batch'),
+              f('Recipients',R,'Who should receive the documents'),
+            ]
+          },
+          {
+            method:'POST',name:'Create batch',
+            desc:'Create a set of documents ready to send',
+            path:'POST /api/DocumentBatch/Create',
+            fields:[
+              f('Documents',R,'The list of documents to include'),
+            ]
+          },
+          {
+            method:'POST',name:'Send batch',
+            desc:'Send a previously created document batch',
+            path:'POST /api/DocumentBatch/Send',
+            fields:[
+              f('BatchId',R,'The ID of the batch to send'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Document checks',
+        endpoints:[
+          {
+            method:'GET',name:'Document check status',
+            desc:'What is the current status of a right to work check?',
+            path:'GET /DocumentCheck/GetDocumentStatusAsync',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('EmployeeId',R,'Which employee'),
+              f('Status',RO,'Current status of the document check'),
+              f('LastUpdated',RO,'When the status last changed'),
+            ]
+          },
+          {
+            method:'POST',name:'Start document check',
+            desc:'Begin a right to work verification for an employee',
+            path:'POST /DocumentCheck/StartDocumentCheckAsync',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('EmployeeId',R,'Which employee to check'),
+              f('CheckType',R,'The type of document check to perform'),
+            ]
+          },
+          {
+            method:'POST',name:'Configure customer',
+            desc:'Set up a customer to use document checking',
+            path:'POST /DocumentCheck/ConfigureCustomerAsync',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('Configuration',R,'The document check settings for this customer'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+  // ── API 6: Auth Token Service ─────────────
+  {
+    id:'auth-token',
+    title:'Auth Token Service',
+    area:'auth',
+    exposure:'int',
+    icon:'🔑',
+    subtitle:'Issues and validates the login tokens used across the whole platform',
+    exposeNote:'Used only by Onboarding App integrators',
+    groups:[
+      {
+        name:'Token management',
+        endpoints:[
+          {
+            method:'POST',name:'Generate token',
+            desc:'Create a login token for a service or application',
+            path:'POST /api/Auth',
+            fields:[
+              f('clientId',R,'The identifier for the service requesting the token - must be registered in the system'),
+              f('clientSecret',R,'The password for the service - must match the registered secret'),
+              f('type',R,'What kind of token: Bearer for standard use or WebCache for server-side storage'),
+              f('roles',O,'What permissions to embed in the token - defaults to standard website user access'),
+            ]
+          },
+          {
+            method:'POST',name:'Generate token with custom claims',
+            desc:'Same as above but lets you embed additional information inside the token',
+            path:'POST /api/Auth/GetToken',
+            fields:[
+              f('clientId',R,'The identifier for the service'),
+              f('clientSecret',R,'The service password'),
+              f('type',R,'Bearer or WebCache'),
+              f('roles',O,'Permission roles to embed'),
+              f('claims',O,'Any additional custom information to embed inside the token as key-value pairs'),
+            ]
+          },
+          {
+            method:'POST',name:'Validate token',
+            desc:'Check whether a token is still valid and has not expired',
+            path:'POST /api/Auth/Validate',
+            fields:[
+              f('token',R,'The full token string to validate including the type prefix e.g. Bearer eyJ...'),
+              f('Result',RO,'True if valid false if expired or invalid'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+  // ── API 7: iQ HCM UK Service ──────────────
+  {
+    id:'iq-hcm',
+    title:'iQ HCM UK Service',
+    area:'iq',
+    exposure:'int',
+    icon:'💡',
+    subtitle:'The intelligent layer - proactive alerts insights and actions for managers',
+    exposeNote:'Internal - event-driven via Azure Service Bus. Not externally accessible.',
+    groups:[
+      {
+        name:'Alerts - automatic',
+        endpoints:[
+          {
+            method:'EVENT',name:'Work anniversary alert',
+            desc:'Notifies when an employee reaches a work anniversary',
+            path:'Azure Service Bus',
+            fields:[
+              f('EmployeeName',S,'The employees full name'),
+              f('JobTitle',S,'Their job title'),
+              f('StartDate',S,'When they joined'),
+              f('YearsEmployed',S,'How many years they have been employed'),
+              f('CompanyName',S,'Which company'),
+            ]
+          },
+          {
+            method:'EVENT',name:'Birthday alert',
+            desc:'Notifies of upcoming employee birthdays',
+            path:'Azure Service Bus',
+            fields:[
+              f('EmployeeName',S,'The employees full name'),
+              f('JobTitle',S,'Their job title'),
+              f('Birthday',S,'Their birthday date'),
+            ]
+          },
+          {
+            method:'EVENT',name:'Right to work expiry',
+            desc:'Warns when a right to work document is about to expire',
+            path:'Azure Service Bus',
+            fields:[
+              f('EmployeeName',S,'The employees full name'),
+              f('EmployeeNumber',S,'Their HR reference number'),
+              f('JobTitle',S,'Their job title'),
+              f('ExpiryDate',S,'When their right to work document expires'),
+            ]
+          },
+          {
+            method:'EVENT',name:'Right to work missing',
+            desc:'Alerts when an employee has no right to work document',
+            path:'Azure Service Bus',
+            fields:[
+              f('EmployeeName',S,'The employees full name'),
+              f('EmployeeNumber',S,'Their HR reference number'),
+              f('JobTitle',S,'Their job title'),
+              f('StartDate',S,'When they joined - important as RTW should be checked before this date'),
+            ]
+          },
+          {
+            method:'EVENT',name:'Probation period alert',
+            desc:'Notifies as an employee approaches the end of probation',
+            path:'Azure Service Bus',
+            fields:[
+              f('EmployeeName',S,'The employees full name'),
+              f('JobTitle',S,'Their job title'),
+              f('ProbationPeriodEnd',S,'When probation ends'),
+            ]
+          },
+          {
+            method:'EVENT',name:'Fixed term contract expiry',
+            desc:'Warns when a fixed term contract is about to end',
+            path:'Azure Service Bus',
+            fields:[
+              f('EmployeeName',S,'The employees full name'),
+              f('JobTitle',S,'Their job title'),
+              f('FixedTermContractEnd',S,'When the contract ends'),
+            ]
+          },
+          {
+            method:'EVENT',name:'Pay rate bracket change',
+            desc:'Alerts when an employee moves to a new pay bracket',
+            path:'Azure Service Bus',
+            fields:[
+              f('EmployeeName',S,'The employees full name'),
+              f('JobTitle',S,'Their job title'),
+              f('Age',S,'Their age - pay brackets are often age-related e.g. National Living Wage'),
+              f('CurrentPayRate',S,'Their current pay rate'),
+              f('NewPayRate',S,'The new pay rate they will move to'),
+              f('PayIncrease',S,'The amount of the increase'),
+              f('EffectiveDate',S,'When the new rate takes effect'),
+            ]
+          },
+          {
+            method:'EVENT',name:'Onboarding not completed',
+            desc:'Flags if a new hire has not finished their onboarding',
+            path:'Azure Service Bus',
+            fields:[
+              f('FirstName/SurName',S,'The new hires name'),
+              f('StartDate',S,'Their start date'),
+              f('MobileNumber',S,'Their mobile number for follow up contact'),
+            ]
+          },
+          {
+            method:'EVENT',name:'Rota overdue',
+            desc:'Flags when a rota has not been published on time',
+            path:'Azure Service Bus',
+            fields:[
+              f('RotaStartDate',S,'The start date of the overdue rota'),
+              f('LocationName',S,'Which location the rota is for'),
+              f('RotaStatus',S,'Current status of the rota'),
+              f('RotaDeadline',S,'The deadline that was missed'),
+            ]
+          },
+          {
+            method:'EVENT',name:'First shift on rota',
+            desc:'Notifies when an employees first shift is scheduled',
+            path:'Azure Service Bus',
+            fields:[
+              f('EmployeeName',S,'The employees full name'),
+              f('JobTitle',S,'Their job title'),
+              f('ShiftDate',S,'The date of the first shift'),
+              f('ShiftStartTime/ShiftEndTime',S,'When the shift starts and ends'),
+              f('Division',S,'Which division'),
+            ]
+          },
+          {
+            method:'EVENT',name:'Last shift on rota',
+            desc:'Notifies when an employees final shift is scheduled',
+            path:'Azure Service Bus',
+            fields:[
+              f('EmployeeName',S,'The employees full name'),
+              f('JobTitle',S,'Their job title'),
+              f('ShiftDate',S,'The date of the last shift'),
+              f('ShiftStartTime/ShiftEndTime',S,'When the shift starts and ends'),
+              f('Division',S,'Which division'),
+              f('TerminationDate',S,'The employees leaving date'),
+            ]
+          },
+          {
+            method:'EVENT',name:'ECR approval or rejection',
+            desc:'Notifies when an employment change request is approved or rejected',
+            path:'Azure Service Bus',
+            fields:[
+              f('EmployeeName',S,'The employees full name'),
+              f('EmployeeNumber',S,'Their HR reference'),
+              f('EcrEffectiveDate',S,'When the change takes effect'),
+              f('EcrApprover',S,'Who approved or rejected it'),
+              f('EcrComments',S,'Any comments added by the approver'),
+            ]
+          },
+          {
+            method:'EVENT',name:'Trust ID alert',
+            desc:'Notifies about Trust ID right to work check status',
+            path:'Azure Service Bus',
+            fields:[
+              f('EmployeeName',S,'The employees full name'),
+              f('EmployeeNumber',S,'Their HR reference'),
+              f('JobTitle',S,'Their job title'),
+              f('TrustIDCheckDate',S,'When the check was done'),
+              f('TrustIDStatus',S,'The result of the Trust ID check'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Actions and insights',
+        endpoints:[
+          {
+            method:'QUERY',name:'Get action',
+            desc:'Look up a specific recommended action for a manager',
+            path:'MediatR query',
+            fields:[
+              f('ActionId',O,'The ID of the specific action to retrieve'),
+              f('InsightId',O,'The insight ID - use this to find the action linked to a particular insight'),
+            ]
+          },
+          {
+            method:'QUERY',name:'Get all actions for insight',
+            desc:'Get all actions linked to a particular insight',
+            path:'MediatR query',
+            fields:[
+              f('InsightId',R,'The insight ID to find actions for'),
+              f('Actions',RO,'List of all actions linked to this insight'),
+            ]
+          },
+          {
+            method:'POST',name:'Create action',
+            desc:'Create a new recommended action from an event',
+            path:'MediatR command',
+            fields:[
+              f('CustomerCanonicalId',R,'Which customer this action belongs to'),
+              f('LocationCanonicalId',R,'Which location'),
+              f('UserCanonicalId',R,'Which user the action is assigned to'),
+              f('RecipientIds',R,'Who should receive this action'),
+              f('TemplateId',R,'Which action template to use - controls display and available options'),
+              f('StartDateUtc/EndDateUtc',R,'When the action is active'),
+              f('DueDateUtc',R,'When it needs to be acted on by'),
+              f('Severity',R,'How urgent this action is'),
+              f('ActionArguments',R,'The data that populates the action e.g. employee name expiry date shift details'),
+            ]
+          },
+          {
+            method:'POST',name:'Update action',
+            desc:'Update or create an action record',
+            path:'MediatR command',
+            fields:[
+              f('CustomerCanonicalId',R,'Which customer this action belongs to'),
+              f('LocationCanonicalId',R,'Which location'),
+              f('UserCanonicalId',R,'Which user the action is assigned to'),
+              f('RecipientIds',R,'Who should receive this action'),
+              f('TemplateId',R,'Which action template to use'),
+              f('StartDateUtc/EndDateUtc',R,'When the action is active'),
+              f('DueDateUtc',R,'When it needs to be acted on by'),
+              f('Severity',R,'How urgent this action is'),
+              f('ActionArguments',R,'The data that populates the action'),
+              f('CompletedByUserName',O,'Who completed the action'),
+              f('CompletedDateUtc',O,'When it was completed'),
+              f('CompletedSelectedAction',O,'Which option the manager chose'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Customer and settings',
+        endpoints:[
+          {
+            method:'QUERY',name:'Get customer',
+            desc:'Look up a customer by ID or alias',
+            path:'MediatR query',
+            fields:[
+              f('CanonicalId',O,'Customer canonical ID'),
+              f('OrgAlias',O,'Organisation alias - use either this or CanonicalId'),
+            ]
+          },
+          {
+            method:'QUERY',name:'Is iQ enabled?',
+            desc:'Check whether iQ features are switched on for a customer',
+            path:'MediatR query',
+            fields:[
+              f('CustomerId',R,'The customer to check'),
+              f('IsEnabled',RO,'Whether iQ is currently enabled for this customer'),
+            ]
+          },
+          {
+            method:'QUERY',name:'Get iQ settings',
+            desc:'Retrieve iQ configuration for a customer',
+            path:'MediatR query',
+            fields:[
+              f('CustomerId',R,'The customer to get settings for'),
+              f('Settings',RO,'The current iQ configuration for this customer'),
+            ]
+          },
+          {
+            method:'POST',name:'Update customer',
+            desc:'Create or update a customer record',
+            path:'MediatR command',
+            fields:[
+              f('CustomerCanonicalId',R,'The customer identifier'),
+              f('OrgAlias',O,'Organisation alias'),
+              f('IsActive',O,'Whether this customer is active'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Leave and employee events',
+        endpoints:[
+          {
+            method:'EVENT',name:'Holiday request submitted',
+            desc:'A new holiday request has been raised',
+            path:'Azure Service Bus',
+            fields:[
+              f('EmployeeId',S,'Which employee submitted the request'),
+              f('RequestDate',S,'The date requested'),
+              f('Value',S,'How much holiday requested'),
+              f('Type',S,'Days shifts or hours'),
+            ]
+          },
+          {
+            method:'EVENT',name:'Holiday approved or rejected',
+            desc:'A holiday request decision has been made',
+            path:'Azure Service Bus',
+            fields:[
+              f('EmployeeId',S,'Which employee'),
+              f('RequestDate',S,'The holiday date'),
+              f('Status',S,'Whether approved or rejected'),
+              f('ApprovedBy',S,'Who made the decision'),
+            ]
+          },
+          {
+            method:'EVENT',name:'Onboarding completed',
+            desc:'A new hire has finished their onboarding journey',
+            path:'Azure Service Bus',
+            fields:[
+              f('EmployeeId',S,'The new employees ID'),
+              f('OrgAlias',S,'Which organisation'),
+              f('CompletedAt',S,'When onboarding was completed'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+  // ── API 8: iQ360 Events API ───────────────
+  {
+    id:'iq360',
+    title:'iQ360 Events API',
+    area:'iq',
+    exposure:'client',
+    icon:'📊',
+    subtitle:'Tracks which features people are using - feeds usage analytics',
+    exposeNote:'Client library - Fourth calls an external iQ360 server. Fourth does not host this API.',
+    groups:[
+      {
+        name:'Feature usage tracking',
+        endpoints:[
+          {
+            method:'POST',name:'Submit feature usage event',
+            desc:'Record that a user accessed or used a particular feature',
+            path:'POST /api/events/feature-usage',
+            fields:[
+              f('eventId',R,'A unique identifier for this event - must be unique per submission'),
+              f('eventType',R,'What type of event this is e.g. FeatureAccessed'),
+              f('customerId',R,'Which customer this event belongs to'),
+              f('eventTimestamp',O,'When the event occurred - defaults to now if not provided'),
+              f('actorType',O,'Who or what triggered this: USER SYSTEM AGENT or INTEGRATION'),
+              f('actorId',O,'Identifier of the person or system that triggered the event'),
+              f('actorName',O,'Human readable name of who triggered it max 200 characters'),
+              f('locationId',O,'Which location this event relates to'),
+              f('sourceSystem',O,'Which system generated this event'),
+              f('appVersion',O,'Version of the application that generated the event'),
+              f('sessionId',O,'The users session identifier'),
+              f('correlationId',O,'Reference for linking related events together'),
+              f('resourceId',O,'Which specific resource or feature was accessed'),
+              f('resourceType',O,'What type of resource it was'),
+              f('durationMs',O,'How long the operation took in milliseconds'),
+              f('status',O,'The status of the operation'),
+              f('outcome',O,'The outcome of the operation'),
+              f('context',O,'Any additional key-value information about the event'),
+            ]
+          },
+          {
+            method:'POST',name:'Submit feature usage batch',
+            desc:'Record multiple feature usage events in one go',
+            path:'POST /api/events/feature-usage/batch',
+            fields:[
+              f('eventId',R,'A unique identifier for this event - must be unique per submission'),
+              f('eventType',R,'What type of event this is e.g. FeatureAccessed'),
+              f('customerId',R,'Which customer this event belongs to'),
+              f('eventTimestamp',O,'When the event occurred - defaults to now if not provided'),
+              f('actorType',O,'Who or what triggered this: USER SYSTEM AGENT or INTEGRATION'),
+              f('actorId',O,'Identifier of the person or system that triggered the event'),
+              f('actorName',O,'Human readable name of who triggered it max 200 characters'),
+              f('locationId',O,'Which location this event relates to'),
+              f('sourceSystem',O,'Which system generated this event'),
+              f('appVersion',O,'Version of the application that generated the event'),
+              f('sessionId',O,'The users session identifier'),
+              f('correlationId',O,'Reference for linking related events together'),
+              f('resourceId',O,'Which specific resource or feature was accessed'),
+              f('resourceType',O,'What type of resource it was'),
+              f('durationMs',O,'How long the operation took in milliseconds'),
+              f('status',O,'The status of the operation'),
+              f('outcome',O,'The outcome of the operation'),
+              f('context',O,'Any additional key-value information about the event'),
+              f('acceptedCount',RO,'How many events were accepted'),
+              f('rejectedCount',RO,'How many were rejected'),
+              f('rejectedEvents',RO,'Details of any rejected events including the reason why'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+  // ── API 9: Reporting API ──────────────────
+  {
+    id:'reporting',
+    title:'Reporting API',
+    area:'reporting',
+    exposure:'int',
+    icon:'📋',
+    subtitle:'Generates PDF and CSV reports from PeopleSystem data',
+    exposeNote:'Internal - not exposed through an external gateway.',
+    groups:[
+      {
+        name:'Report generation',
+        endpoints:[
+          {
+            method:'GET',name:'Generate PDF report',
+            desc:'Run a report and get it back as a PDF file',
+            path:'GET /api/reports/ReportPDF',
+            fields:[
+              f('rpt',R,'Which report to run'),
+              f('meta',R,'Metadata about the report request'),
+              f('token',R,'Authentication token'),
+              f('groupName',R,'Which group to run the report for'),
+              f('styleSheet',O,'Custom stylesheet to apply to the report'),
+              f('reporttemplate',O,'Which report template to use'),
+              f('rnd',O,'Random value to prevent caching'),
+            ]
+          },
+          {
+            method:'GET',name:'Generate CSV report',
+            desc:'Run a report and get the data as a spreadsheet',
+            path:'GET /api/reports/ReportCSV',
+            fields:[
+              f('rpt',R,'Which report to run'),
+              f('meta',R,'Metadata about the report request'),
+              f('token',R,'Authentication token'),
+              f('groupName',R,'Which group to run the report for'),
+              f('styleSheet',O,'Custom stylesheet to apply to the report'),
+              f('reporttemplate',O,'Which report template to use'),
+              f('rnd',O,'Random value to prevent caching'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+  // ── API 10: HMRC Submission API ───────────
+  {
+    id:'hmrc-submission',
+    title:'HMRC Submission API',
+    area:'hmrc',
+    exposure:'int',
+    icon:'🏛️',
+    subtitle:'Sends payroll data to HMRC - RTI submissions and error handling',
+    exposeNote:'Internal - submissions go outbound to HMRC. This service is not externally accessible itself.',
+    groups:[
+      {
+        name:'Submissions',
+        endpoints:[
+          {
+            method:'POST',name:'Submit to HMRC',
+            desc:'Send a payroll XML submission to HMRC and get their response',
+            path:'POST /api/submission/submit-xml/...',
+            fields:[
+              f('CorrelationId',R,'A unique reference to track this submission end to end'),
+              f('groupId',R,'Which group this submission is for'),
+              f('companyId',R,'Which company'),
+              f('SubmissionType',R,'The type of HMRC submission being made e.g. RTI'),
+              f('XmlContent',R,'The actual payroll data in the XML format HMRC requires'),
+              f('EmployerReference',R,'The employers PAYE reference'),
+              f('TaxYear',R,'The tax year this submission covers'),
+              f('HMRCCorrelationId',RO,'The reference HMRC gives us when they receive it'),
+              f('Progress',RO,'How far through processing the submission is'),
+              f('StatusHistory',RO,'Full history of every status change including any errors'),
+              f('BlobFiles',RO,'The XML files sent to and received from HMRC'),
+            ]
+          },
+          {
+            method:'POST',name:'Poll submission status',
+            desc:'Check whether HMRC has processed a submission yet',
+            path:'POST /api/submission/.../Poll',
+            fields:[
+              f('CorrelationId',R,'The submission reference to check'),
+              f('groupId',R,'Which group'),
+              f('companyId',R,'Which company'),
+              f('Status',RO,'Current processing status'),
+              f('CompletedAt',RO,'When HMRC finished processing if complete'),
+            ]
+          },
+          {
+            method:'GET',name:'Get submission errors',
+            desc:'Find out why a submission was rejected by HMRC',
+            path:'GET /api/submission/.../Errors',
+            fields:[
+              f('hmrcCorrelationId',R,'The HMRC reference for the submission'),
+              f('groupId',R,'Which group'),
+              f('companyId',R,'Which company'),
+              f('Errors',RO,'List of error messages returned by HMRC explaining why the submission was rejected'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+  // ── API 11: Audit APIs ────────────────────
+  {
+    id:'audit-apis',
+    title:'Audit APIs',
+    area:'infra',
+    exposure:'int',
+    icon:'🔍',
+    subtitle:'Track every change made across PeopleSystem for compliance',
+    exposeNote:'Internal - receives messages via the API gateway. Not exposed externally.',
+    groups:[
+      {
+        name:'Audit control',
+        endpoints:[
+          {
+            method:'POST',name:'Start audit collection',
+            desc:'Begin capturing a record of changes',
+            path:'POST /api/audit-control/start',
+            fields:[
+              f('GroupId',R,'Which group to start auditing'),
+              f('EmployeeId',O,'Optionally limit auditing to a specific employee'),
+            ]
+          },
+          {
+            method:'POST',name:'Stop audit collection',
+            desc:'Stop capturing changes',
+            path:'POST /api/audit-control/stop',
+            fields:[
+              f('GroupId',R,'Which group to stop auditing'),
+            ]
+          },
+          {
+            method:'GET',name:'Audit status',
+            desc:'Is audit collection currently running?',
+            path:'GET /api/audit-control/status',
+            fields:[
+              f('GroupId',R,'Which group to check'),
+              f('IsActive',RO,'Whether audit collection is currently running'),
+              f('StartedAt',RO,'When collection started'),
+            ]
+          },
+          {
+            method:'POST',name:'Ingest audit records',
+            desc:'Push audit records into the audit store',
+            path:'POST /api/audit-ingest',
+            fields:[
+              f('GroupId',R,'Which group these records belong to'),
+              f('EmployeeId',R,'Which employee'),
+              f('EntityType',R,'What kind of data was affected e.g. Employee'),
+              f('EntityAction',R,'What was done to it e.g. Updated'),
+              f('CurrentUser',O,'Who was logged in when this happened'),
+              f('Method',O,'The type of API call made e.g. GET POST'),
+              f('Body',O,'The data that was sent'),
+              f('StatusCode',O,'Whether the call succeeded 200 or failed 400 500'),
+              f('TimeUtc',R,'Exactly when this happened'),
+              f('TraceId',O,'Technical reference linking all calls in a single user action - useful for debugging'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+  // ── API 12: Legacy PeopleSystem API ───────
+  {
+    id:'legacy-peoplesystem',
+    title:'Legacy PeopleSystem API',
+    area:'people',
+    exposure:'int',
+    icon:'📦',
+    subtitle:'The older version of the PeopleSystem API - still active being phased out over time',
+    exposeNote:'Internal - uses a legacy header-based auth system. Not exposed through the external API gateway.',
+    groups:[
+      {
+        name:'Employee and HR',
+        endpoints:[
+          {
+            method:'GET',name:'Employee summary',
+            desc:'Get a summary of employees for a company',
+            path:'GET /api/employee/summary/{groupId}/{clientId}',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('clientId',R,'The company identifier'),
+              f('EmployeeId',RO,'Employee ID'),
+              f('FirstName/Surname',RO,'Employee name'),
+              f('Email',RO,'Employee email'),
+            ]
+          },
+          {
+            method:'POST',name:'Terminate benefits',
+            desc:'Stop an employees benefits when they leave',
+            path:'POST /api/hr/employment/TerminateEmployeeBenefits/...',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('employeeId',R,'Which employee to terminate benefits for'),
+            ]
+          },
+          {
+            method:'POST',name:'Reinstate benefits',
+            desc:'Restart an employees benefits if they return',
+            path:'POST /api/hr/employment/UnterminateEmployeeBenefits/...',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('employeeId',R,'Which employee to reinstate benefits for'),
+            ]
+          },
+          {
+            method:'POST',name:'Save employment change',
+            desc:'Save a pending change to an employees record',
+            path:'POST /api/hr/employment/Save/...',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('guid',R,'The identifier of the pending change'),
+              f('LocationID/LocationName',O,'New work location'),
+              f('DivisionID/DivisionName',O,'New division'),
+              f('JobTitleID/JobTitleName',O,'New job title'),
+              f('ContractID/ContractName',O,'New contract type'),
+              f('PayRate/Salary',O,'New pay rate or salary'),
+              f('ContractHours',O,'New contracted hours'),
+              f('PaidByRota',O,'Whether pay should be driven by rota'),
+              f('IncludedInRota',O,'Whether to include on rota'),
+            ]
+          },
+          {
+            method:'GET',name:'Roll back change',
+            desc:'Undo a change that was made to an employment record',
+            path:'GET /api/hr/employment/RollbackChange/...',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('guid',R,'The identifier of the change to undo'),
+            ]
+          },
+          {
+            method:'POST',name:'Check for conflicts',
+            desc:'Before making a change check whether it clashes with anything else',
+            path:'POST /api/hr/employment/CheckConflict/...',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('clientId',R,'The company identifier'),
+              f('EffectiveDate',R,'The date the change would take effect'),
+              f('IdentifierConflict',RO,'A reference for the conflict found'),
+              f('PreviousEffectiveDate/NextEffectiveDate',RO,'The dates of surrounding changes that conflict'),
+              f('approvedItems',RO,'Changes already approved that conflict'),
+              f('currentDateItems',RO,'Changes on the same date that conflict'),
+              f('futureDateItems',RO,'Future changes that conflict'),
+            ]
+          },
+          {
+            method:'POST',name:'Confirm effective date',
+            desc:'Lock in the date a change will take effect',
+            path:'POST /api/hr/employment/ConfirmEffectiveDateChanges/...',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('guid',R,'The change identifier'),
+              f('effectiveDate',R,'The confirmed date the change takes effect'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Payroll - statutory pay',
+        endpoints:[
+          {
+            method:'GET',name:'Student and council loan data',
+            desc:'Student Loan and Council Tax deduction records',
+            path:'GET /api/payroll/scl/...',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('clientId',R,'The company identifier'),
+              f('SclId',RO,'Internal ID for this record'),
+              f('LeaveDate',RO,'Date of leave relevant to this loan'),
+              f('IsHalfDay',RO,'Whether this is a half day adjustment'),
+              f('IsDeducted',RO,'Whether the deduction has been applied'),
+              f('NotificationDate',RO,'When the deduction was notified'),
+            ]
+          },
+          {
+            method:'POST',name:'Update loan record',
+            desc:'Update a student or council loan deduction',
+            path:'POST /api/payroll/scl/Update',
+            fields:[
+              f('SclId',R,'The record to update'),
+              f('GroupId',R,'The group identifier'),
+              f('ClientId',R,'The company identifier'),
+              f('LeaveDate',O,'Updated leave date'),
+              f('IsHalfDay',O,'Whether this is a half day'),
+              f('IsDeducted',O,'Whether the deduction should be applied'),
+              f('NotificationDate',O,'Updated notification date'),
+            ]
+          },
+          {
+            method:'GET',name:'Parental leave',
+            desc:'Shared Neonatal Care Pay parental leave records',
+            path:'GET /api/sncp/parentalleave/...',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('clientId',R,'The company identifier'),
+              f('NeonatalAdmission/NeonatalDischarge',RO,'When the baby was admitted to and discharged from neonatal care'),
+              f('NeonatalLeaveWeeksAccrued/NeonatalLeeksTaken',RO,'Weeks of SNCP leave earned and taken'),
+              f('BabyDue/BabyBorn',RO,'Expected and actual birth dates'),
+              f('AverageEarnings',RO,'Weekly earnings used to calculate statutory pay'),
+              f('StillBirth',RO,'Whether this relates to a stillbirth'),
+              f('IsOverrideExclusion',RO,'Whether normal exclusion rules have been overridden'),
+            ]
+          },
+          {
+            method:'POST',name:'Create SNCP record',
+            desc:'Create a Shared Neonatal Care Pay record',
+            path:'POST /api/sncp',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('clientId',R,'The company identifier'),
+              f('NeonatalAdmission',R,'When the baby was admitted to neonatal care'),
+              f('NeonatalDischarge',R,'When the baby was discharged'),
+              f('BabyDue',R,'Expected birth date'),
+              f('BabyBorn',O,'Actual birth date'),
+              f('AverageEarnings',R,'Weekly earnings for statutory pay calculation'),
+              f('StillBirth',O,'Whether this is a stillbirth case'),
+            ]
+          },
+          {
+            method:'GET',name:'Paternity pay record',
+            desc:'Statutory Paternity Pay records',
+            path:'GET /api/spp/...',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('clientId',R,'The company identifier'),
+              f('sppEmployeeId',R,'The SPP record identifier'),
+              f('Notified',RO,'When the employee notified the employer of paternity leave'),
+              f('Week1Start/Week2Start',RO,'Start dates of each week of paternity leave'),
+              f('BabyDue/BabyBorn',RO,'Expected and actual birth dates'),
+              f('AverageEarnings',RO,'Weekly earnings for statutory pay calculation'),
+            ]
+          },
+          {
+            method:'POST',name:'RTI post-processing',
+            desc:'Post-process an HMRC Real Time Information payrun',
+            path:'POST /api/rti/postprocess...',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('payRunId',R,'Which payrun to post-process'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'iQ settings legacy',
+        endpoints:[
+          {
+            method:'GET',name:'Is iQ enabled?',
+            desc:'Check whether iQ is turned on for a customer',
+            path:'GET /api/iqsettings/isiqenabled/...',
+            fields:[
+              f('groupidOrCanonical',R,'The group ID or canonical ID to check'),
+              f('IsEnabled',RO,'Whether iQ is enabled for this customer'),
+            ]
+          },
+          {
+            method:'POST',name:'Toggle iQ on or off',
+            desc:'Switch iQ features on or off for a customer',
+            path:'POST /api/iqsettings/ToggleiQ',
+            fields:[
+              f('groupidOrCanonical',R,'The group ID or canonical ID'),
+              f('Enable',R,'True to turn iQ on false to turn it off'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'SSO and accounts',
+        endpoints:[
+          {
+            method:'POST',name:'Update SSO account',
+            desc:'Sync changes to a users single sign-on account',
+            path:'POST /api/hr/SSOMessage/UpdateAccount/...',
+            fields:[
+              f('groupid',R,'The group identifier'),
+              f('clientId',R,'The company identifier'),
+              f('AccountDetails',R,'The updated account information to sync'),
+            ]
+          },
+          {
+            method:'POST',name:'Reactivate SSO account',
+            desc:'Re-enable an account that was deactivated',
+            path:'POST /api/hr/SSOMessage/ReactivateAccount/...',
+            fields:[
+              f('groupId',R,'The group identifier'),
+              f('clientId',R,'The company identifier'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+  // ── API 13: LP Sync API ───────────────────
+  {
+    id:'lp-sync',
+    title:'LP Sync API',
+    area:'people',
+    exposure:'int',
+    icon:'🔄',
+    subtitle:'Synchronises lieu time and labour productivity data between systems',
+    exposeNote:'Internal - lieu and payroll sync service. No external access.',
+    groups:[
+      {
+        name:'Lieu requests',
+        endpoints:[
+          {
+            method:'POST',name:'Create lieu request',
+            desc:'Record time off in lieu earned by working extra hours',
+            path:'POST /LieuRequest',
+            fields:[
+              f('ForeignDepartmentID',R,'The department identifier from the external system'),
+              f('ForeignStaffID',R,'The employee identifier from the external system'),
+              f('ShiftDate',R,'The date the extra hours were worked'),
+              f('LieuType',R,'The category of lieu entitlement'),
+              f('LieuHours',R,'How many hours of lieu time have been earned'),
+            ]
+          },
+          {
+            method:'GET',name:'Get lieu info',
+            desc:'Retrieve lieu entitlement information',
+            path:'GET /LieuInfo',
+            fields:[
+              f('ForeignStaffID',R,'The employee identifier'),
+              f('LieuHours',RO,'Total lieu hours available'),
+              f('LieuType',RO,'The type of lieu entitlement'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Rotas',
+        endpoints:[
+          {
+            method:'GET',name:'Get rota data',
+            desc:'Retrieve rota and shift information',
+            path:'GET /Rotas',
+            fields:[
+              f('ClientID',R,'Which location'),
+              f('ShiftDate',R,'The date to get rota data for'),
+              f('DivisionID',R,'Which division'),
+              f('TotalHours',RO,'Total hours scheduled on this date'),
+              f('TotalTips',RO,'Total tips recorded on this date'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Menus and recipes',
+        endpoints:[
+          {
+            method:'GET',name:'Get menus',
+            desc:'Retrieve menu data for labour productivity planning',
+            path:'GET /Menu',
+            fields:[
+              f('Id',RO,'Menu identifier'),
+              f('Name',RO,'Menu name'),
+            ]
+          },
+          {
+            method:'GET',name:'Get menu cycles',
+            desc:'Retrieve repeating menu schedules',
+            path:'GET /MenuCycle',
+            fields:[
+              f('Id',RO,'Cycle identifier'),
+              f('Name/ShortName',RO,'Full and short name of the cycle'),
+              f('Description',RO,'What this cycle covers'),
+              f('StartDate/EndDate',RO,'When this cycle is active'),
+            ]
+          },
+          {
+            method:'GET',name:'Get meal periods',
+            desc:'Retrieve meal period data',
+            path:'GET /MealPeriod',
+            fields:[
+              f('Id',RO,'Meal period identifier'),
+              f('Name',RO,'Meal period name e.g. Breakfast Lunch Dinner'),
+            ]
+          },
+          {
+            method:'GET',name:'Get recipes',
+            desc:'Retrieve recipe data',
+            path:'GET /Recipe',
+            fields:[
+              f('Id',RO,'Recipe identifier'),
+              f('Name',RO,'Recipe name'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+
+let activeFilter = 'all';
+let searchQuery  = '';
+
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+
+function esc(s){
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function searchText(api) {
-  const parts = [api.title, api.subtitle];
-  api.groups.forEach(g => {
-    parts.push(g.name);
-    g.endpoints.forEach(e => parts.push(e.name, e.desc, e.path, e.method));
-  });
-  return parts.join(' ').toLowerCase();
+function countEndpoints(api){
+  return api.groups.reduce((n,g)=>n+g.endpoints.length,0);
 }
 
-function endpointSearchText(e, groupName) {
-  return [e.name, e.desc, e.path, e.method, groupName].join(' ').toLowerCase();
+function matchesFilter(api){
+  if(activeFilter==='all')  return true;
+  if(activeFilter==='open') return api.exposure==='open';
+  if(activeFilter==='int')  return api.exposure==='int';
+  return api.area===activeFilter;
 }
 
-function matchesFilter(api, f) {
-  if (f === 'all') return true;
-  if (f === 'open') return api.exposure === 'open';
-  if (f === 'int') return api.exposure === 'int';
-  if (f.startsWith('area-')) return api.area === f.slice(5);
-  return true;
+function matchesSearch(api,q){
+  if(!q) return true;
+  const lq=q.toLowerCase();
+  if(api.title.toLowerCase().includes(lq)||api.subtitle.toLowerCase().includes(lq)) return true;
+  for(const g of api.groups){
+    if(g.name.toLowerCase().includes(lq)) return true;
+    for(const ep of g.endpoints){
+      if(ep.name.toLowerCase().includes(lq)||ep.desc.toLowerCase().includes(lq)||ep.path.toLowerCase().includes(lq)) return true;
+      for(const fd of ep.fields){
+        if(fd.name.toLowerCase().includes(lq)||fd.desc.toLowerCase().includes(lq)) return true;
+      }
+    }
+  }
+  return false;
 }
 
-function buildCard(api, query) {
-  const n = countEndpoints(api);
-  const [badgeClass, badgeLabel] = EXPOSURE_BADGE[api.exposure] || ['badge-int', api.exposure];
-  const ql = query.toLowerCase();
+// ─────────────────────────────────────────────
+// RENDER HELPERS
+// ─────────────────────────────────────────────
 
-  const groupsHtml = api.groups.map(g => {
-    const endpointsHtml = g.endpoints.map(e => {
-      const epText = endpointSearchText(e, g.name);
-      const hide = ql && !epText.includes(ql) ? ' hidden' : '';
-      return `<div class="endpoint${hide}">
-        <div class="method-col"><span class="method-badge method-${e.method}">${e.method}</span></div>
-        <div>
-          <div class="endpoint-name">${e.name}</div>
-          <div class="endpoint-desc">${e.desc}</div>
-          <code class="endpoint-path">${e.path}</code>
+function expBadge(exp){
+  const m=EXPOSURE_META[exp]||EXPOSURE_META.int;
+  return `<span class="badge-exp ${m.badgeCls}">${esc(m.label)}</span>`;
+}
+
+function methodBadge(method){
+  return `<span class="method m-${method}">${method}</span>`;
+}
+
+function fieldBadge(type){
+  const MAP={required:['f-required','Required'],optional:['f-optional','Optional'],readonly:['f-readonly','Read only'],system:['f-system','System']};
+  const [cls,label]=MAP[type]||MAP.optional;
+  return `<span class="badge-field ${cls}">${label}</span>`;
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+
+function renderFilters(){
+  document.getElementById('filters').innerHTML=FILTERS.map(ft=>`
+    <button class="filter-btn${activeFilter===ft.id?' active':''}" onclick="setFilter('${ft.id}')">${esc(ft.label)}</button>
+  `).join('');
+}
+
+function renderStats(visible){
+  const totalEp=visible.reduce((n,a)=>n+countEndpoints(a),0);
+  const openN=visible.filter(a=>a.exposure==='open').length;
+  const empN =visible.filter(a=>a.exposure==='emp').length;
+  const intN =visible.filter(a=>a.exposure==='int').length;
+  document.getElementById('stats').innerHTML=`
+    <div class="stat-item"><span class="stat-count">${visible.length}</span>&nbsp;APIs</div>
+    <span class="stat-sep">·</span>
+    <div class="stat-item"><span class="stat-count">${totalEp}</span>&nbsp;endpoints</div>
+    <span class="stat-sep">·</span>
+    <div class="stat-item">${expBadge('open')}&nbsp;<span class="stat-count">${openN}</span></div>
+    <div class="stat-item">${expBadge('emp')}&nbsp;<span class="stat-count">${empN}</span></div>
+    <div class="stat-item">${expBadge('int')}&nbsp;<span class="stat-count">${intN}</span></div>
+  `;
+}
+
+function renderEndpoint(ep,uid){
+  const fieldsHtml=ep.fields.map(fd=>`
+    <tr>
+      <td><span class="field-name">${esc(fd.name)}</span></td>
+      <td>${fieldBadge(fd.type)}</td>
+      <td class="field-desc">${esc(fd.desc)}</td>
+    </tr>`).join('');
+
+  const fieldsBlock=ep.fields.length?`
+    <button class="toggle-fields" onclick="toggleFields('${uid}',this)">Show fields</button>
+    <div class="fields-wrap" id="${uid}">
+      <table class="fields-table">
+        <thead><tr><th>Field name</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>${fieldsHtml}</tbody>
+      </table>
+    </div>`:'';
+
+  return `
+    <div class="endpoint">
+      <div class="ep-row">
+        ${methodBadge(ep.method)}
+        <div class="ep-info">
+          <div class="ep-name">${esc(ep.name)}</div>
+          <div class="ep-desc">${esc(ep.desc)}</div>
+          <div class="ep-path">${esc(ep.path)}</div>
         </div>
-      </div>`;
-    }).join('');
-
-    const allHidden = ql && g.endpoints.every(e => !endpointSearchText(e, g.name).includes(ql));
-    return `<div class="endpoint-group${allHidden ? ' hidden' : ''}">
-      <div class="group-name">${g.name}</div>
-      ${endpointsHtml}
+      </div>
+      ${fieldsBlock}
     </div>`;
-  }).join('');
-
-  const card = document.createElement('div');
-  card.className = 'api-card' + (ql ? ' open' : '');
-  card.innerHTML = `
-    <div class="api-header" onclick="this.parentElement.classList.toggle('open')">
-      <div class="api-icon">${api.icon}</div>
-      <div class="api-title">${api.title}</div>
-      <span class="badge ${badgeClass}">${badgeLabel}</span>
-      <span class="endpoint-count">${n} endpoint${n !== 1 ? 's' : ''}</span>
-      <span class="chevron">▼</span>
-    </div>
-    <div class="api-body">
-      <p class="api-subtitle">${api.subtitle}</p>
-      <p class="api-expose-note">${api.exposeNote}</p>
-      ${groupsHtml}
-    </div>`;
-  return card;
 }
 
-let currentFilter = 'all';
-let currentSearch = '';
+function renderApi(api,autoOpen){
+  const epCount=countEndpoints(api);
+  const m=EXPOSURE_META[api.exposure]||EXPOSURE_META.int;
+  const groupsHtml=api.groups.map((g,gi)=>
+    `<div class="group-heading">${esc(g.name)}</div>`+
+    g.endpoints.map((ep,ei)=>renderEndpoint(ep,`${api.id}-g${gi}e${ei}`)).join('')
+  ).join('');
 
-function render() {
-  const list = document.getElementById('api-list');
-  const noResults = document.getElementById('no-results');
-  const summary = document.getElementById('summary');
+  return `
+    <div class="api-card ${m.cardCls}${autoOpen?' open':''}" id="card-${api.id}">
+      <div class="api-header" onclick="toggleCard('${api.id}')">
+        <div class="api-icon">${api.icon}</div>
+        <div class="api-meta">
+          <div class="api-title-row">
+            <span class="api-title">${esc(api.title)}</span>
+            ${expBadge(api.exposure)}
+          </div>
+          <div class="api-subtitle">${esc(api.subtitle)}</div>
+          <div class="api-expose-note">${esc(api.exposeNote)}</div>
+        </div>
+        <div class="api-right">
+          <span class="ep-count">${epCount} endpoint${epCount!==1?'s':''}</span>
+          <svg class="chevron" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+      </div>
+      <div class="api-body">${groupsHtml}</div>
+    </div>`;
+}
 
-  list.innerHTML = '';
-
-  const ql = currentSearch.toLowerCase();
-  const visible = DATA.apis.filter(api => {
-    if (!matchesFilter(api, currentFilter)) return false;
-    if (!ql) return true;
-    return searchText(api).includes(ql);
-  });
-
-  const totalEndpoints = visible.reduce((s, a) => s + countEndpoints(a), 0);
-  const openCount = visible.filter(a => a.exposure === 'open').length;
-  const intCount = visible.filter(a => a.exposure === 'int').length;
-
-  if (visible.length === 0) {
-    noResults.classList.remove('hidden');
-    summary.innerHTML = '';
+function render(){
+  const visible=APIS.filter(a=>matchesFilter(a)&&matchesSearch(a,searchQuery));
+  const autoOpen=searchQuery.length>0;
+  renderFilters();
+  renderStats(visible);
+  const content=document.getElementById('content');
+  if(!visible.length){
+    content.innerHTML=`
+      <div class="no-results">
+        <div class="no-results-icon">🔍</div>
+        <div class="no-results-text">No APIs match your search or filter.</div>
+      </div>`;
   } else {
-    noResults.classList.add('hidden');
-    summary.innerHTML = `
-      <span class="summary-stat"><strong>${visible.length}</strong> API${visible.length !== 1 ? 's' : ''}</span>
-      <div class="summary-divider"></div>
-      <span class="summary-stat"><strong>${totalEndpoints}</strong> endpoint${totalEndpoints !== 1 ? 's' : ''}</span>
-      <div class="summary-divider"></div>
-      <span class="summary-stat"><strong>${openCount}</strong> open</span>
-      <div class="summary-divider"></div>
-      <span class="summary-stat"><strong>${intCount}</strong> internal</span>`;
-    visible.forEach(api => list.appendChild(buildCard(api, currentSearch)));
+    content.innerHTML=visible.map(a=>renderApi(a,autoOpen)).join('');
   }
 }
 
-document.getElementById('search').addEventListener('input', e => {
-  currentSearch = e.target.value.trim();
-  render();
-});
+// ─────────────────────────────────────────────
+// INTERACTIONS
+// ─────────────────────────────────────────────
 
-document.getElementById('filters').addEventListener('click', e => {
-  const btn = e.target.closest('.filter-btn');
-  if (!btn) return;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  currentFilter = btn.dataset.filter;
+function setFilter(id){
+  activeFilter=id;
   render();
+}
+
+function toggleCard(id){
+  const card=document.getElementById('card-'+id);
+  if(card) card.classList.toggle('open');
+}
+
+function toggleFields(uid,btn){
+  const wrap=document.getElementById(uid);
+  if(!wrap) return;
+  const open=wrap.classList.toggle('open');
+  btn.textContent=open?'Hide fields':'Show fields';
+}
+
+let searchTimer;
+document.getElementById('search').addEventListener('input',e=>{
+  clearTimeout(searchTimer);
+  searchTimer=setTimeout(()=>{
+    searchQuery=e.target.value.trim();
+    render();
+  },150);
 });
 
 render();
