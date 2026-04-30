@@ -19,11 +19,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .search-input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.12)}
 .search-input::placeholder{color:#9ca3af}
 
-/* ── Filters ── */
-.filters{padding:10px 24px;border-bottom:1px solid #f3f4f6;display:flex;flex-wrap:wrap;gap:6px;background:#fafafa}
-.filter-btn{padding:4px 12px;border:1px solid #e5e7eb;border-radius:20px;background:#fff;color:#6b7280;font-size:12px;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:inherit}
-.filter-btn:hover{border-color:#3b82f6;color:#3b82f6}
-.filter-btn.active{background:#3b82f6;border-color:#3b82f6;color:#fff}
+/* ── Tabs ── */
+.tabs{padding:0 24px;border-bottom:2px solid #e5e7eb;display:flex;gap:0;background:#fff}
+.tab-btn{padding:14px 28px;border:none;border-bottom:3px solid transparent;background:transparent;color:#6b7280;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:inherit;margin-bottom:-2px}
+.tab-btn:hover{color:#111827}
+.tab-btn.active{color:#111827;border-bottom-color:#111827}
 
 /* ── Stats ── */
 .stats{padding:8px 24px;border-bottom:1px solid #f3f4f6;display:flex;gap:18px;flex-wrap:wrap;align-items:center;background:#fafafa}
@@ -119,7 +119,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 @media(max-width:640px){
   .header{padding:8px 12px}
-  .filters,.stats,.content{padding-left:12px;padding-right:12px}
+  .tabs,.stats,.content{padding-left:12px;padding-right:12px}
   .ep-path{display:none}
 }
 </style>
@@ -139,7 +139,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 </header>
 
-<div class="filters" id="filters"></div>
+<div class="tabs" id="tabs"></div>
 <div class="stats" id="stats"></div>
 <main class="content" id="content"></main>
 
@@ -155,18 +155,9 @@ const EXPOSURE_META = {
   client: { label:'Client library',  cardCls:'exp-client', badgeCls:'exp-client-badge' },
 };
 
-const FILTERS = [
-  {id:'all',        label:'All'},
-  {id:'open',       label:'Open APIs only'},
-  {id:'int',        label:'Internal only'},
-  {id:'onboarding', label:'Onboarding'},
-  {id:'people',     label:'People & HR'},
-  {id:'ess',        label:'Employee self-service'},
-  {id:'iq',         label:'iQ & Alerts'},
-  {id:'auth',       label:'Auth'},
-  {id:'hmrc',       label:'HMRC'},
-  {id:'infra',      label:'Audit & infra'},
-  {id:'reporting',  label:'Reporting'},
+const TABS = [
+  {id:'open', label:'Open APIs'},
+  {id:'int',  label:'Internal APIs'},
 ];
 
 const R='required', O='optional', RO='readonly', S='system';
@@ -251,10 +242,10 @@ const APIS = [
     id:'ess',
     title:'Employee Self Service API',
     area:'ess',
-    exposure:'emp',
+    exposure:'int',
     icon:'📱',
     subtitle:'What employees see and do themselves — payslips, holidays, personal details',
-    exposeNote:'Employee-facing — called directly from the employee app using a Salesforce identity token',
+    exposeNote:'Internal - used by the employee app but not directly accessible to customers or partners',
     groups:[
       {
         name:'My details',
@@ -1799,10 +1790,10 @@ const APIS = [
     id:'iq360',
     title:'iQ360 Events API',
     area:'iq',
-    exposure:'client',
+    exposure:'int',
     icon:'📊',
     subtitle:'Tracks which features people are using - feeds usage analytics',
-    exposeNote:'Client library - Fourth calls an external iQ360 server. Fourth does not host this API.',
+    exposeNote:'Internal - Fourth calls this service internally. Not directly accessible to customers or partners',
     groups:[
       {
         name:'Feature usage tracking',
@@ -2370,7 +2361,7 @@ const APIS = [
 // STATE
 // ─────────────────────────────────────────────
 
-let activeFilter = 'all';
+let activeFilter = 'open';
 let searchQuery  = '';
 
 // ─────────────────────────────────────────────
@@ -2388,10 +2379,9 @@ function countEndpoints(api){
 }
 
 function matchesFilter(api){
-  if(activeFilter==='all')  return true;
   if(activeFilter==='open') return api.exposure==='open';
   if(activeFilter==='int')  return api.exposure==='int';
-  return api.area===activeFilter;
+  return false;
 }
 
 function matchesSearch(api,q){
@@ -2433,25 +2423,18 @@ function fieldBadge(type){
 // RENDER
 // ─────────────────────────────────────────────
 
-function renderFilters(){
-  document.getElementById('filters').innerHTML=FILTERS.map(ft=>`
-    <button class="filter-btn${activeFilter===ft.id?' active':''}" onclick="setFilter('${ft.id}')">${esc(ft.label)}</button>
+function renderTabs(){
+  document.getElementById('tabs').innerHTML=TABS.map(t=>`
+    <button class="tab-btn${activeFilter===t.id?' active':''}" onclick="setFilter('${t.id}')">${esc(t.label)}</button>
   `).join('');
 }
 
 function renderStats(visible){
   const totalEp=visible.reduce((n,a)=>n+countEndpoints(a),0);
-  const openN=visible.filter(a=>a.exposure==='open').length;
-  const empN =visible.filter(a=>a.exposure==='emp').length;
-  const intN =visible.filter(a=>a.exposure==='int').length;
   document.getElementById('stats').innerHTML=`
     <div class="stat-item"><span class="stat-count">${visible.length}</span>&nbsp;APIs</div>
     <span class="stat-sep">·</span>
     <div class="stat-item"><span class="stat-count">${totalEp}</span>&nbsp;endpoints</div>
-    <span class="stat-sep">·</span>
-    <div class="stat-item">${expBadge('open')}&nbsp;<span class="stat-count">${openN}</span></div>
-    <div class="stat-item">${expBadge('emp')}&nbsp;<span class="stat-count">${empN}</span></div>
-    <div class="stat-item">${expBadge('int')}&nbsp;<span class="stat-count">${intN}</span></div>
   `;
 }
 
@@ -2520,7 +2503,7 @@ function renderApi(api,autoOpen){
 function render(){
   const visible=APIS.filter(a=>matchesFilter(a)&&matchesSearch(a,searchQuery));
   const autoOpen=searchQuery.length>0;
-  renderFilters();
+  renderTabs();
   renderStats(visible);
   const content=document.getElementById('content');
   if(!visible.length){
