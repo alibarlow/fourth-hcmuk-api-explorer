@@ -222,6 +222,13 @@ const AUTH_META = {
   'audit-apis':          'Internal',
   'legacy-peoplesystem': 'Service header',
   'lp-sync':             'Internal',
+  'iq-wfm':             'Custom header',
+  'bi-webapi':          'Subdomain',
+  'scheduling':         'Custom header',
+  'hr-webapi':          'Subdomain',
+  'tna-webapi':         'Org GUID or subdomain',
+  'additional-payment-webapi': 'Subdomain',
+  'sales-labour-modeling': 'Internal',
 };
 
 const TABS = [
@@ -2581,6 +2588,1564 @@ const APIS = [
     ]
   },
 
+  // ── API: IQ WFM API ──────────────────────────
+  {
+    id:'iq-wfm',
+    title:'IQ WFM API',
+    area:'wfm',
+    exposure:'int',
+    icon:'📊',
+    subtitle:'Intelligent workforce management — labour adjustments, sales performance, scheduling and absence cover for managers',
+    exposeNote:'Internal — used by the MiQ manager app. Not directly accessible to customers or partners.',
+    groups:[
+      {
+        name:'Health and configuration',
+        endpoints:[
+          {
+            method:'GET',name:'Health check',
+            desc:'Validates authentication and returns the resolved user identity',
+            path:'GET /root',
+            fields:[
+              f('X-Fourth-Org',R,'Organisation identifier header'),
+              f('X-Fourth-UserID',R,'User identifier header'),
+            ]
+          },
+          {
+            method:'GET',name:'Organisation configuration',
+            desc:'Returns organisation-level configuration settings, optionally including location-specific settings',
+            path:'GET /organisations/configurations',
+            fields:[
+              f('locationCanonicalId',O,'Include to get location-scoped settings alongside organisation settings'),
+            ]
+          },
+          {
+            method:'GET',name:'Users at location',
+            desc:'Returns users at a given location filtered by permission level',
+            path:'GET /users/location',
+            fields:[
+              f('locationCanonicalId',R,'Which location to get users for'),
+              f('userPermissions[]',R,'List of permission IDs to filter by - integers'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Labour and scheduling',
+        endpoints:[
+          {
+            method:'GET',name:'Labour adjustments',
+            desc:'Retrieves labour adjustments for a location scoped to a specific insight - shows forecast vs actual hours and available open shifts',
+            path:'GET /labour-adjustments',
+            fields:[
+              f('locationCanonicalId',R,'Which location'),
+              f('insightId',O,'Which insight to scope the adjustments to'),
+            ]
+          },
+          {
+            method:'POST',name:'Activate open shifts',
+            desc:'Activates manager-selected open shifts to address forecasted labour demand after manager approval in the MiQ app',
+            path:'POST /labour-adjustments/update',
+            fields:[
+              f('locationCanonicalId',R,'Which location'),
+              f('selectedAction',R,'The action selected by the manager'),
+              f('businessDate',R,'The business date'),
+              f('insightId',O,'The insight ID'),
+              f('openShiftIds',R,'List of open shift IDs to activate'),
+            ]
+          },
+          {
+            method:'GET',name:'Labour cost for week',
+            desc:'Returns labour and sales schedule data for an entire working week',
+            path:'GET /labour-cost',
+            fields:[
+              f('locationCanonicalId',R,'Which location'),
+              f('weekStartDate',R,'The start date of the week'),
+            ]
+          },
+          {
+            method:'POST',name:'Update schedule approval status',
+            desc:'Approves rejects or marks a schedule as ready for review based on manager action in the MiQ app',
+            path:'POST /labour/schedule-update',
+            fields:[
+              f('locationCanonicalId',R,'Which location'),
+              f('weekStartDate',R,'The week start date'),
+              f('selectedAction',R,'The approval action: approve reject or ready-for-review'),
+            ]
+          },
+          {
+            method:'POST',name:'Publish schedule',
+            desc:'Publishes a schedule identified by an insight ID',
+            path:'POST /publish-schedule',
+            fields:[
+              f('insightId',O,'The insight ID of the schedule to publish'),
+            ]
+          },
+          {
+            method:'POST',name:'Reset forecast',
+            desc:'Resets the forecast for a location on a given business date',
+            path:'POST /forecast/reset/{locationCanonicalId}',
+            fields:[
+              f('locationCanonicalId',R,'Which location - in the URL path'),
+              f('businessDate',R,'The date to reset the forecast for'),
+              f('insightId',O,'The insight ID'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Sales performance',
+        endpoints:[
+          {
+            method:'GET',name:'Sales performance for week',
+            desc:'Sales performance for a single location and business date in the context of the full week - includes AI forecast manager sales actuals and labour',
+            path:'GET /sales-performance',
+            fields:[
+              f('locationCanonicalId',R,'Which location'),
+              f('businessDate',R,'The business date'),
+            ]
+          },
+          {
+            method:'GET',name:'Sales performance for date',
+            desc:'Sales performance for a single location scoped to a specific date - yesterday context',
+            path:'GET /sales-performance-for-date',
+            fields:[
+              f('locationCanonicalId',R,'Which location'),
+              f('businessDate',R,'The specific date'),
+            ]
+          },
+          {
+            method:'POST',name:'Batch sales performance for week',
+            desc:'Sales performance for multiple locations at once in week context',
+            path:'POST /sales-performance/search',
+            fields:[
+              f('locationCanonicalIds[]',R,'List of location canonical IDs'),
+              f('businessDate',R,'The business date'),
+            ]
+          },
+          {
+            method:'POST',name:'Batch sales performance for date',
+            desc:'Sales performance for multiple locations at once scoped to a single date',
+            path:'POST /sales-performance/search-for-date',
+            fields:[
+              f('locationCanonicalIds[]',R,'List of location canonical IDs'),
+              f('businessDate',R,'The specific date'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Scheduling and absence',
+        endpoints:[
+          {
+            method:'GET',name:'Busy intervals',
+            desc:'Returns busy intervals ranked by activity level for a location on a sales date - useful for understanding peak times',
+            path:'GET /busy-intervals',
+            fields:[
+              f('locationCanonicalId',R,'Which location'),
+              f('salesDate',R,'The date to analyse'),
+            ]
+          },
+          {
+            method:'PUT',name:'Update employee skill points',
+            desc:'Updates skill points for employees at a location - zero values are ignored and missing employee/role pairs are not created',
+            path:'PUT /employees-skill-points',
+            fields:[
+              f('locationCanonicalId',R,'Which location'),
+              f('userCanonicalId',R,'Employee canonical ID'),
+              f('roleId',R,'Role ID'),
+              f('skillPoint',R,'Skill point value to set'),
+            ]
+          },
+          {
+            method:'GET',name:'Absence cover',
+            desc:'Retrieves an archived absence cover shift and lists available employees who can cover it',
+            path:'GET /absence-cover',
+            fields:[
+              f('shiftId',R,'The shift ID to find cover for - must be a positive number'),
+            ]
+          },
+          {
+            method:'POST',name:'Convert absence to open shift',
+            desc:'Converts an absence cover shift into an open shift optionally inviting specific employees',
+            path:'POST /absence-cover/open-shift',
+            fields:[
+              f('shiftId',R,'The shift to convert - must be a positive integer'),
+              f('employeeIds',O,'Specific employee IDs to invite - if omitted the shift is open to all'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+  // ── API: Scheduling API ─────────────────────
+  {
+    id:'scheduling',
+    title:'Scheduling API',
+    area:'wfm',
+    exposure:'int',
+    icon:'📅',
+    subtitle:'Core scheduling engine — shifts rotas open shifts templates sign-offs expenses and Time and Attendance',
+    exposeNote:'Internal — powers the scheduling screens. Not directly accessible to customers or partners. Base path: /locations/{locationId}/departments/{departmentId}/...',
+    groups:[
+      {
+        name:'Activity drivers',
+        endpoints:[
+          {
+            method:'GET',name:'Get activity driver values',
+            desc:'Gets activity driver values for a specific department and week',
+            path:'GET .../activity-driver-values',
+            fields:[
+              f('locationId',R,'Location ID in the URL path'),
+              f('departmentId',R,'Department ID in the URL path'),
+              f('weekStartDate',O,'The week to get values for - defaults to current week'),
+            ]
+          },
+          {
+            method:'POST',name:'Save activity driver values',
+            desc:'Saves activity driver values for forecast or actual data',
+            path:'POST .../activity-driver-values',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('values',R,'The activity driver values to save as forecast or actual'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Approval and reporting',
+        endpoints:[
+          {
+            method:'GET',name:'Approval report',
+            desc:'Gets the approval report for a department on a specific date',
+            path:'GET .../approval-report/{date}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date in the URL path'),
+            ]
+          },
+          {
+            method:'GET',name:'Labour cost analysis by department',
+            desc:'Gets department-level data for the Labour Cost Analysis report',
+            path:'GET .../labour-cost-analysis-report/departments',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date in the URL path'),
+            ]
+          },
+          {
+            method:'GET',name:'Labour cost analysis by employee',
+            desc:'Gets employee-level data for the Labour Cost Analysis report',
+            path:'GET .../labour-cost-analysis-report/employees',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date in the URL path'),
+            ]
+          },
+          {
+            method:'GET',name:'Costs by session',
+            desc:'Retrieves labour costs broken down by session for a department on a date',
+            path:'GET .../date/{date}/costs-by-session',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Auto-scheduling',
+        endpoints:[
+          {
+            method:'POST',name:'Run auto-scheduler',
+            desc:'Executes the standard auto-scheduler for a department',
+            path:'POST .../run-auto-scheduler',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('schedulerRequest',R,'Auto-scheduler configuration and parameters'),
+            ]
+          },
+          {
+            method:'POST',name:'Run AI scheduler',
+            desc:'Executes the AI-based scheduler for a department',
+            path:'POST .../run-ai-scheduler',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('schedulerRequest',R,'AI scheduler configuration and parameters'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Contractor shifts',
+        endpoints:[
+          {
+            method:'POST',name:'Create contractor shift',
+            desc:'Creates a new contractor shift for a department',
+            path:'POST .../contractor-shifts',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('shift details',R,'Contractor shift details including role dates and times'),
+            ]
+          },
+          {
+            method:'PUT',name:'Update contractor shift',
+            desc:'Updates an existing contractor shift',
+            path:'PUT .../contractor-shifts/{id}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('id',R,'The shift ID to update in the URL path'),
+              f('shift details',R,'Updated shift details'),
+            ]
+          },
+          {
+            method:'DELETE',name:'Delete contractor shift',
+            desc:'Deletes a specific contractor shift',
+            path:'DELETE .../contractor-shifts/{id}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('id',R,'The shift ID to delete'),
+            ]
+          },
+          {
+            method:'DELETE',name:'Bulk delete contractor shifts',
+            desc:'Deletes multiple contractor shifts at once',
+            path:'DELETE .../contractor-shifts',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('ids',R,'List of shift IDs to delete'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Department settings',
+        endpoints:[
+          {
+            method:'PUT',name:'Set department closed',
+            desc:'Sets whether a department is closed on a specific date',
+            path:'PUT .../closed-date/{date}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date in the URL path'),
+              f('isClosed',R,'True to mark as closed false to mark as open'),
+            ]
+          },
+          {
+            method:'GET',name:'Get opening and closing times',
+            desc:'Gets default and week-specific opening and closing times for a department',
+            path:'GET .../open-close-times/{weekStartDate}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('weekStartDate',R,'The week start date'),
+            ]
+          },
+          {
+            method:'POST',name:'Save opening and closing times',
+            desc:'Saves opening and closing times for a department',
+            path:'POST .../open-close-times',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('times',R,'The opening and closing times to save'),
+            ]
+          },
+          {
+            method:'GET',name:'Get department settings',
+            desc:'Retrieves configuration settings including roles and pay rules for the schedule view',
+            path:'GET .../Settings',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+            ]
+          },
+          {
+            method:'GET',name:'Get permissions',
+            desc:'Gets user permissions for a department',
+            path:'GET .../permissions',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Labour demand',
+        endpoints:[
+          {
+            method:'GET',name:'Labour demand',
+            desc:'Gets labour demand requirements for a specified period',
+            path:'GET .../from/{from}/to/{to}/labour-demand',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('from',R,'Period start date'),
+              f('to',R,'Period end date'),
+            ]
+          },
+          {
+            method:'GET',name:'Role-based scheduling demand',
+            desc:'Gets Role-Based Scheduling labour demand',
+            path:'GET .../labour-demand-rbs',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('weekStartDate',O,'The week to get demand for'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Lieu (time off in lieu)',
+        endpoints:[
+          {
+            method:'GET',name:'Get lieu balances',
+            desc:'Gets Time Off in Lieu balances for all employees on a date',
+            path:'GET .../lieu/{date}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date'),
+            ]
+          },
+          {
+            method:'POST',name:'Create or update lieu entry',
+            desc:'Creates or updates a lieu entry for an employee',
+            path:'POST .../lieu/{date}/employee/{employeeId}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date'),
+              f('employeeId',R,'The employee ID'),
+              f('lieuHours',R,'Number of lieu hours to record as a decimal'),
+            ]
+          },
+          {
+            method:'DELETE',name:'Delete lieu entry',
+            desc:'Deletes a lieu entry for an employee',
+            path:'DELETE .../lieu/{date}/employee/{employeeId}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date'),
+              f('employeeId',R,'The employee ID'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Open shifts',
+        endpoints:[
+          {
+            method:'POST',name:'Create open shift',
+            desc:'Creates a new open shift available for any eligible employee',
+            path:'POST .../open-shifts',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('role',R,'The role for this shift'),
+              f('startDateTime',R,'Shift start date and time'),
+              f('endDateTime',R,'Shift end date and time'),
+            ]
+          },
+          {
+            method:'PUT',name:'Update open shift',
+            desc:'Updates an existing open shift',
+            path:'PUT .../open-shifts/{id}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('id',R,'The shift ID to update'),
+              f('shift details',R,'Updated shift details'),
+            ]
+          },
+          {
+            method:'PUT',name:'Assign open shift to employee',
+            desc:'Assigns an open shift to a specific employee',
+            path:'PUT .../open-shifts/assign/{employeeId}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('employeeId',R,'The employee to assign the shift to'),
+              f('shift details',R,'The shift to assign'),
+            ]
+          },
+          {
+            method:'PUT',name:'Convert open shifts to standard shifts',
+            desc:'Converts multiple open shifts into standard assigned shifts',
+            path:'PUT .../open-shifts/convert',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('shifts',R,'The open shifts to convert'),
+            ]
+          },
+          {
+            method:'DELETE',name:'Delete open shift',
+            desc:'Deletes a single open shift',
+            path:'DELETE .../open-shifts/{id}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('id',R,'The shift ID to delete'),
+            ]
+          },
+          {
+            method:'DELETE',name:'Bulk delete open shifts',
+            desc:'Deletes multiple open shifts based on criteria',
+            path:'DELETE .../open-shifts/bulk-delete',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('criteria',R,'Criteria defining which shifts to delete'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Rota management',
+        endpoints:[
+          {
+            method:'POST',name:'Approve rota',
+            desc:'Approves the rota for a specific date',
+            path:'POST .../date/{date}/rota-approve',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The rota date'),
+              f('source',O,'Source system triggering the approval'),
+            ]
+          },
+          {
+            method:'POST',name:'Reject rota',
+            desc:'Rejects the rota for a specific date',
+            path:'POST .../date/{date}/rota-reject',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The rota date'),
+              f('source',O,'Source system triggering the rejection'),
+            ]
+          },
+          {
+            method:'POST',name:'Close rota',
+            desc:'Closes the rota for a specific date',
+            path:'POST .../date/{date}/rota-close',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The rota date'),
+            ]
+          },
+          {
+            method:'POST',name:'Reopen rota',
+            desc:'Reopens a closed rota for a specific date',
+            path:'POST .../date/{date}/rota-reopen',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The rota date'),
+            ]
+          },
+          {
+            method:'POST',name:'Mark rota ready for review',
+            desc:'Marks the rota as ready for review',
+            path:'POST .../date/{date}/rota-readyToReview',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The rota date'),
+              f('source',O,'Source system'),
+            ]
+          },
+          {
+            method:'POST',name:'Submit rota',
+            desc:'Submits the rota for a specific date',
+            path:'POST .../date/{date}/rota-submit',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The rota date'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Schedule management',
+        endpoints:[
+          {
+            method:'GET',name:'Get schedule for period',
+            desc:'Gets full schedule data for a date range',
+            path:'GET .../from/{from}/to/{to}/schedule-period',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('from',R,'Period start date'),
+              f('to',R,'Period end date'),
+              f('loadWeeklyData',O,'Whether to include weekly data'),
+              f('sortOrderType',O,'How to sort the schedule'),
+            ]
+          },
+          {
+            method:'POST',name:'Save schedule note',
+            desc:'Saves a note on the weekly schedule',
+            path:'POST .../schedule-notes',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('note',R,'The note text to save'),
+            ]
+          },
+          {
+            method:'POST',name:'Save schedule sort order',
+            desc:'Saves the preferred sort order for roles and employees on the schedule view',
+            path:'POST .../schedule-sort-order',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('sortOrder',R,'The preferred sort order configuration'),
+            ]
+          },
+          {
+            method:'POST',name:'Publish schedule',
+            desc:'Publishes the schedule for a specific date',
+            path:'POST .../date/{date}/publish-schedule',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date to publish'),
+            ]
+          },
+          {
+            method:'POST',name:'Printable schedule',
+            desc:'Generates data for a printable version of the schedule',
+            path:'POST .../date/{date}/printable-schedule',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date'),
+              f('departments',R,'Department data to include'),
+            ]
+          },
+          {
+            method:'POST',name:'Synchronise to HR',
+            desc:'Synchronises scheduling data to the HR system',
+            path:'POST .../date/{date}/synchr',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date to synchronise'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Schedule templates',
+        endpoints:[
+          {
+            method:'GET',name:'Get schedule templates',
+            desc:'Retrieves available schedule templates for a department',
+            path:'GET .../schedule-templates',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+            ]
+          },
+          {
+            method:'POST',name:'Save as template',
+            desc:'Saves the current week as a new schedule template',
+            path:'POST .../schedule-templates',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('templateName',R,'Name for the new template'),
+            ]
+          },
+          {
+            method:'POST',name:'Load template',
+            desc:'Loads a specific template into a target week',
+            path:'POST .../schedule-templates/{templateId}/weekStartDate/{weekStartDate}/load',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('templateId',R,'Which template to load'),
+              f('weekStartDate',R,'The target week'),
+            ]
+          },
+          {
+            method:'DELETE',name:'Delete templates',
+            desc:'Deletes selected schedule templates',
+            path:'DELETE .../schedule-templates',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('ids',R,'List of template IDs to delete'),
+            ]
+          },
+          {
+            method:'POST',name:'Load previous week',
+            desc:'Loads the schedule from the previous week into the target week',
+            path:'POST .../schedule-templates/weekStartDate/{weekStartDate}/load-previous-week',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('weekStartDate',R,'The target week'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Set shifts',
+        endpoints:[
+          {
+            method:'GET',name:'Get set shifts',
+            desc:'Gets recurring set shifts for a week',
+            path:'GET .../setshifts',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('weekStartDate',O,'The week to get set shifts for'),
+            ]
+          },
+          {
+            method:'POST',name:'Save set shifts',
+            desc:'Saves or assigns set shifts for employees',
+            path:'POST .../setshifts',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('setShifts',R,'The set shift assignments to save'),
+            ]
+          },
+          {
+            method:'DELETE',name:'Delete set shifts',
+            desc:'Deletes set shifts for specified employees',
+            path:'DELETE .../setshifts',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('employeeIds',R,'List of employee IDs whose set shifts should be deleted'),
+            ]
+          },
+          {
+            method:'POST',name:'Load set shifts for week',
+            desc:'Loads set shifts into a specific week',
+            path:'POST .../setshifts/load',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('setShifts',R,'Set shift configuration to load'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Shifts',
+        endpoints:[
+          {
+            method:'POST',name:'Create shift',
+            desc:'Creates a new shift for an employee',
+            path:'POST .../shifts',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('employeeId',R,'Which employee'),
+              f('role',R,'The role for this shift'),
+              f('startDateTime',R,'Shift start'),
+              f('endDateTime',R,'Shift end'),
+            ]
+          },
+          {
+            method:'PUT',name:'Update shift',
+            desc:'Updates an existing shift',
+            path:'PUT .../shifts',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('shift details',R,'Updated shift details including the shift ID'),
+            ]
+          },
+          {
+            method:'DELETE',name:'Delete shift',
+            desc:'Deletes a shift',
+            path:'DELETE .../shifts/{id}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('id',R,'The shift ID to delete'),
+              f('employeeId',R,'The employee the shift belongs to'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Sign-offs',
+        endpoints:[
+          {
+            method:'PUT',name:'Sign off forecast',
+            desc:'Signs off or undoes the forecast sign-off for a specific date',
+            path:'PUT .../date/{date}/signoffs/forecast',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date'),
+              f('completeForecast',R,'True to sign off false to undo the sign-off'),
+            ]
+          },
+          {
+            method:'PUT',name:'Sign off actuals',
+            desc:'Signs off or undoes the actuals sign-off for a specific date',
+            path:'PUT .../date/{date}/signoffs/actual',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date'),
+              f('completeActual',R,'True to sign off false to undo the sign-off'),
+            ]
+          },
+          {
+            method:'GET',name:'Sign-off audit log',
+            desc:'Retrieves the audit log for sign-offs on a specific date',
+            path:'GET .../date/{date}/signoffs-audit',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Staff and expenses',
+        endpoints:[
+          {
+            method:'GET',name:'Get staff list',
+            desc:'Gets the staff list and their skill points for a period',
+            path:'GET .../staff/from/{from}/to/{to}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('from',R,'Period start date'),
+              f('to',R,'Period end date'),
+            ]
+          },
+          {
+            method:'PUT',name:'Update staff skill points',
+            desc:'Updates skill points for staff members',
+            path:'PUT .../staff/from/{from}/to/{to}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('from',R,'Period start date'),
+              f('to',R,'Period end date'),
+              f('skillPoints',R,'Updated skill point values'),
+            ]
+          },
+          {
+            method:'GET',name:'Get staff expenses',
+            desc:'Retrieves employee and contractor expenses for a period',
+            path:'GET .../staff-expenses/from/{from}/to/{to}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('from',R,'Period start date'),
+              f('to',R,'Period end date'),
+            ]
+          },
+          {
+            method:'PUT',name:'Update employee expense',
+            desc:'Updates a specific employee expense entry',
+            path:'PUT .../staff-expenses/date/{date}/employee/{employeeId}/staffExpenseType/{staffExpenseTypeId}/shift/{shiftId}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date'),
+              f('employeeId',R,'The employee'),
+              f('staffExpenseTypeId',R,'The expense type'),
+              f('shiftId',R,'The shift'),
+              f('value',R,'The expense value as a decimal number'),
+            ]
+          },
+          {
+            method:'PUT',name:'Update contractor expense',
+            desc:'Updates a specific contractor expense entry',
+            path:'PUT .../contractor-expenses/staffExpenseType/{staffExpenseTypeId}/shift/{shiftId}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('staffExpenseTypeId',R,'The expense type'),
+              f('shiftId',R,'The shift'),
+              f('value',R,'The expense value as a decimal number'),
+            ]
+          },
+          {
+            method:'PUT',name:'Update total expense',
+            desc:'Updates a total expense entry for a department on a date',
+            path:'PUT .../staff-expense-totals/date/{date}/staffExpenseType/{staffExpenseTypeId}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date'),
+              f('staffExpenseTypeId',R,'The expense type'),
+              f('value',R,'The total value as a decimal number'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Time and Attendance',
+        endpoints:[
+          {
+            method:'GET',name:'Get T&A data',
+            desc:'Gets Time and Attendance data for all employees on a specific date',
+            path:'GET .../employees-tna/date/{date}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date'),
+            ]
+          },
+          {
+            method:'POST',name:'Action T&A entry',
+            desc:'Approves or adjusts a Time and Attendance entry for an employee',
+            path:'POST .../employees-tna/date/{date}/employee/{employeeId}',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date'),
+              f('employeeId',R,'The employee'),
+              f('action',R,'The action to take: approve or adjust'),
+              f('adjustedTimes',O,'Adjusted clock in and out times if action is adjust'),
+            ]
+          },
+          {
+            method:'POST',name:'Convert T&A to shifts',
+            desc:'Converts available T&A shifts into actual scheduled shifts',
+            path:'POST .../employees-tna/date/{date}/employee/{employeeId}/availableShifts',
+            fields:[
+              f('locationId',R,'Location ID'),
+              f('departmentId',R,'Department ID'),
+              f('date',R,'The date'),
+              f('employeeId',R,'The employee'),
+              f('shifts',R,'The available shifts to convert'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+  // ── API: BI WebApi ───────────────────────────
+  {
+    id:'bi-webapi',
+    title:'BI WebApi',
+    area:'wfm',
+    exposure:'open',
+    icon:'📈',
+    subtitle:'Business intelligence data feed — labour hours budgets payroll sales and shifts for external reporting tools',
+    exposeNote:'Open — 15 endpoints accessible externally for BI and reporting integrations. Authentication via organisation subdomain.',
+    groups:[
+      {
+        name:'Labour and hours',
+        endpoints:[
+          {
+            method:'GET',name:'Allowed hours',
+            desc:'Department allowed actual and variance hours filtered by date range',
+            path:'GET /organisations/{subdomain}/allowedHours',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('from/to',O,'Date range'),
+              f('daysBefore/daysAfter',O,'Relative date range as alternative to from/to'),
+            ]
+          },
+          {
+            method:'GET',name:'Stream allowed hours',
+            desc:'Streams department allowed actual and variance hours as a continuous JSON stream - use for large data sets',
+            path:'GET /organisations/{subdomain}/streamAllowedHours',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('from/to',O,'Date range'),
+              f('daysBefore/daysAfter',O,'Relative date range'),
+            ]
+          },
+          {
+            method:'GET',name:'Budgets',
+            desc:'Budget records filtered by date range or relative days',
+            path:'GET /organisations/{subdomain}/budgets',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('from/to',O,'Date range'),
+              f('daysBefore/daysAfter',O,'Relative date range'),
+            ]
+          },
+          {
+            method:'GET',name:'Minimum staffing levels',
+            desc:'Minimum staffing levels configured for the organisation',
+            path:'GET /organisations/{subdomain}/minimumStaffing',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+            ]
+          },
+          {
+            method:'GET',name:'Productivity results',
+            desc:'Productivity analysis results filtered by date range or relative days',
+            path:'GET /organisations/{subdomain}/ProductivityResults',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('from/to',O,'Date range'),
+              f('daysBefore/daysAfter',O,'Relative date range'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Payroll',
+        endpoints:[
+          {
+            method:'GET',name:'Payroll records',
+            desc:'Payroll records filtered by date range or relative days',
+            path:'GET /organisations/{subdomain}/payroll',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('from/to',O,'Date range'),
+              f('daysBefore/daysAfter',O,'Relative date range'),
+            ]
+          },
+          {
+            method:'GET',name:'Request payroll file',
+            desc:'Requests an offline payroll file to be generated - use for large exports',
+            path:'GET /organisations/{subdomain}/payrollfilerequest',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('from/to',O,'Date range'),
+              f('daysBefore/daysAfter',O,'Relative date range'),
+            ]
+          },
+          {
+            method:'GET',name:'Payroll file status',
+            desc:'Gets the status of a payroll file generation request',
+            path:'GET /organisations/{subdomain}/payrollfilerequeststatus',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('idOrFilename',R,'The file request ID or filename to check'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Sales and shifts',
+        endpoints:[
+          {
+            method:'GET',name:'Sales data',
+            desc:'Actual and forecast sales filtered by date range or relative days',
+            path:'GET /organisations/{subdomain}/sales',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('from/to',O,'Date range'),
+              f('daysBefore/daysAfter',O,'Relative date range'),
+            ]
+          },
+          {
+            method:'GET',name:'Shift records',
+            desc:'BI shift records filtered by date range or relative days',
+            path:'GET /organisations/{subdomain}/shifts',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('from/to',O,'Date range'),
+              f('daysBefore/daysAfter',O,'Relative date range'),
+            ]
+          },
+          {
+            method:'GET',name:'Contractor shifts',
+            desc:'Contractor shifts optionally filtered by agency',
+            path:'GET /organisations/{subdomain}/contractorShifts',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('from/to',O,'Date range'),
+              f('daysBefore/daysAfter',O,'Relative date range'),
+              f('agencyForeignID',O,'Filter to a specific agency'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Fixed costs and tasks',
+        endpoints:[
+          {
+            method:'GET',name:'Fixed costs',
+            desc:'Fixed costs filtered by date range or relative days',
+            path:'GET /organisations/{subdomain}/fixedcosts',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('from/to',O,'Date range'),
+              f('daysBefore/daysAfter',O,'Relative date range'),
+            ]
+          },
+          {
+            method:'GET',name:'Fixed tasks',
+            desc:'Fixed tasks filtered by date range or relative days',
+            path:'GET /organisations/{subdomain}/fixedtasks',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('from/to',O,'Date range'),
+              f('daysBefore/daysAfter',O,'Relative date range'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Reporting',
+        endpoints:[
+          {
+            method:'GET',name:'Daily labour summary',
+            desc:'Labour daily summary filtered by date range or relative days',
+            path:'GET /organisations/{subdomain}/dailysummary',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('from/to',O,'Date range'),
+              f('daysBefore/daysAfter',O,'Relative date range'),
+            ]
+          },
+          {
+            method:'GET',name:'Signoff status',
+            desc:'Signoff status records filtered by date range or relative days',
+            path:'GET /organisations/{subdomain}/signoffstatus',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('from/to',O,'Date range'),
+              f('daysBefore/daysAfter',O,'Relative date range'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+  // ── API: HR WebApi ───────────────────────────
+  {
+    id:'hr-webapi',
+    title:'HR WebApi',
+    area:'wfm',
+    exposure:'int',
+    icon:'👥',
+    subtitle:'HR data feed into WFM — syncs staff locations job titles departments and sales data from HR systems into the scheduling platform',
+    exposeNote:'Internal — receives data from HR systems to keep WFM in sync. Not directly accessible to customers or partners.',
+    groups:[
+      {
+        name:'Staff and users',
+        endpoints:[
+          {
+            method:'POST',name:'Create staff',
+            desc:'Queues staff records to be created in WFM - submitted in chunks',
+            path:'POST /organisations/{subdomain}/staff',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('staff',R,'List of staff records to create each with name role location and employment details'),
+            ]
+          },
+          {
+            method:'POST',name:'Create users',
+            desc:'Queues user account records to be created - includes ID format validation',
+            path:'POST /organisations/{subdomain}/users',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('users',R,'List of user account records to create'),
+            ]
+          },
+          {
+            method:'POST',name:'Assign additional roles',
+            desc:'Queues additional role assignments for a staff member',
+            path:'POST /organisations/{subdomain}/staff/{staffId}/additionalRoles',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('staffId',R,'The staff member to assign roles to'),
+              f('roles',R,'List of additional role assignments'),
+            ]
+          },
+          {
+            method:'POST',name:'Create main employments',
+            desc:'Queues main employment records to be created',
+            path:'POST /organisations/{subdomain}/mainEmployments',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('employments',R,'List of main employment records'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Organisation structure',
+        endpoints:[
+          {
+            method:'POST',name:'Create departments',
+            desc:'Queues department records to be created in WFM',
+            path:'POST /organisations/{subdomain}/departments',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('departments',R,'List of department records to create'),
+            ]
+          },
+          {
+            method:'POST',name:'Create job titles',
+            desc:'Queues job title records to be created in WFM',
+            path:'POST /organisations/{subdomain}/jobtitles',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('jobTitles',R,'List of job title records to create'),
+            ]
+          },
+          {
+            method:'POST',name:'Create locations',
+            desc:'Queues location records to be created in WFM',
+            path:'POST /organisations/{subdomain}/locations',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('locations',R,'List of location records to create'),
+            ]
+          },
+          {
+            method:'POST',name:'Create financial periods',
+            desc:'Queues financial period records to be created',
+            path:'POST /organisations/{subdomain}/financialPeriods',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('periods',R,'List of financial period records'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Scheduling data',
+        endpoints:[
+          {
+            method:'POST',name:'Create shift sets',
+            desc:'Queues shift set data grouped by staff member before forwarding',
+            path:'POST /organisations/{subdomain}/shiftSets',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('shiftSets',R,'List of shift set records grouped by staff ID'),
+            ]
+          },
+          {
+            method:'POST',name:'Create activity driver values',
+            desc:'Queues activity driver values to be created - validates day-type rules',
+            path:'POST /organisations/{subdomain}/activitydrivervalues',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('values',R,'List of activity driver values as budget forecast or actual'),
+            ]
+          },
+          {
+            method:'POST',name:'Create sales data',
+            desc:'Queues sales data records to be created in WFM',
+            path:'POST /organisations/{subdomain}/sales',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('sales',R,'List of sales records'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+  // ── API: TnA WebApi ──────────────────────────
+  {
+    id:'tna-webapi',
+    title:'TnA WebApi',
+    area:'wfm',
+    exposure:'int',
+    icon:'⏱️',
+    subtitle:'Time and Attendance data submission — clock in and out records from physical clocking devices into WFM',
+    exposeNote:'Internal — one endpoint is externally accessible for T&A device integrations. The others are internal only.',
+    groups:[
+      {
+        name:'T&A submissions',
+        endpoints:[
+          {
+            method:'POST',name:'Submit T&A data (internal)',
+            desc:'Submits Time and Attendance clock data using the organisation internal GUID - validates each record before processing',
+            path:'POST /api/organisations/{guid}/tnadata',
+            fields:[
+              f('guid',R,'The organisation internal T&A GUID - in the URL path'),
+              f('clockData',R,'T&A submission containing clock records each with ClockStatus employee number and location. Submitted as XML.'),
+            ]
+          },
+          {
+            method:'POST',name:'Submit T&A data (external)',
+            desc:'Externally accessible T&A submission endpoint - validates the organisation header before processing',
+            path:'POST /api/organisations/{subdomain}/tnasubmission',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain - in the URL path'),
+              f('X-Fourth-Org',R,'Organisation identifier header - must match the subdomain'),
+              f('clockData',R,'T&A submission containing clock records. Submitted as XML.'),
+            ]
+          },
+          {
+            method:'POST',name:'Override T&A data',
+            desc:'Overrides all T&A data for a specific employee day and location - not supported for organisations with cross-day enabled',
+            path:'POST /api/organisations/{guid}/tnafulldata',
+            fields:[
+              f('guid',R,'The organisation internal GUID'),
+              f('empNo',R,'Employee number'),
+              f('locationCode',R,'Location code'),
+              f('date',R,'The date to override'),
+              f('clockData',R,'The replacement T&A data as XML'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+  // ── API: Additional Payment WebApi ───────────
+  {
+    id:'additional-payment-webapi',
+    title:'Additional Payment WebApi',
+    area:'wfm',
+    exposure:'int',
+    icon:'💰',
+    subtitle:'Additional payments from external payroll systems into WFM scheduling',
+    exposeNote:'Internal — used by payroll integrations to push additional payment data into WFM. Not directly accessible to customers or partners.',
+    groups:[
+      {
+        name:'Payments',
+        endpoints:[
+          {
+            method:'POST',name:'Submit additional payments',
+            desc:'Inserts additional payment values from an external payroll system into WFM',
+            path:'POST /organisations/{subdomain}/additionalpayments',
+            fields:[
+              f('subdomain',R,'Your organisation subdomain'),
+              f('payments',R,'List of additional payment records each with element number and value'),
+            ]
+          },
+        ]
+      },
+    ]
+  },
+
+  // ── API: Sales Labour Modeling API ───────────
+  {
+    id:'sales-labour-modeling',
+    title:'Sales Labour Modeling API',
+    area:'wfm',
+    exposure:'int',
+    icon:'🔮',
+    subtitle:'Sales forecasting and labour modelling — rulesets scenarios fixed tasks and forecast uploads for WFM planning',
+    exposeNote:'Internal — used by the WFM planning tools. Not directly accessible to customers or partners.',
+    groups:[
+      {
+        name:'Fixed tasks',
+        endpoints:[
+          {
+            method:'GET',name:'Download fixed tasks',
+            desc:'Downloads all fixed tasks as a CSV file',
+            path:'GET /fixed-tasks/download',
+            fields:[]
+          },
+          {
+            method:'POST',name:'Upload fixed tasks',
+            desc:'Uploads a CSV file containing fixed tasks',
+            path:'POST /fixed-tasks/upload',
+            fields:[
+              f('file',R,'The CSV file containing fixed tasks to upload'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Forecast requests',
+        endpoints:[
+          {
+            method:'GET',name:'List forecast requests',
+            desc:'Gets all forecast requests optionally filtered by status',
+            path:'GET /forecast-requests',
+            fields:[
+              f('statuses',O,'Filter by one or more statuses'),
+            ]
+          },
+          {
+            method:'DELETE',name:'Delete forecast request',
+            desc:'Deletes a specific forecast request',
+            path:'DELETE /forecast-requests/{id}',
+            fields:[
+              f('id',R,'The forecast request ID to delete'),
+            ]
+          },
+          {
+            method:'POST',name:'Upload sales forecast',
+            desc:'Uploads a sales forecast CSV file',
+            path:'POST /forecast-requests/upload',
+            fields:[
+              f('file',R,'The CSV forecast file to upload'),
+              f('isWeekly',R,'True if this is a weekly forecast false for daily'),
+            ]
+          },
+          {
+            method:'PUT',name:'Archive forecast request',
+            desc:'Archives a forecast request',
+            path:'PUT /forecast-requests/{id}/archive',
+            fields:[
+              f('id',R,'The forecast request ID to archive'),
+            ]
+          },
+          {
+            method:'PUT',name:'Restore forecast request',
+            desc:'Restores an archived forecast request',
+            path:'PUT /forecast-requests/{id}/restore',
+            fields:[
+              f('id',R,'The forecast request ID to restore'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Locations and rulesets',
+        endpoints:[
+          {
+            method:'GET',name:'List locations with rulesets',
+            desc:'Gets location ruleset information with paging and search',
+            path:'GET /locations',
+            fields:[
+              f('page',R,'Page number'),
+              f('pageSize',R,'Number of results per page'),
+              f('searchTerm',O,'Filter locations by name or code'),
+            ]
+          },
+          {
+            method:'GET',name:'Download location rulesets',
+            desc:'Downloads ruleset assignments for all locations as a CSV file',
+            path:'GET /locations/download',
+            fields:[]
+          },
+          {
+            method:'POST',name:'Upload location rulesets',
+            desc:'Uploads ruleset assignments for locations',
+            path:'POST /locations/upload',
+            fields:[
+              f('file',R,'CSV file containing location ruleset assignments'),
+            ]
+          },
+          {
+            method:'GET',name:'List rulesets',
+            desc:'Gets a paged list of available rulesets',
+            path:'GET /rulesets',
+            fields:[
+              f('page',R,'Page number'),
+              f('pageSize',R,'Number of results per page'),
+              f('searchTerm',O,'Filter rulesets by name'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Minimum staffing',
+        endpoints:[
+          {
+            method:'GET',name:'Download minimum staffing levels',
+            desc:'Downloads minimum staffing levels as a CSV file',
+            path:'GET /minimum-staff-levels/download',
+            fields:[]
+          },
+          {
+            method:'POST',name:'Upload minimum staffing levels',
+            desc:'Uploads minimum staffing levels from a CSV file',
+            path:'POST /minimum-staff-levels/upload',
+            fields:[
+              f('file',R,'CSV file containing minimum staffing levels'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Scenarios',
+        endpoints:[
+          {
+            method:'GET',name:'List scenarios',
+            desc:'Gets scenario requests optionally filtered by status',
+            path:'GET /scenarios',
+            fields:[
+              f('statuses',O,'Filter by one or more statuses'),
+            ]
+          },
+          {
+            method:'POST',name:'Create scenario',
+            desc:'Creates a new labour modelling scenario',
+            path:'POST /scenarios',
+            fields:[
+              f('scenarioName',R,'Name for the new scenario'),
+              f('configuration',R,'Scenario configuration and parameters'),
+            ]
+          },
+          {
+            method:'POST',name:'Create scenario analytics',
+            desc:'Creates an analytics request for specified scenarios',
+            path:'POST /scenarios/analytics',
+            fields:[
+              f('scenarioIds',R,'List of scenario IDs to run analytics for'),
+            ]
+          },
+          {
+            method:'DELETE',name:'Delete scenario',
+            desc:'Deletes a scenario',
+            path:'DELETE /scenarios/{id}',
+            fields:[
+              f('id',R,'The scenario ID to delete'),
+            ]
+          },
+          {
+            method:'PUT',name:'Archive scenario',
+            desc:'Archives a scenario',
+            path:'PUT /scenarios/{id}/archive',
+            fields:[
+              f('id',R,'The scenario ID to archive'),
+            ]
+          },
+          {
+            method:'PUT',name:'Restore scenario',
+            desc:'Restores an archived scenario',
+            path:'PUT /scenarios/{id}/restore',
+            fields:[
+              f('id',R,'The scenario ID to restore'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Data sync',
+        endpoints:[
+          {
+            method:'POST',name:'Trigger data sync',
+            desc:'Manually triggers a data synchronisation',
+            path:'POST /sync-requests',
+            fields:[]
+          },
+          {
+            method:'GET',name:'Latest sync status',
+            desc:'Gets the status of the latest sync request',
+            path:'GET /sync-requests/latest',
+            fields:[]
+          },
+        ]
+      },
+    ]
+  },
+
 ];
 
 // ─────────────────────────────────────────────
@@ -2728,6 +4293,152 @@ const RESPONSE_FIELDS = {
   'lp-sync|Get menu cycles':{note:'Returns a list.',fields:[rf('Id','Integer','Cycle ID'),rf('Name / ShortName','Text','Names'),rf('Description','Text','Description'),rf('StartDate / EndDate','Date','Active dates')]},
   'lp-sync|Get meal periods':{note:'Returns a list.',fields:[rf('Id','Integer','Meal period ID'),rf('Name','Text','Name e.g. Breakfast, Lunch, Dinner')]},
   'lp-sync|Get recipes':{note:'Returns a list.',fields:[rf('Id','Integer','Recipe ID'),rf('Name','Text','Recipe name')]},
+
+  // ── IQ WFM API ──
+  'iq-wfm|Health check':{fields:[rf('customerCanonicalId','Text','The resolved customer canonical ID'),rf('userCanonicalId','Text','The resolved user canonical ID')]},
+  'iq-wfm|Organisation configuration':{fields:[rf('fourthAccountId','Text','Fourth account identifier'),rf('psIntegration','True/False','Whether PeopleSystem integration is enabled'),rf('psOrganisationId','Text','PeopleSystem organisation ID'),rf('autoSchedulingEnabled','True/False','Whether auto-scheduling is enabled'),rf('cfmEnabled','True/False','Whether CFM is enabled for the location - only returned when locationCanonicalId is provided')]},
+  'iq-wfm|Users at location':{note:'Returns a list of users matching the permission filter.',fields:[rf('userId','Integer','User ID'),rf('forename','Text','First name'),rf('surname','Text','Last name'),rf('userCanonicalId','Text','User canonical ID'),rf('email','Text','Email address')]},
+  'iq-wfm|Labour adjustments':{fields:[rf('customerCanonicalId','Text','Customer ID'),rf('locationName','Text','Location name'),rf('locationCode','Text','Location code'),rf('locationCanonicalId','Text','Location canonical ID'),rf('date','Date','The date'),rf('forecastSales','Number','Forecast sales'),rf('aiForecastSales','Number','AI-generated forecast sales'),rf('labourCost','Number','Labour cost if available'),rf('labourActualPercentage','Number','Actual labour as percentage if available'),rf('labourBudgetPercentage','Number','Budget labour percentage'),rf('requiredHours','Number','Hours required'),rf('scheduledHours','Number','Hours scheduled'),rf('newRequiredHours','Number','Updated required hours'),rf('newHoursNeeded','Number','Additional hours needed'),rf('shiftsNeeded','List','Available open shifts each with shiftId role shiftStart shiftEnd hours and cost')]},
+  'iq-wfm|Activate open shifts':{note:'HTTP 200 OK on success. HTTP 400 Bad Request with error details if validation fails.',fields:[]},
+  'iq-wfm|Labour cost for week':{fields:[rf('locationName','Text','Location name'),rf('locationCode','Text','Location code'),rf('week','Date','Week start date'),rf('forecastSales','Number','Forecast sales'),rf('budgetSales','Number','Budget sales'),rf('labourCost','Number','Labour cost'),rf('labourPercentage','Number','Labour as percentage of sales'),rf('labourBudgetPercentage','Number','Budget labour percentage'),rf('correctHours','Number','Hours within target'),rf('overHours','Number','Hours over target'),rf('underHours','Number','Hours under target'),rf('requiredHours','Number','Required hours'),rf('actualHours','Number','Actual hours worked'),rf('scheduleNotes','Text','Any notes on the schedule')]},
+  'iq-wfm|Update schedule approval status':{note:'HTTP 200 OK on success. HTTP 400 Bad Request or HTTP 401 Unauthorized on failure.',fields:[]},
+  'iq-wfm|Publish schedule':{fields:[rf('isSuccess','True/False','Whether the publish succeeded'),rf('error','Text','Error message if failed'),rf('message','Text','Status message'),rf('employees','List','Employees on the published schedule'),rf('scheduleLastPublishedDate','Date','When last published if applicable'),rf('dateTimeUtcNow','Date','Current timestamp'),rf('schedulePublishedBy','Text','Who published it'),rf('autoPublishWarningMessage','Text','Any auto-publish warning'),rf('isPublished','True/False','Whether now published')]},
+  'iq-wfm|Reset forecast':{note:'HTTP 200 OK on success. HTTP 400 Bad Request or HTTP 401 Unauthorized on failure.',fields:[]},
+  'iq-wfm|Sales performance for week':{fields:[rf('customerCanonicalId','Text','Customer ID'),rf('location','Text','Location name'),rf('locationCode','Text','Location code'),rf('locationCanonicalId','Text','Location canonical ID'),rf('weekStartDate','Date','Week start date'),rf('aiForecast','Number','AI forecast sales'),rf('managerSales','Number','Manager entered sales'),rf('actualSales','Number','Actual sales'),rf('forecastLabour','Number','Forecast labour'),rf('actualLabour','Number','Actual labour if available'),rf('labourBudgetPercentage','Number','Budget labour percentage'),rf('sales','List','Daily sales breakdown')]},
+  'iq-wfm|Sales performance for date':{fields:[rf('customerCanonicalId','Text','Customer ID'),rf('location','Text','Location name'),rf('locationCode','Text','Location code'),rf('locationCanonicalId','Text','Location canonical ID'),rf('weekStartDate','Date','Week start date'),rf('aiForecast','Number','AI forecast sales'),rf('managerSales','Number','Manager entered sales'),rf('actualSales','Number','Actual sales'),rf('forecastLabour','Number','Forecast labour'),rf('actualLabour','Number','Actual labour if available'),rf('labourBudgetPercentage','Number','Budget labour percentage'),rf('sales','List','Daily sales breakdown')]},
+  'iq-wfm|Batch sales performance for week':{note:'Returns a list. For each location: same fields as Sales performance for week.',fields:[rf('customerCanonicalId','Text','Customer ID'),rf('location','Text','Location name'),rf('locationCode','Text','Location code'),rf('locationCanonicalId','Text','Location canonical ID'),rf('weekStartDate','Date','Week start date'),rf('aiForecast','Number','AI forecast sales'),rf('managerSales','Number','Manager entered sales'),rf('actualSales','Number','Actual sales'),rf('forecastLabour','Number','Forecast labour'),rf('actualLabour','Number','Actual labour if available'),rf('labourBudgetPercentage','Number','Budget labour percentage'),rf('sales','List','Daily sales breakdown')]},
+  'iq-wfm|Batch sales performance for date':{note:'Returns a list. For each location: same fields as Sales performance for date.',fields:[rf('customerCanonicalId','Text','Customer ID'),rf('location','Text','Location name'),rf('locationCode','Text','Location code'),rf('locationCanonicalId','Text','Location canonical ID'),rf('weekStartDate','Date','Week start date'),rf('aiForecast','Number','AI forecast sales'),rf('managerSales','Number','Manager entered sales'),rf('actualSales','Number','Actual sales'),rf('forecastLabour','Number','Forecast labour'),rf('actualLabour','Number','Actual labour if available'),rf('labourBudgetPercentage','Number','Budget labour percentage'),rf('sales','List','Daily sales breakdown')]},
+  'iq-wfm|Busy intervals':{fields:[rf('locationCanonicalId','Text','Location canonical ID'),rf('totalSales','Number','Total sales for the date'),rf('intervals','List','List of intervals each with rank intervalStartTime intervalEndTime totalItems totalSales and a breakdown of sales by type')]},
+  'iq-wfm|Update employee skill points':{note:'HTTP 200 OK on success. HTTP 400 Bad Request or HTTP 401 Unauthorized on failure.',fields:[]},
+  'iq-wfm|Absence cover':{fields:[rf('weekStartDate/weekEndDate','Date','The week dates'),rf('archivedShift','List','The shift details including shiftId employeeName roleName startDateTime endDateTime chargedDate'),rf('availableEmployees','List','Employees who can cover each with employeeId employeeName hourlyRate and cost'),rf('labourData','List','Labour context including sales labourCost labourBudget labourBudgetPercentage and labourBudgetVariance')]},
+  'iq-wfm|Convert absence to open shift':{note:'HTTP 200 OK on success. HTTP 400 Bad Request or HTTP 401 Unauthorized on failure.',fields:[]},
+
+  // ── BI WebApi ──
+  'bi-webapi|Allowed hours':{note:'Returns a list. For each department: department name, allowed hours, actual hours, variance hours, date.',fields:[rf('department','Text','Department name'),rf('allowedHours','Number','Allowed hours'),rf('actualHours','Number','Actual hours'),rf('varianceHours','Number','Variance hours'),rf('date','Date','The date')]},
+  'bi-webapi|Stream allowed hours':{note:'Streams the same data as Allowed hours as a continuous JSON stream. Suitable for large date ranges.',fields:[rf('department','Text','Department name'),rf('allowedHours','Number','Allowed hours'),rf('actualHours','Number','Actual hours'),rf('varianceHours','Number','Variance hours'),rf('date','Date','The date')]},
+  'bi-webapi|Budgets':{note:'Returns a list of budget records by department and date.',fields:[]},
+  'bi-webapi|Minimum staffing levels':{note:'Returns a list of minimum staffing requirements by role, location, and time period.',fields:[]},
+  'bi-webapi|Productivity results':{note:'Returns a list of productivity results by location and date.',fields:[]},
+  'bi-webapi|Payroll records':{note:'Returns a list of payroll records by employee and pay period.',fields:[]},
+  'bi-webapi|Request payroll file':{fields:[rf('id','Text','File request ID'),rf('fileName','Text','Expected filename'),rf('status','Text','Current generation status'),rf('errorMessage','Text','Error if generation failed')]},
+  'bi-webapi|Payroll file status':{fields:[rf('id','Text','File request ID'),rf('fileName','Text','Filename'),rf('status','Text','Current status'),rf('errorMessage','Text','Error message if failed')]},
+  'bi-webapi|Sales data':{note:'Returns a list of sales records with actual and forecast values by location and date.',fields:[]},
+  'bi-webapi|Shift records':{note:'Returns a list of shift records by employee, location, and date.',fields:[]},
+  'bi-webapi|Contractor shifts':{note:'Returns a list of contractor shift records.',fields:[]},
+  'bi-webapi|Fixed costs':{note:'Returns a list of fixed cost records by location and date.',fields:[]},
+  'bi-webapi|Fixed tasks':{note:'Returns a list of fixed task records.',fields:[]},
+  'bi-webapi|Daily labour summary':{note:'Returns a list of daily labour summaries by location.',fields:[]},
+  'bi-webapi|Signoff status':{note:'Returns a list of signoff status records by location and date.',fields:[]},
+
+  // ── Scheduling API ──
+  'scheduling|Get activity driver values':{note:'Returns activity driver values for the department and week.',fields:[]},
+  'scheduling|Save activity driver values':{note:'HTTP 200 OK on success. HTTP 400 Bad Request if validation fails.',fields:[]},
+  'scheduling|Approval report':{note:'Returns approval report data for the department on the specified date.',fields:[]},
+  'scheduling|Labour cost analysis by department':{note:'Returns department-level labour cost analysis data.',fields:[]},
+  'scheduling|Labour cost analysis by employee':{note:'Returns employee-level labour cost analysis data.',fields:[]},
+  'scheduling|Costs by session':{note:'Returns labour costs broken down by session for the department.',fields:[]},
+  'scheduling|Run auto-scheduler':{fields:[rf('isSuccess','True/False','Whether scheduling succeeded'),rf('result','Text','Scheduling outcome details')]},
+  'scheduling|Run AI scheduler':{fields:[rf('isSuccess','True/False','Whether scheduling succeeded'),rf('result','Text','Scheduling outcome details')]},
+  'scheduling|Create contractor shift':{note:'Returns the created contractor shift details including its new ID.',fields:[]},
+  'scheduling|Update contractor shift':{note:'Returns the updated contractor shift details.',fields:[]},
+  'scheduling|Delete contractor shift':{note:'Returns the deleted shift details including its ID.',fields:[]},
+  'scheduling|Bulk delete contractor shifts':{note:'Returns details of all deleted shifts.',fields:[]},
+  'scheduling|Set department closed':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Get opening and closing times':{note:'Returns default opening and closing times plus any week-specific overrides.',fields:[]},
+  'scheduling|Save opening and closing times':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Get department settings':{note:'Returns roles, pay rules, and other configuration settings for the schedule view.',fields:[]},
+  'scheduling|Get permissions':{note:'Returns the current user\'s permissions for this department.',fields:[]},
+  'scheduling|Labour demand':{note:'Returns labour demand requirements by role and time slot for the period.',fields:[]},
+  'scheduling|Role-based scheduling demand':{note:'Returns role-based labour demand data for scheduling.',fields:[]},
+  'scheduling|Get lieu balances':{note:'Returns lieu balances for each employee showing hours accrued and taken.',fields:[]},
+  'scheduling|Create or update lieu entry':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Delete lieu entry':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Create open shift':{note:'Returns the created open shift including its new ID.',fields:[]},
+  'scheduling|Update open shift':{note:'Returns the updated open shift details.',fields:[]},
+  'scheduling|Assign open shift to employee':{note:'Returns the shift now assigned to the employee.',fields:[]},
+  'scheduling|Convert open shifts to standard shifts':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Delete open shift':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Bulk delete open shifts':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Approve rota':{fields:[rf('status','Text','The new rota status')]},
+  'scheduling|Reject rota':{fields:[rf('status','Text','The new rota status')]},
+  'scheduling|Close rota':{fields:[rf('status','Text','The new rota status')]},
+  'scheduling|Reopen rota':{fields:[rf('status','Text','The new rota status')]},
+  'scheduling|Mark rota ready for review':{fields:[rf('status','Text','The new rota status')]},
+  'scheduling|Submit rota':{fields:[rf('status','Text','The new rota status')]},
+  'scheduling|Get schedule for period':{note:'Returns full schedule data for the period including all shifts, employees, and roles.',fields:[]},
+  'scheduling|Save schedule note':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Save schedule sort order':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Publish schedule':{note:'Returns published schedule details including employees and publication timestamp.',fields:[]},
+  'scheduling|Printable schedule':{note:'Returns printable schedule data formatted for print output.',fields:[]},
+  'scheduling|Synchronise to HR':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Get schedule templates':{note:'Returns a list of available templates each with ID, name, and creation details.',fields:[]},
+  'scheduling|Save as template':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Load template':{note:'Returns the result of loading the template including any conflicts or warnings.',fields:[]},
+  'scheduling|Delete templates':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Load previous week':{note:'Returns the result of loading including any conflicts or warnings.',fields:[]},
+  'scheduling|Get set shifts':{note:'Returns set shifts for the week by employee and role.',fields:[]},
+  'scheduling|Save set shifts':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Delete set shifts':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Load set shifts for week':{note:'Returns the result of loading including which shifts were applied.',fields:[]},
+  'scheduling|Create shift':{note:'Returns the created shift including its new ID.',fields:[]},
+  'scheduling|Update shift':{note:'Returns the updated shift details.',fields:[]},
+  'scheduling|Delete shift':{note:'Returns the deleted shift details.',fields:[]},
+  'scheduling|Sign off forecast':{note:'Returns sign-off result including status and any errors.',fields:[]},
+  'scheduling|Sign off actuals':{note:'Returns sign-off result including status and any errors.',fields:[]},
+  'scheduling|Sign-off audit log':{note:'Returns the audit log of all sign-off actions taken on this date including who did what and when.',fields:[]},
+  'scheduling|Get staff list':{note:'Returns a list of staff members with their skill points for each role.',fields:[]},
+  'scheduling|Update staff skill points':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Get staff expenses':{note:'Returns expenses for each employee and contractor in the period.',fields:[]},
+  'scheduling|Update employee expense':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Update contractor expense':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Update total expense':{note:'HTTP 200 OK on success.',fields:[]},
+  'scheduling|Get T&A data':{note:'Returns T&A records for each employee showing clocked in and out times and status.',fields:[]},
+  'scheduling|Action T&A entry':{note:'Returns the actioned T&A entry with updated status.',fields:[]},
+  'scheduling|Convert T&A to shifts':{note:'Returns the actioned T&A entry with the new shifts created.',fields:[]},
+
+  // ── HR WebApi ──
+  'hr-webapi|Create staff':{note:'HTTP 200 OK on success. HTTP 401 Unauthorized or HTTP 500 if parsing fails.',fields:[]},
+  'hr-webapi|Create users':{note:'HTTP 200 OK on success. HTTP 400 Bad Request if validation fails. HTTP 401 Unauthorized or HTTP 500 if parsing fails.',fields:[]},
+  'hr-webapi|Assign additional roles':{note:'HTTP 200 OK on success. HTTP 401 Unauthorized or HTTP 500 if parsing fails.',fields:[]},
+  'hr-webapi|Create main employments':{note:'HTTP 200 OK on success. HTTP 401 Unauthorized or HTTP 500 if parsing fails.',fields:[]},
+  'hr-webapi|Create departments':{note:'HTTP 200 OK on success. HTTP 401 Unauthorized or HTTP 500 if parsing fails.',fields:[]},
+  'hr-webapi|Create job titles':{note:'HTTP 200 OK on success. HTTP 401 Unauthorized or HTTP 500 if parsing fails.',fields:[]},
+  'hr-webapi|Create locations':{note:'HTTP 200 OK on success. HTTP 401 Unauthorized or HTTP 500 if parsing fails.',fields:[]},
+  'hr-webapi|Create financial periods':{note:'HTTP 200 OK on success. HTTP 401 Unauthorized or HTTP 500 if parsing fails.',fields:[]},
+  'hr-webapi|Create shift sets':{note:'HTTP 200 OK on success. HTTP 401 Unauthorized or HTTP 500 if parsing fails.',fields:[]},
+  'hr-webapi|Create activity driver values':{note:'HTTP 200 OK on success. HTTP 400 Bad Request if validation fails.',fields:[]},
+  'hr-webapi|Create sales data':{note:'HTTP 200 OK on success. HTTP 401 Unauthorized or HTTP 500 if parsing fails.',fields:[]},
+
+  // ── TnA WebApi ──
+  'tna-webapi|Submit T&A data (internal)':{fields:[rf('submissionDate','Date','When submitted'),rf('organisationId','Text','Organisation identifier'),rf('processedRecords','Number','Number of records successfully processed'),rf('submittedRecords','Number','Total records submitted'),rf('deletedRecords','Integer','Number of records deleted'),rf('error','List','Any error messages'),rf('invalidRecord','List','Records that failed validation')]},
+  'tna-webapi|Submit T&A data (external)':{fields:[rf('submissionDate','Date','When submitted'),rf('organisationId','Text','Organisation identifier'),rf('processedRecords','Number','Records successfully processed'),rf('submittedRecords','Number','Total records submitted'),rf('deletedRecords','Integer','Records deleted'),rf('error','List','Error messages if any'),rf('invalidRecord','List','Records that failed validation')]},
+  'tna-webapi|Override T&A data':{note:'Same response shape as the T&A submission endpoints. The deletedRecords count shows how many previous records were removed.',fields:[rf('submissionDate','Date','When submitted'),rf('organisationId','Text','Organisation identifier'),rf('processedRecords','Number','Records successfully processed'),rf('submittedRecords','Number','Total records submitted'),rf('deletedRecords','Integer','Number of previous records removed'),rf('error','List','Error messages if any'),rf('invalidRecord','List','Records that failed validation')]},
+
+  // ── Additional Payment WebApi ──
+  'additional-payment-webapi|Submit additional payments':{fields:[rf('processedRecords','Integer','Number of payments successfully processed'),rf('submittedRecords','Integer','Total payments submitted'),rf('errors','List','Any errors each showing the element number and error description')]},
+
+  // ── Sales Labour Modeling API ──
+  'sales-labour-modeling|Download fixed tasks':{note:'CSV file download containing all fixed tasks.',fields:[]},
+  'sales-labour-modeling|Upload fixed tasks':{note:'HTTP 200 OK on success. HTTP 400 Bad Request if the file is invalid.',fields:[]},
+  'sales-labour-modeling|List forecast requests':{note:'Returns a list of forecast requests each with ID, status, created date, and details.',fields:[]},
+  'sales-labour-modeling|Delete forecast request':{note:'HTTP 200 OK on success.',fields:[]},
+  'sales-labour-modeling|Upload sales forecast':{note:'HTTP 200 OK on success. HTTP 400 Bad Request if the file is invalid.',fields:[]},
+  'sales-labour-modeling|Archive forecast request':{note:'HTTP 200 OK on success.',fields:[]},
+  'sales-labour-modeling|Restore forecast request':{note:'HTTP 200 OK on success.',fields:[]},
+  'sales-labour-modeling|List locations with rulesets':{fields:[rf('fileUploadInfo','List','Details of any recent ruleset file upload including ID filename status and errors'),rf('pagedResult','List','Paged list of locations each with their ruleset assignment')]},
+  'sales-labour-modeling|Download location rulesets':{note:'CSV file download containing location ruleset assignments.',fields:[]},
+  'sales-labour-modeling|Upload location rulesets':{note:'HTTP 200 OK on success. HTTP 400 Bad Request if the file is invalid.',fields:[]},
+  'sales-labour-modeling|List rulesets':{note:'Returns a paged list of rulesets each with ID, name, and configuration details.',fields:[]},
+  'sales-labour-modeling|Download minimum staffing levels':{note:'CSV file download containing minimum staffing level configurations.',fields:[]},
+  'sales-labour-modeling|Upload minimum staffing levels':{note:'HTTP 200 OK on success. HTTP 400 Bad Request if the file is invalid.',fields:[]},
+  'sales-labour-modeling|List scenarios':{note:'Returns a list of scenarios each with ID, status, type, and created date.',fields:[]},
+  'sales-labour-modeling|Create scenario':{note:'HTTP 200 OK on success. HTTP 400 Bad Request if validation fails.',fields:[]},
+  'sales-labour-modeling|Create scenario analytics':{note:'HTTP 200 OK on success. HTTP 400 Bad Request if validation fails.',fields:[]},
+  'sales-labour-modeling|Delete scenario':{note:'HTTP 200 OK on success.',fields:[]},
+  'sales-labour-modeling|Archive scenario':{note:'HTTP 200 OK on success.',fields:[]},
+  'sales-labour-modeling|Restore scenario':{note:'HTTP 200 OK on success.',fields:[]},
+  'sales-labour-modeling|Trigger data sync':{note:'HTTP 200 OK on success.',fields:[]},
+  'sales-labour-modeling|Latest sync status':{fields:[rf('userCanonicalId','Text','Who triggered the sync'),rf('requestedAtUtc','Date','When it was requested'),rf('status','Text','Current sync status'),rf('modifiedAtUtc','Date','When the status last changed')]},
 };
 
 // ─────────────────────────────────────────────
@@ -2975,8 +4686,12 @@ function render(){
         <div class="no-results-text">No APIs match your search or filter.</div>
       </div>`;
   } else {
+    const hcmApis=visible.filter(a=>a.area!=='wfm');
+    const wfmApis=visible.filter(a=>a.area==='wfm');
     const warning=activeFilter==='int'?renderTypeMismatchWarning():'';
-    content.innerHTML=`<div class="section-header">HCM UK</div>`+warning+visible.map(a=>renderApi(a,autoOpen)).join('');
+    let html=`<div class="section-header">HCM UK</div>`+warning+hcmApis.map(a=>renderApi(a,autoOpen)).join('');
+    if(wfmApis.length) html+=`<div class="section-header">WFM UK</div>`+wfmApis.map(a=>renderApi(a,autoOpen)).join('');
+    content.innerHTML=html;
   }
 }
 
