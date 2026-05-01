@@ -99,9 +99,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .fields-wrap.open{display:block}
 .fields-table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden}
 .fields-table th{background:#f9fafb;padding:5px 10px;text-align:left;font-weight:600;color:#6b7280;border-bottom:1px solid #e5e7eb;font-size:10px;text-transform:uppercase;letter-spacing:.05em}
-.fields-table th:first-child{width:28%}
-.fields-table th:nth-child(2){width:14%}
+.fields-table th:first-child{width:25%}
+.fields-table th:nth-child(2){width:13%}
+.fields-table th:nth-child(3){width:12%}
 .fields-table td{padding:5px 10px;border-bottom:1px solid #f3f4f6;vertical-align:top;color:#374151}
+.fields-table td:nth-child(2){font-size:11px;color:#374151;white-space:nowrap}
 .fields-table tr:last-child td{border-bottom:none}
 .fields-table tr:hover td{background:#fafafa}
 .field-name{font-family:'SF Mono',Consolas,monospace;font-size:11px;color:#1f2937}
@@ -2625,10 +2627,29 @@ function renderStats(visible){
   `;
 }
 
+const FD_GUID  = new Set(['submissionId','batchHeaderId','CorrelationId'].map(s=>s.toLowerCase()));
+const FD_INT   = new Set(['groupId','clientId','companyId','empId','id','yearid','locationid','iqid','payRunId','sncpEmpId','sppEmployeeId','salaryRequestId','employeePaymentId','taxyear','payperiod','employeepaybasisid','essHolidayRequestId','DivisionId','LocationID','JobTitleID','EmployeeID','PayrollID'].map(s=>s.toLowerCase()));
+const FD_BOOL  = new Set(['delta','showFormer','IsActive','IsPaused','IsCompleted','Paid','HalfDay','Unpaid','PaidByRota','IncludedInRota','IsLeaver','CasualStaff','CanEdit','CanBookHalfDay','IsDisabled','HasDependents'].map(s=>s.toLowerCase()));
+const FD_DTIME = new Set(['CreatedAt','CompletedAt','eventTimestamp','processedAt'].map(s=>s.toLowerCase()));
+const FD_DATE  = new Set(['dateFrom','dateTo','StartDate','EndDate','DateOfBirth','TerminationDate','RequestDate','ProcessingDate','ShiftDate','PayDate','HolidayYearStartDate'].map(s=>s.toLowerCase()));
+const FD_NUM   = new Set(['Value','Units','Rate','Amount','RateOfPay','AnnualSalary','ContractHours','TotalHours','RemainingHoliday','Allowed','Taken','Booked','Remaining','Accrued','NetPay','CurrentGrossPay','TotalGrossPayToDate','DayRate','AvgHoursPerWeek'].map(s=>s.toLowerCase()));
+function fieldDataType(name){
+  for(const p of name.split('/').map(s=>s.trim().toLowerCase())){
+    if(FD_GUID.has(p))  return 'GUID';
+    if(FD_INT.has(p))   return 'Integer';
+    if(FD_BOOL.has(p))  return 'True / False';
+    if(FD_DTIME.has(p)) return 'Date & time';
+    if(FD_DATE.has(p))  return 'Date';
+    if(FD_NUM.has(p))   return 'Number';
+  }
+  return 'Text';
+}
+
 function renderEndpoint(ep,uid){
   const fieldsHtml=ep.fields.map(fd=>`
     <tr>
       <td><span class="field-name">${esc(fd.name)}</span></td>
+      <td>${fieldDataType(fd.name)}</td>
       <td>${fieldBadge(fd.type)}</td>
       <td class="field-desc">${esc(fd.desc)}</td>
     </tr>`).join('');
@@ -2637,7 +2658,7 @@ function renderEndpoint(ep,uid){
     <button class="toggle-fields" onclick="toggleFields('${uid}',this)">Show fields</button>
     <div class="fields-wrap" id="${uid}">
       <table class="fields-table">
-        <thead><tr><th>Field name</th><th>Required</th><th>Description</th></tr></thead>
+        <thead><tr><th>Field name</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
         <tbody>${fieldsHtml}</tbody>
       </table>
     </div>`:'';
@@ -2657,7 +2678,7 @@ function renderEndpoint(ep,uid){
 }
 
 function renderParamTypes(api){
-  if(!api.paramTypes||!api.paramTypes.length) return '';
+  if(!api.paramTypes) return '';
   const rows=api.paramTypes.map(p=>`
             <tr>
               <td>${esc(p.param)}</td>
