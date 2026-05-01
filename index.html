@@ -119,6 +119,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .no-results-icon{font-size:40px;margin-bottom:14px}
 .no-results-text{font-size:14px}
 
+/* ── Type mismatch warning ── */
+.type-warning{background:#fffbeb;border:1px solid #f59e0b;border-left:4px solid #d97706;border-radius:8px;padding:14px 16px;margin-bottom:16px}
+.type-warning-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.type-warning-icon{font-size:17px;flex-shrink:0;line-height:1}
+.type-warning-title{font-size:14px;font-weight:700;color:#92400e}
+.type-warning-desc{font-size:13px;color:#78350f;line-height:1.5;margin-bottom:12px}
+.type-mismatch-table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #fcd34d;border-radius:4px;overflow:hidden}
+.type-mismatch-table th{background:#fef3c7;padding:6px 10px;text-align:left;font-weight:700;color:#92400e;border-bottom:2px solid #fcd34d;font-size:11px}
+.type-mismatch-table td{padding:5px 10px;border-bottom:1px solid #fde68a;vertical-align:top;color:#78350f}
+.type-mismatch-table tr:last-child td{border-bottom:none}
+.type-mismatch-table td:first-child{font-family:'SF Mono',Consolas,monospace;font-size:11px;font-weight:600}
+.type-mismatch-table .not-used{color:#b45309;font-style:italic}
+
+/* ── Parameter types section ── */
+.param-types-section{margin-top:10px;padding-top:4px;border-top:2px solid #e5e7eb}
+.param-types-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px;background:transparent;border:none;border-bottom:1px solid #e5e7eb;cursor:pointer;font-family:inherit;font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:#374151;margin-bottom:2px}
+.param-types-toggle:hover{color:#111827}
+.pt-arrow{transition:transform .2s;color:#9ca3af;flex-shrink:0}
+.param-types-wrap{display:none;margin-top:8px}
+.param-types-wrap.open{display:block}
+.param-types-table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden}
+.param-types-table th{background:#f9fafb;padding:5px 10px;text-align:left;font-weight:600;color:#6b7280;border-bottom:1px solid #e5e7eb;font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+.param-types-table td{padding:5px 10px;border-bottom:1px solid #f3f4f6;vertical-align:top;color:#374151}
+.param-types-table tr:last-child td{border-bottom:none}
+.param-types-table tr:hover td{background:#fafafa}
+.param-types-table td:first-child{font-family:'SF Mono',Consolas,monospace;font-size:11px;color:#1f2937;width:26%}
+.param-types-table td:nth-child(2){width:22%}
+.param-types-table td:nth-child(3){color:#6b7280}
+
 @media(max-width:640px){
   .header{padding:8px 12px}
   .tabs,.stats,.content{padding-left:12px;padding-right:12px}
@@ -164,6 +193,7 @@ const TABS = [
 
 const R='required', O='optional', RO='readonly', S='system';
 function f(name,type,desc){return{name,type,desc};}
+function pt(param,type,notes){return{param,type,notes};}
 
 // ─────────────────────────────────────────────
 // DATA
@@ -627,6 +657,17 @@ const APIS = [
           },
         ]
       },
+    ],
+    paramTypes:[
+      pt('empId','Integer','Your employee ID number - a whole number'),
+      pt('id (payslip)','Integer','Payslip ID number'),
+      pt('taxyear','Integer','Four digit year e.g. 2024'),
+      pt('payperiod','Integer','Pay period number'),
+      pt('companyid','Integer','Company ID number'),
+      pt('employeepaybasisid','Integer','Pay basis ID number'),
+      pt('pdffilename','String','File name including extension e.g. "P45.pdf" or "P45Additional.pdf"'),
+      pt('yearid','Integer','Holiday year number'),
+      pt('essHolidayRequestId','Integer','Holiday request ID number'),
     ]
   },
 
@@ -1069,6 +1110,23 @@ const APIS = [
           },
         ]
       },
+    ],
+    paramTypes:[
+      pt('organisationId','String (numeric)','Pass as a number in text form e.g. "123"'),
+      pt('dateFrom / dateTo','String','Use format YYYY-MM-DD e.g. "2024-01-31"'),
+      pt('start','String','Date in format YYYY-MM-DD'),
+      pt('duration','String','Number of days written as text e.g. "7"'),
+      pt('delta','True / False','Set to true to only return records changed since last sync'),
+      pt('showFormer','True / False (optional)','Whether to include former employees. Optional - defaults to true'),
+      pt('submissionId','GUID','Standard GUID format e.g. "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"'),
+      pt('locationid (labour cost endpoints)','Integer','A whole number e.g. 42'),
+      pt('locationid (job title endpoints)','String','Use format "PS_##_##"'),
+      pt('locationcanonicalid','String','Canonical location identifier'),
+      pt('companyId','Integer','A whole number'),
+      pt('employeePaymentId','Integer','A whole number'),
+      pt('employeeNumber','String','Text reference'),
+      pt('clientID','String','Text - note this is a string here unlike in other APIs'),
+      pt('GroupID / CustomerCanonicalID / LocationCanonicalID / iQID','String','All string values on iQ Settings endpoints'),
     ]
   },
 
@@ -1316,6 +1374,14 @@ const APIS = [
           },
         ]
       },
+    ],
+    paramTypes:[
+      pt('orgAlias','String','Organisation short name e.g. "acme"'),
+      pt('requestId','String','Onboarding request identifier'),
+      pt('customerCanonicalId','String','Customer canonical identifier'),
+      pt('employeeId','String','Employee identifier - note this is a string in Onboarding unlike integers used elsewhere'),
+      pt('appKey','String','Application key for authorisation'),
+      pt('returnUrl','String','Full URL to redirect to after signing'),
     ]
   },
 
@@ -1499,6 +1565,18 @@ const APIS = [
           },
         ]
       },
+    ],
+    paramTypes:[
+      pt('groupId','Integer','A whole number - note this is an integer unlike the Integration API'),
+      pt('ClientId / clientId','Integer','A whole number - note this is an integer unlike the Integration API'),
+      pt('clientAccessID','Integer','A whole number - note this is an integer unlike the Integration API'),
+      pt('parentModuleID','Integer','A whole number - note this is an integer unlike the Integration API'),
+      pt('companyID','Integer','A whole number'),
+      pt('employerPaybasisId','Integer','A whole number'),
+      pt('batchHeaderId','GUID','Standard GUID format'),
+      pt('correlationId','String','Text reference'),
+      pt('dateFrom / dateTo','Date and time (nullable)','Full date and time - note this differs from the Integration API which uses a plain date string'),
+      pt('token','String','Authentication token text'),
     ]
   },
 
@@ -1549,6 +1627,13 @@ const APIS = [
           },
         ]
       },
+    ],
+    paramTypes:[
+      pt('clientId','String','The registered service identifier'),
+      pt('clientSecret','String','The service password'),
+      pt('type','String','Either "Bearer" or "WebCache"'),
+      pt('roles','List of strings (optional)','e.g. ["WebSiteUser"] - defaults to WebSiteUser if not provided'),
+      pt('claims','Key-value pairs (optional)','Additional custom data to embed in the token'),
     ]
   },
 
@@ -2043,6 +2128,11 @@ const APIS = [
           },
         ]
       },
+    ],
+    paramTypes:[
+      pt('CorrelationId','String','Unique tracking reference'),
+      pt('groupId','Integer','A whole number'),
+      pt('companyId','Integer','A whole number'),
     ]
   },
 
@@ -2337,6 +2427,18 @@ const APIS = [
           },
         ]
       },
+    ],
+    paramTypes:[
+      pt('groupId','Integer','A whole number'),
+      pt('clientId','Integer','A whole number'),
+      pt('groupidOrCanonical','String','Accepts either a numeric group ID or a canonical string identifier in the same field'),
+      pt('iqid','Integer','iQ setting identifier - a whole number'),
+      pt('locationid','Integer','A whole number'),
+      pt('payRunId','Integer','Pay run identifier - a whole number'),
+      pt('dateFrom / dateTo','Date and time','Full date and time value - note this differs from the Integration API'),
+      pt('sncpEmpId','Integer','SNCP employee record ID'),
+      pt('sppEmployeeId','Integer','SPP employee record ID'),
+      pt('salaryRequestId','Integer','Salary request ID'),
     ]
   },
 
@@ -2554,6 +2656,30 @@ function renderEndpoint(ep,uid){
     </div>`;
 }
 
+function renderParamTypes(api){
+  if(!api.paramTypes||!api.paramTypes.length) return '';
+  const rows=api.paramTypes.map(p=>`
+            <tr>
+              <td>${esc(p.param)}</td>
+              <td>${esc(p.type)}</td>
+              <td>${esc(p.notes)}</td>
+            </tr>`).join('');
+  return `
+    <div class="param-types-section">
+      <button class="param-types-toggle" onclick="toggleParamTypes('${api.id}')">
+        Parameter types &amp; formats
+        <svg id="pta-${api.id}" class="pt-arrow" width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+      </button>
+      <div class="param-types-wrap" id="pt-${api.id}">
+        <table class="param-types-table">
+          <thead><tr><th>Parameter</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>${rows}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
 function renderApi(api,autoOpen){
   const epCount=countEndpoints(api);
   const m=EXPOSURE_META[api.exposure]||EXPOSURE_META.int;
@@ -2581,8 +2707,31 @@ function renderApi(api,autoOpen){
           </svg>
         </div>
       </div>
-      <div class="api-body">${groupsHtml}</div>
+      <div class="api-body">${groupsHtml}${renderParamTypes(api)}</div>
     </div>`;
+}
+
+function renderTypeMismatchWarning(){
+  return `
+  <div class="type-warning">
+    <div class="type-warning-header">
+      <span class="type-warning-icon">&#9888;</span>
+      <span class="type-warning-title">Type mismatches between APIs</span>
+    </div>
+    <p class="type-warning-desc">Several parameters share the same name across different APIs but expect different data types. This is a known source of integration bugs &mdash; always check the type carefully before building requests.</p>
+    <table class="type-mismatch-table">
+      <thead>
+        <tr><th>Parameter</th><th>Integration API</th><th>Gateway</th><th>Legacy API</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>clientId</td><td>String</td><td>Integer</td><td>Integer</td></tr>
+        <tr><td>clientAccessID</td><td>String</td><td>Integer</td><td class="not-used">Not used</td></tr>
+        <tr><td>parentModuleID</td><td>String</td><td>Integer</td><td class="not-used">Not used</td></tr>
+        <tr><td>dateFrom / dateTo</td><td>String (YYYY-MM-DD)</td><td>Date and time</td><td>Date and time</td></tr>
+        <tr><td>locationid on iQ Settings</td><td>String (PS_##_##)</td><td class="not-used">Not used</td><td>Integer</td></tr>
+      </tbody>
+    </table>
+  </div>`;
 }
 
 function render(){
@@ -2598,7 +2747,8 @@ function render(){
         <div class="no-results-text">No APIs match your search or filter.</div>
       </div>`;
   } else {
-    content.innerHTML=`<div class="section-header">HCM UK</div>`+visible.map(a=>renderApi(a,autoOpen)).join('');
+    const warning=activeFilter==='int'?renderTypeMismatchWarning():'';
+    content.innerHTML=`<div class="section-header">HCM UK</div>`+warning+visible.map(a=>renderApi(a,autoOpen)).join('');
   }
 }
 
@@ -2621,6 +2771,14 @@ function toggleFields(uid,btn){
   if(!wrap) return;
   const open=wrap.classList.toggle('open');
   btn.textContent=open?'Hide fields':'Show fields';
+}
+
+function toggleParamTypes(id){
+  const wrap=document.getElementById('pt-'+id);
+  const arrow=document.getElementById('pta-'+id);
+  if(!wrap) return;
+  const open=wrap.classList.toggle('open');
+  if(arrow) arrow.style.transform=open?'rotate(180deg)':'';
 }
 
 let searchTimer;
