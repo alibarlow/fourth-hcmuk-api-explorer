@@ -138,18 +138,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .no-results-icon{font-size:40px;margin-bottom:14px}
 .no-results-text{font-size:14px}
 
-/* ── Type mismatch warning ── */
-.type-warning{background:#fffbeb;border:1px solid #f59e0b;border-left:4px solid #d97706;border-radius:8px;padding:14px 16px;margin-bottom:16px}
-.type-warning-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.type-warning-icon{font-size:17px;flex-shrink:0;line-height:1}
-.type-warning-title{font-size:14px;font-weight:700;color:#92400e}
-.type-warning-desc{font-size:13px;color:#78350f;line-height:1.5;margin-bottom:12px}
-.type-mismatch-table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #fcd34d;border-radius:4px;overflow:hidden}
-.type-mismatch-table th{background:#fef3c7;padding:6px 10px;text-align:left;font-weight:700;color:#92400e;border-bottom:2px solid #fcd34d;font-size:11px}
-.type-mismatch-table td{padding:5px 10px;border-bottom:1px solid #fde68a;vertical-align:top;color:#78350f}
+/* ── Type mismatch info box ── */
+.type-info{border:1px solid #e5e7eb;border-radius:10px;margin-bottom:16px;overflow:hidden;background:#fff}
+.type-info-header{display:flex;align-items:center;gap:8px;padding:11px 14px;cursor:pointer;user-select:none}
+.type-info-header:hover{background:#f9fafb}
+.type-info-icon{width:18px;height:18px;border-radius:50%;border:1.5px solid #6b7280;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#6b7280;flex-shrink:0;line-height:1}
+.type-info-title{flex:1;font-size:13px;font-weight:600;color:#374151}
+.type-info-chevron{width:16px;height:16px;color:#9ca3af;transition:transform .2s;flex-shrink:0}
+.type-info.open .type-info-chevron{transform:rotate(180deg)}
+.type-info-body{display:none;padding:0 14px 14px}
+.type-info.open .type-info-body{display:block}
+.type-info-desc{font-size:13px;color:#6b7280;line-height:1.5;margin-bottom:10px}
+.type-mismatch-table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden}
+.type-mismatch-table th{background:#f9fafb;padding:5px 10px;text-align:left;font-weight:600;color:#6b7280;border-bottom:1px solid #e5e7eb;font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+.type-mismatch-table td{padding:5px 10px;border-bottom:1px solid #f3f4f6;vertical-align:top;color:#374151}
 .type-mismatch-table tr:last-child td{border-bottom:none}
-.type-mismatch-table td:first-child{font-family:'SF Mono',Consolas,monospace;font-size:11px;font-weight:600}
-.type-mismatch-table .not-used{color:#b45309;font-style:italic}
+.type-mismatch-table tr:hover td{background:#fafafa}
+.type-mismatch-table td:first-child{font-family:'SF Mono',Consolas,monospace;font-size:11px;color:#1f2937;font-weight:600}
+.type-mismatch-table .not-used{color:#9ca3af;font-style:italic}
 
 /* ── Parameter types section ── */
 .param-types-section{margin-top:10px;padding-top:4px;border-top:2px solid #e5e7eb}
@@ -4676,25 +4682,32 @@ function renderApi(api,autoOpen){
 
 function renderTypeMismatchWarning(){
   return `
-  <div class="type-warning">
-    <div class="type-warning-header">
-      <span class="type-warning-icon">&#9888;</span>
-      <span class="type-warning-title">Type mismatches between APIs</span>
+  <div class="type-info" id="type-mismatch-box">
+    <div class="type-info-header" onclick="toggleTypeMismatch()">
+      <span class="type-info-icon">i</span>
+      <span class="type-info-title">Type mismatches between APIs</span>
+      <svg class="type-info-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>
     </div>
-    <p class="type-warning-desc">Several parameters share the same name across different APIs but expect different data types. This is a known source of integration bugs &mdash; always check the type carefully before building requests.</p>
-    <table class="type-mismatch-table">
-      <thead>
-        <tr><th>Parameter</th><th>Integration API</th><th>Gateway</th><th>Legacy API</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>clientId</td><td>String</td><td>Integer</td><td>Integer</td></tr>
-        <tr><td>clientAccessID</td><td>String</td><td>Integer</td><td class="not-used">Not used</td></tr>
-        <tr><td>parentModuleID</td><td>String</td><td>Integer</td><td class="not-used">Not used</td></tr>
-        <tr><td>dateFrom / dateTo</td><td>String (YYYY-MM-DD)</td><td>Date and time</td><td>Date and time</td></tr>
-        <tr><td>locationid on iQ Settings</td><td>String (PS_##_##)</td><td class="not-used">Not used</td><td>Integer</td></tr>
-      </tbody>
-    </table>
+    <div class="type-info-body">
+      <p class="type-info-desc">Several parameters share the same name across different APIs but expect different data types. This is a known source of integration bugs &mdash; always check the type carefully before building requests.</p>
+      <table class="type-mismatch-table">
+        <thead>
+          <tr><th>Parameter</th><th>Integration API</th><th>Gateway</th><th>Legacy API</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>clientId</td><td>String</td><td>Integer</td><td>Integer</td></tr>
+          <tr><td>clientAccessID</td><td>String</td><td>Integer</td><td class="not-used">Not used</td></tr>
+          <tr><td>parentModuleID</td><td>String</td><td>Integer</td><td class="not-used">Not used</td></tr>
+          <tr><td>dateFrom / dateTo</td><td>String (YYYY-MM-DD)</td><td>Date and time</td><td>Date and time</td></tr>
+          <tr><td>locationid on iQ Settings</td><td>String (PS_##_##)</td><td class="not-used">Not used</td><td>Integer</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>`;
+}
+
+function toggleTypeMismatch(){
+  document.getElementById('type-mismatch-box').classList.toggle('open');
 }
 
 function render(){
