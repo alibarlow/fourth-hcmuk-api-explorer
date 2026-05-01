@@ -78,7 +78,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .ep-info{flex:1;min-width:0}
 .ep-name{font-size:13px;font-weight:600;color:#111827}
 .ep-desc{font-size:12px;color:#6b7280;margin-top:1px}
-.ep-path{font-family:'SF Mono',Consolas,monospace;font-size:11px;color:#9ca3af;margin-top:3px}
+.ep-path{font-family:'SF Mono',Consolas,monospace;font-size:11px;color:#9ca3af}
+.ep-path-row{display:flex;align-items:center;gap:6px;margin-top:3px}
 
 /* ── Method badges ── */
 .method{display:inline-flex;align-items:center;justify-content:center;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:.04em;flex-shrink:0;min-width:52px;margin-top:2px}
@@ -150,10 +151,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .param-types-table td:nth-child(2){width:22%}
 .param-types-table td:nth-child(3){color:#6b7280}
 
+/* ── Card meta badges ── */
+.badge-updated{display:inline-flex;align-items:center;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:500;white-space:nowrap;background:#f3f4f6;color:#9ca3af}
+.badge-auth{display:inline-flex;align-items:center;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:500;white-space:nowrap;background:#e2e8f0;color:#475569}
+
+/* ── Copy path button ── */
+.copy-btn{padding:1px 7px;border:1px solid #e5e7eb;border-radius:3px;background:#fafafa;font-size:10px;color:#9ca3af;cursor:pointer;font-family:inherit;transition:all .15s;flex-shrink:0;margin-left:auto;line-height:1.6}
+.copy-btn:hover{border-color:#d1d5db;color:#6b7280;background:#f3f4f6}
+.copy-btn.copied{border-color:#86efac;background:#f0fdf4;color:#166534}
+
 @media(max-width:640px){
   .header{padding:8px 12px}
   .tabs,.stats,.content{padding-left:12px;padding-right:12px}
-  .ep-path{display:none}
+  .ep-path-row{display:none}
 }
 </style>
 </head>
@@ -186,6 +196,22 @@ const EXPOSURE_META = {
   emp:    { label:'Employee-facing', cardCls:'exp-emp',    badgeCls:'exp-emp-badge'    },
   int:    { label:'Internal',        cardCls:'exp-int',    badgeCls:'exp-int-badge'    },
   client: { label:'Client library',  cardCls:'exp-client', badgeCls:'exp-client-badge' },
+};
+
+const AUTH_META = {
+  'onboarding-public':   'JWT',
+  'ess':                 'Custom header',
+  'peoplesystem':        'Org-scoped',
+  'onboarding-internal': 'JWT + API Key',
+  'peoplesystem-gateway':'JWT',
+  'auth-token':          'Client credentials',
+  'iq-hcm':              'Service Bus',
+  'iq360':               'Bearer / Basic',
+  'reporting':           'Token param',
+  'hmrc-submission':     'Internal',
+  'audit-apis':          'Internal',
+  'legacy-peoplesystem': 'Service header',
+  'lp-sync':             'Internal',
 };
 
 const TABS = [
@@ -2670,7 +2696,10 @@ function renderEndpoint(ep,uid){
         <div class="ep-info">
           <div class="ep-name">${esc(ep.name)}</div>
           <div class="ep-desc">${esc(ep.desc)}</div>
-          <div class="ep-path">${esc(ep.path)}</div>
+          <div class="ep-path-row">
+            <span class="ep-path">${esc(ep.path)}</span>
+            <button class="copy-btn" data-path="${esc(ep.path)}" onclick="copyPath(this)">Copy</button>
+          </div>
         </div>
       </div>
       ${fieldsBlock}
@@ -2704,6 +2733,7 @@ function renderParamTypes(api){
 function renderApi(api,autoOpen){
   const epCount=countEndpoints(api);
   const m=EXPOSURE_META[api.exposure]||EXPOSURE_META.int;
+  const auth=AUTH_META[api.id];
   const groupsHtml=api.groups.map((g,gi)=>
     `<div class="group-heading">${esc(g.name)}</div>`+
     g.endpoints.map((ep,ei)=>renderEndpoint(ep,`${api.id}-g${gi}e${ei}`)).join('')
@@ -2717,6 +2747,8 @@ function renderApi(api,autoOpen){
           <div class="api-title-row">
             <span class="api-title">${esc(api.title)}</span>
             ${expBadge(api.exposure)}
+            <span class="badge-updated">Last updated: April 2026</span>
+            ${auth?`<span class="badge-auth">Auth: ${esc(auth)}</span>`:''}
           </div>
           <div class="api-subtitle">${esc(api.subtitle)}</div>
           <div class="api-expose-note">${esc(api.exposeNote)}</div>
@@ -2785,6 +2817,15 @@ function setFilter(id){
 function toggleCard(id){
   const card=document.getElementById('card-'+id);
   if(card) card.classList.toggle('open');
+}
+
+function copyPath(btn){
+  const path=btn.dataset.path;
+  navigator.clipboard.writeText(path).then(()=>{
+    btn.textContent='✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},1500);
+  }).catch(()=>{});
 }
 
 function toggleFields(uid,btn){
