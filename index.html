@@ -176,6 +176,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .param-types-table td:first-child{font-family:'SF Mono',Consolas,monospace;font-size:11px;color:#1f2937;width:26%}
 .param-types-table td:nth-child(2){width:22%}
 .param-types-table td:nth-child(3){color:#6b7280}
+.info-sec-intro{font-size:13px;color:#4b5563;margin:0 0 10px;line-height:1.5}
+.field-subsection-hdr td{padding:4px 0 !important;border:none !important;background:transparent !important}
+.field-subsection-btn{width:100%;display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;color:#374151;text-align:left;letter-spacing:.03em;text-transform:uppercase}
+.field-subsection-btn:hover{background:#e9eaec;color:#111827}
+.field-subsection-intro-cell{font-size:12px;color:#6b7280;font-style:italic;padding:6px 10px !important}
 
 /* ── Card meta badges ── */
 .badge-updated{display:inline-flex;align-items:center;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:500;white-space:nowrap;background:#f3f4f6;color:#9ca3af}
@@ -1204,7 +1209,29 @@ const APIS = [
     exposure:'int',
     icon:'⚙️',
     subtitle:'The internal engine powering the new hire journey — e-sign, documents, candidates',
-    exposeNote:'Internal — not externally accessible. Handles DocuSign and Twilio webhook callbacks.',
+    exposeNote:'Internal engine — also accessible externally at https://api.fourth.com/api/oauth/onboarding/ via Basic Authentication and Cookie header. Internal calls use JWT Bearer token or X-API-Key.',
+    infoSections:[
+      {id:'error-codes',name:'Error codes',type:'errorCodes',rows:[
+        {code:'200',status:'OK',desc:'Request succeeded'},
+        {code:'400',status:'Bad Request',desc:'Incorrect authentication token'},
+        {code:'401',status:'Unauthorised',desc:'Token has expired'},
+        {code:'404',status:'Not Found',desc:'Onboarding request brand or customer not found'},
+        {code:'422',status:'Unprocessable Entity',desc:'Organisation not found'},
+      ]},
+      {id:'webhook-callback',name:'Webhook callback',type:'fields',
+       intro:'When a CallbackUrl is provided on the Create Request call, Onboarding will POST to it whenever the status changes. The callback body contains these fields:',
+       fields:[
+        {name:'RequestId',type:'Text',desc:'The onboarding request GUID'},
+        {name:'CandidateStatus',type:'Text',desc:'The current status of the candidate'},
+        {name:'ESignInProgress',type:'True/False',desc:'Whether e-sign has started'},
+        {name:'ESignCompleted',type:'True/False',desc:'Whether e-sign is complete'},
+        {name:'OnboardingCompleted',type:'True/False',desc:'Whether the full onboarding is complete'},
+        {name:'EmployeeCreationFailed',type:'True/False',desc:'Whether the HR employee creation failed'},
+        {name:'Description',type:'Text',desc:'Error message if EmployeeCreationFailed is true'},
+      ]},
+      {id:'candidate-url',name:'Candidate registration URL',type:'text',
+       content:'Once a candidate is created they receive an SMS with a shortened link. The full URL format for use in the hiring manager UI is: https://app.onbrd.me?requestId={RequestId}&orgAlias={OrgAlias}'},
+    ],
     groups:[
       {
         name:'New hire journey',
@@ -1233,12 +1260,60 @@ const APIS = [
               sf('JobTitle',R,'Minimum 2 characters'),
               sf('LocationName',R,'Minimum 2 characters'),
               sf('Division',R,'Minimum 1 character'),
+              sf('PaidByRota',R,'Whether pay is driven by the rota - Y or N. Must be N for Salary pay type and Y for Hourly or Shift pay type.'),
+              sf('EmploymentType',R,'Employment type - must be one of: FullTime, PartTime, Flex, Casual'),
+              sf('PayType',R,'Pay type - use empty string for Salary, H for Hourly, S for Shift'),
+              sf('RateOfPay',C,'Hourly or shift rate of pay e.g. 11.44 - required if PayType is H or S, must be blank if PayType is Salary'),
+              sf('AnnualSalary',C,'Annual salary e.g. 10000 - required if PayType is Salary, must be blank if PayType is H or S'),
+              sf('IncludedInRota',R,'Whether to include on the rota - Y or N'),
+              sf('LocationId',O,'Value from customer Structure File export. Must be at least 2 digits - zero-pad single digit values e.g. 01 not 1.'),
+              sf('JobTitleId',O,'Value from customer Structure File export. Must be at least 2 digits - zero-pad single digit values.'),
+              sf('ContractId',O,'Value from customer Structure File export. Must be at least 2 digits - zero-pad single digit values.'),
               sf('HolidayDaysTaken',O,'Holiday days taken to date'),
               sf('HolidayAverageHoursPerWeek',O,'Average holiday hours per week'),
               sf('HolidayAverageDaysPerWeek',O,'Average holiday days per week'),
               sf('HolidayEffectiveDate',O,'Date from which holiday calculations take effect'),
               sf('EmployeeSourceDesc',O,'Description of the recruitment source'),
               sf('EffectiveDate',O,'The date these employment details take effect'),
+              {name:'ExtraDocumentFields - common keys',type:'subsection',id:'extradoc',
+               intro:'ExtraDocumentFields is a dictionary of additional DocuSign field mappings sent within ImmutableData. Keys must match field names configured in the customer\'s document templates. Common standard keys are listed below - additional bespoke keys may exist per customer.',
+               fields:[
+                {name:'work_location',type:'optional',desc:'Main location of work'},
+                {name:'location_address',type:'optional',desc:'Location address - first line town and postcode'},
+                {name:'location_email',type:'optional',desc:'Location email address'},
+                {name:'location_telephone',type:'optional',desc:'Location telephone number'},
+                {name:'location_department',type:'optional',desc:'Department or division'},
+                {name:'line_manager',type:'optional',desc:'Line manager name'},
+                {name:'reports_to',type:'optional',desc:'Job title of the person this role reports to'},
+                {name:'employer',type:'optional',desc:'Employer name'},
+                {name:'candidate_notice_period',type:'optional',desc:'Notice period'},
+                {name:'Notice_in_probation',type:'optional',desc:'Notice period during probation'},
+                {name:'candidate_probation_period',type:'optional',desc:'Length of probation period'},
+                {name:'candidate_start_time',type:'optional',desc:'Start time'},
+                {name:'candidate_days_per_week',type:'optional',desc:'Number of days worked per week'},
+                {name:'candidate_contracted_hours_per_week',type:'optional',desc:'Contracted hours per week'},
+                {name:'candidate_hours_per_week',type:'optional',desc:'Hours per week'},
+                {name:'annual_leave',type:'optional',desc:'Annual leave entitlement - in days hours or weeks'},
+                {name:'days_paid_holiday',type:'optional',desc:'Number of paid holiday days'},
+                {name:'date_of_offer',type:'optional',desc:'Date the offer was sent to the candidate'},
+                {name:'contract_effective_date',type:'optional',desc:'Date the contract takes effect'},
+                {name:'continuous_employment_start_date',type:'optional',desc:'Continuous employment start date'},
+                {name:'continuous_service_start_date',type:'optional',desc:'Continuous service start date'},
+                {name:'bonus_percentage',type:'optional',desc:'Bonus percentage - customer picks from configured options'},
+                {name:'car_allowance',type:'optional',desc:'Car allowance amount'},
+                {name:'overtime_Type',type:'optional',desc:'Overtime type - either Overtime or Lieu'},
+                {name:'remote_working_days',type:'optional',desc:'Number of remote working days'},
+                {name:'unspent_convictions',type:'optional',desc:'Whether the candidate has unspent convictions - Yes or No'},
+                {name:'bespoke_benefits',type:'optional',desc:'Any bespoke benefits - free text'},
+              ]},
+              section('SensitiveInformation fields'),
+              sf('HasDependants',O,'Whether the candidate has dependants - sent as SensitiveInformation.HasDependants'),
+              sf('DependentChildren',O,'Number of dependent children - sent as SensitiveInformation.DependentChildren'),
+              sf('DependentDisabled',O,'Number of disabled dependants - sent as SensitiveInformation.DependentDisabled'),
+              sf('DependentElderly',O,'Number of elderly dependants - sent as SensitiveInformation.DependentElderly'),
+              sf('Languages',O,'Preferred language - note the API key uses plural Languages not Language - sent as SensitiveInformation.Languages'),
+              sf('Disability',O,'Disability types - for multiple values use array notation e.g. SensitiveInformation.Disability.0 SensitiveInformation.Disability.1'),
+              sf('AgeRange',O,'Age range category - exists in the code model but does not appear in external API documentation'),
             ]
           },
           {
@@ -1265,12 +1340,60 @@ const APIS = [
               sf('JobTitle',R,'Minimum 2 characters'),
               sf('LocationName',R,'Minimum 2 characters'),
               sf('Division',R,'Minimum 1 character'),
+              sf('PaidByRota',R,'Whether pay is driven by the rota - Y or N. Must be N for Salary pay type and Y for Hourly or Shift pay type.'),
+              sf('EmploymentType',R,'Employment type - must be one of: FullTime, PartTime, Flex, Casual'),
+              sf('PayType',R,'Pay type - use empty string for Salary, H for Hourly, S for Shift'),
+              sf('RateOfPay',C,'Hourly or shift rate of pay e.g. 11.44 - required if PayType is H or S, must be blank if PayType is Salary'),
+              sf('AnnualSalary',C,'Annual salary e.g. 10000 - required if PayType is Salary, must be blank if PayType is H or S'),
+              sf('IncludedInRota',R,'Whether to include on the rota - Y or N'),
+              sf('LocationId',O,'Value from customer Structure File export. Must be at least 2 digits - zero-pad single digit values e.g. 01 not 1.'),
+              sf('JobTitleId',O,'Value from customer Structure File export. Must be at least 2 digits - zero-pad single digit values.'),
+              sf('ContractId',O,'Value from customer Structure File export. Must be at least 2 digits - zero-pad single digit values.'),
               sf('HolidayDaysTaken',O,'Holiday days taken to date'),
               sf('HolidayAverageHoursPerWeek',O,'Average holiday hours per week'),
               sf('HolidayAverageDaysPerWeek',O,'Average holiday days per week'),
               sf('HolidayEffectiveDate',O,'Date from which holiday calculations take effect'),
               sf('EmployeeSourceDesc',O,'Description of the recruitment source'),
               sf('EffectiveDate',O,'The date these employment details take effect'),
+              {name:'ExtraDocumentFields - common keys',type:'subsection',id:'extradoc',
+               intro:'ExtraDocumentFields is a dictionary of additional DocuSign field mappings sent within ImmutableData. Keys must match field names configured in the customer\'s document templates. Common standard keys are listed below - additional bespoke keys may exist per customer.',
+               fields:[
+                {name:'work_location',type:'optional',desc:'Main location of work'},
+                {name:'location_address',type:'optional',desc:'Location address - first line town and postcode'},
+                {name:'location_email',type:'optional',desc:'Location email address'},
+                {name:'location_telephone',type:'optional',desc:'Location telephone number'},
+                {name:'location_department',type:'optional',desc:'Department or division'},
+                {name:'line_manager',type:'optional',desc:'Line manager name'},
+                {name:'reports_to',type:'optional',desc:'Job title of the person this role reports to'},
+                {name:'employer',type:'optional',desc:'Employer name'},
+                {name:'candidate_notice_period',type:'optional',desc:'Notice period'},
+                {name:'Notice_in_probation',type:'optional',desc:'Notice period during probation'},
+                {name:'candidate_probation_period',type:'optional',desc:'Length of probation period'},
+                {name:'candidate_start_time',type:'optional',desc:'Start time'},
+                {name:'candidate_days_per_week',type:'optional',desc:'Number of days worked per week'},
+                {name:'candidate_contracted_hours_per_week',type:'optional',desc:'Contracted hours per week'},
+                {name:'candidate_hours_per_week',type:'optional',desc:'Hours per week'},
+                {name:'annual_leave',type:'optional',desc:'Annual leave entitlement - in days hours or weeks'},
+                {name:'days_paid_holiday',type:'optional',desc:'Number of paid holiday days'},
+                {name:'date_of_offer',type:'optional',desc:'Date the offer was sent to the candidate'},
+                {name:'contract_effective_date',type:'optional',desc:'Date the contract takes effect'},
+                {name:'continuous_employment_start_date',type:'optional',desc:'Continuous employment start date'},
+                {name:'continuous_service_start_date',type:'optional',desc:'Continuous service start date'},
+                {name:'bonus_percentage',type:'optional',desc:'Bonus percentage - customer picks from configured options'},
+                {name:'car_allowance',type:'optional',desc:'Car allowance amount'},
+                {name:'overtime_Type',type:'optional',desc:'Overtime type - either Overtime or Lieu'},
+                {name:'remote_working_days',type:'optional',desc:'Number of remote working days'},
+                {name:'unspent_convictions',type:'optional',desc:'Whether the candidate has unspent convictions - Yes or No'},
+                {name:'bespoke_benefits',type:'optional',desc:'Any bespoke benefits - free text'},
+              ]},
+              section('SensitiveInformation fields'),
+              sf('HasDependants',O,'Whether the candidate has dependants - sent as SensitiveInformation.HasDependants'),
+              sf('DependentChildren',O,'Number of dependent children - sent as SensitiveInformation.DependentChildren'),
+              sf('DependentDisabled',O,'Number of disabled dependants - sent as SensitiveInformation.DependentDisabled'),
+              sf('DependentElderly',O,'Number of elderly dependants - sent as SensitiveInformation.DependentElderly'),
+              sf('Languages',O,'Preferred language - note the API key uses plural Languages not Language - sent as SensitiveInformation.Languages'),
+              sf('Disability',O,'Disability types - for multiple values use array notation e.g. SensitiveInformation.Disability.0 SensitiveInformation.Disability.1'),
+              sf('AgeRange',O,'Age range category - exists in the code model but does not appear in external API documentation'),
             ]
           },
           {
@@ -1415,6 +1538,17 @@ const APIS = [
               f('FileName',R,'The name of the file being uploaded'),
               f('DocumentType',R,'What kind of document: CV, RighttoWork, Contracts, Image, OnboardingDocuments, or Other'),
               f('File',R,'The actual file content'),
+            ]
+          },
+          {
+            method:'POST',name:'Upload binary document',
+            desc:'Upload a document as raw binary data. Maximum file size: 50 MB. Accepted image types: .jpg .jpeg .png .svg. Accepted file types: .pdf .doc .docx .jpg .jpeg .png. Content type must be application/octet-stream.',
+            path:'POST /UploadBinaryDocument',
+            fields:[
+              f('OrgAlias',R,'Organisation identifier'),
+              f('RequestId',R,'Onboarding request ID'),
+              f('DocumentType',R,'What kind of document: CV, RighttoWork, Contracts, Image, OnboardingDocuments, or Other'),
+              f('FileName',R,'The name of the file being uploaded'),
             ]
           },
           {
@@ -4624,9 +4758,15 @@ function renderEndpoint(ep,uid,apiId){
   const resNote=resData.note||'';
   const hasContent=reqFields.length||resFields.length||resNote;
 
-  const reqHtml=reqFields.map(fd=>{
+  const reqHtml=reqFields.map((fd,idx)=>{
     if(fd.type==='note') return `<tr class="field-note-row"><td colspan="4">${esc(fd.name)}</td></tr>`;
     if(fd.type==='section') return `<tr class="field-section-row"><td colspan="4">${esc(fd.name)}</td></tr>`;
+    if(fd.type==='subsection'){
+      const sid=`${uid}-ss${idx}`;
+      const introRow=fd.intro?`<tr data-ss="${sid}" style="display:none"><td colspan="4" class="field-subsection-intro-cell">${esc(fd.intro)}</td></tr>`:'';
+      const subRows=(fd.fields||[]).map(sfd=>`<tr data-ss="${sid}" style="display:none"><td><span class="field-name">${esc(sfd.name)}</span></td><td>Text</td><td>${fieldBadge(sfd.type)}</td><td class="field-desc">${esc(sfd.desc)}</td></tr>`).join('');
+      return `<tr class="field-subsection-hdr"><td colspan="4"><button class="field-subsection-btn" onclick="toggleFieldSubsection('${sid}')">${esc(fd.name)}<svg id="ssa-${sid}" class="pt-arrow" width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg></button></td></tr>${introRow}${subRows}`;
+    }
     const subCls=fd.sub?' field-sub-row':'';
     return `<tr class="${subCls}"><td><span class="field-name">${esc(fd.name)}</span></td><td>${fieldDataType(fd.name)}</td><td>${fieldBadge(fd.type)}</td><td class="field-desc">${esc(fd.desc)}</td></tr>`;
   }).join('');
@@ -4689,10 +4829,57 @@ function renderParamTypes(api){
     </div>`;
 }
 
+function renderInfoSections(api){
+  if(!api.infoSections||!api.infoSections.length) return '';
+  return api.infoSections.map(sec=>{
+    const uid=api.id+'-is-'+sec.id;
+    let bodyHtml='';
+    if(sec.type==='errorCodes'){
+      const rows=sec.rows.map(r=>`<tr><td>${esc(r.code)}</td><td>${esc(r.status)}</td><td class="field-desc">${esc(r.desc)}</td></tr>`).join('');
+      bodyHtml=`<table class="param-types-table"><thead><tr><th>Code</th><th>Status</th><th>Description</th></tr></thead><tbody>${rows}</tbody></table>`;
+    } else if(sec.type==='fields'){
+      const intro=sec.intro?`<p class="info-sec-intro">${esc(sec.intro)}</p>`:'';
+      const rows=sec.fields.map(fd=>`<tr><td><span class="field-name">${esc(fd.name)}</span></td><td>${esc(fd.type)}</td><td class="field-desc">${esc(fd.desc)}</td></tr>`).join('');
+      bodyHtml=intro+`<table class="param-types-table"><thead><tr><th>Field name</th><th>Type</th><th>Description</th></tr></thead><tbody>${rows}</tbody></table>`;
+    } else if(sec.type==='text'){
+      bodyHtml=`<p class="info-sec-intro">${esc(sec.content)}</p>`;
+    }
+    return `
+      <div class="param-types-section">
+        <button class="param-types-toggle" onclick="toggleInfoSection('${api.id}','${sec.id}')">
+          ${esc(sec.name)}
+          <svg id="isa-${uid}" class="pt-arrow" width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+        </button>
+        <div class="param-types-wrap" id="is-${uid}">
+          ${bodyHtml}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleInfoSection(apiId,sectionId){
+  const uid=apiId+'-is-'+sectionId;
+  const wrap=document.getElementById('is-'+uid);
+  const arrow=document.getElementById('isa-'+uid);
+  if(!wrap) return;
+  const open=wrap.classList.toggle('open');
+  if(arrow) arrow.style.transform=open?'rotate(180deg)':'';
+}
+
+function toggleFieldSubsection(sid){
+  const rows=document.querySelectorAll(`[data-ss="${sid}"]`);
+  const arrow=document.getElementById('ssa-'+sid);
+  if(!rows.length) return;
+  const open=rows[0].style.display==='none';
+  rows.forEach(r=>r.style.display=open?'':'none');
+  if(arrow) arrow.style.transform=open?'rotate(180deg)':'';
+}
+
 function renderApi(api,autoOpen){
   const epCount=countEndpoints(api);
   const m=EXPOSURE_META[api.exposure]||EXPOSURE_META.int;
   const auth=AUTH_META[api.id];
+  const infoHtml=renderInfoSections(api);
   const groupsHtml=api.groups.map((g,gi)=>
     `<div class="group-heading">${esc(g.name)}</div>`+
     g.endpoints.map((ep,ei)=>renderEndpoint(ep,`${api.id}-g${gi}e${ei}`,api.id)).join('')
@@ -4719,7 +4906,7 @@ function renderApi(api,autoOpen){
           </svg>
         </div>
       </div>
-      <div class="api-body">${groupsHtml}${renderParamTypes(api)}</div>
+      <div class="api-body">${infoHtml}${groupsHtml}${renderParamTypes(api)}</div>
     </div>`;
 }
 
