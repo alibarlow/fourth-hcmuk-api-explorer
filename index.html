@@ -91,9 +91,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .m-EVENT{background:#ede9fe;color:#5b21b6}
 .m-QUERY{background:#fce7f3;color:#9d174d}
 
-/* ── Show fields toggle ── */
-.toggle-fields{margin-top:6px;padding:3px 10px;border:1px solid #e5e7eb;border-radius:4px;background:#fff;font-size:11px;color:#6b7280;cursor:pointer;font-family:inherit;transition:all .15s}
-.toggle-fields:hover{border-color:#3b82f6;color:#3b82f6}
+/* ── Field tabs ── */
+.ep-tabs{display:flex;gap:6px;margin-top:8px}
+.ep-tab{padding:2px 10px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;font-size:11px;color:#6b7280;cursor:pointer;font-family:inherit;transition:all .15s;font-weight:500;white-space:nowrap;line-height:1.6}
+.ep-tab:hover{border-color:#d1d5db;color:#374151;background:#f9fafb}
+.ep-tab.active{background:#1a1a2e;border-color:#1a1a2e;color:#fff}
+
+/* ── Response note ── */
+.response-note{font-size:12px;color:#374151;padding:7px 10px;background:#f8fafc;border:1px solid #e5e7eb;border-left:3px solid #9ca3af;border-radius:4px;margin-bottom:6px;line-height:1.5}
+
+/* ── Fields empty message ── */
+.fields-empty{font-size:12px;color:#9ca3af;padding:6px 2px;font-style:italic}
 
 /* ── Fields table ── */
 .fields-wrap{display:none;margin-top:8px}
@@ -103,6 +111,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .fields-table th:first-child{width:25%}
 .fields-table th:nth-child(2){width:13%}
 .fields-table th:nth-child(3){width:12%}
+.fields-table-res th:first-child{width:30%}
+.fields-table-res th:nth-child(2){width:16%}
 .fields-table td{padding:5px 10px;border-bottom:1px solid #f3f4f6;vertical-align:top;color:#374151}
 .fields-table td:nth-child(2){font-size:11px;color:#374151;white-space:nowrap}
 .fields-table tr:last-child td{border-bottom:none}
@@ -222,6 +232,7 @@ const TABS = [
 const R='required', O='optional', RO='readonly', S='system';
 function f(name,type,desc){return{name,type,desc};}
 function pt(param,type,notes){return{param,type,notes};}
+function rf(name,type,desc){return{name,type,desc};}
 
 // ─────────────────────────────────────────────
 // DATA
@@ -2573,6 +2584,153 @@ const APIS = [
 ];
 
 // ─────────────────────────────────────────────
+// RESPONSE FIELDS
+// ─────────────────────────────────────────────
+
+const RESPONSE_FIELDS = {
+  // ── Onboarding Public ──
+  'onboarding-public|Follow a short link':{note:'HTTP 302 redirect to the destination URL. No response body.',fields:[]},
+  'onboarding-public|Create brand':{fields:[rf('IsSuccessful','True/False','Whether the operation succeeded'),rf('Errors','Text','Any field-level error messages if it failed'),rf('Result','Text','The created or updated brand details')]},
+  'onboarding-public|Update brand':{fields:[rf('IsSuccessful','True/False','Whether the operation succeeded'),rf('Errors','Text','Any field-level error messages if it failed'),rf('Result','Text','The created or updated brand details')]},
+  'onboarding-public|Upload brand logo':{fields:[rf('IsSuccessful','True/False','Whether the upload succeeded'),rf('Errors','Text','Any error messages if it failed')]},
+  'onboarding-public|Get all brands':{note:'Returns a list of brands.',fields:[rf('BrandAlias','Text','Short unique name'),rf('BrandName','Text','Full display name'),rf('PrimaryColour','Text','Brand colour'),rf('Logo','Text','Logo URL'),rf('IsActive','True/False','Whether active'),rf('BothEmergencyContactsMandatory','True/False','Whether two emergency contacts required'),rf('ReferencesMandatory','Integer','Number of references required'),rf('IsDiversityandInclusionRequired','True/False','Whether diversity section required')]},
+
+  // ── ESS ──
+  'ess|Get my profile':{fields:[rf('Id','Integer','Your employee ID'),rf('FirstNames / Surname','Text','Your full name'),rf('PreferredName','Text','Preferred name'),rf('DateOfBirth','Date','Date of birth'),rf('Gender','Text','Gender'),rf('Address fields','Text','Home address'),rf('HomeTel / MobileTel','Text','Phone numbers'),rf('WorkEmail / HomeEmail','Text','Email addresses'),rf('NationalInsuranceNumber','Text','NI number'),rf('EmployeeNumber','Text','HR reference'),rf('StartDate','Date','Start date'),rf('LengthOfService','Text','Length of service'),rf('CanEdit','True/False','Whether you can edit your profile'),rf('CanBookHalfDay','True/False','Whether you can book half days'),rf('CasualStaff','True/False','Whether on casual contract'),rf('IfLeaver','True/False','Whether leaving')]},
+  'ess|My employment details':{fields:[rf('JobTitle','Text','Job title'),rf('CompanyName','Text','Company'),rf('LocationName','Text','Work location'),rf('Division','Text','Division'),rf('Manager','Text','Line manager'),rf('PayType','Text','Hourly or salary'),rf('IsLeaver','True/False','Whether leaving'),rf('TerminationDate','Date','Leaving date if applicable'),rf('PAYEReference','Text','Employer PAYE reference')]},
+  'ess|My line manager':{fields:[rf('LineManagerName','Text','Line manager name'),rf('LineManagerFAID','Text','Line manager Fourth account ID'),rf('PrimaryAbsenceManagerName','Text','Who approves absences'),rf('PrimaryHolidayManagerName','Text','Who approves holidays')]},
+  'ess|Holiday balance':{fields:[rf('Allowed','Number','Total days entitled'),rf('Taken','Number','Days taken'),rf('Booked','Number','Days booked'),rf('Remaining','Number','Days remaining'),rf('Accrued','Number','Days accrued'),rf('HolidayYearStartDate','Date','Holiday year start'),rf('AvgHoursPerWeek','Number','Average hours per week'),rf('TotalHolidayAllowance','Number','Total allowance in hours')]},
+  'ess|My rota':{note:'Returns a paged list of shifts.',fields:[rf('ShiftDate','Date','Shift date'),rf('Location','Text','Work location'),rf('Department','Text','Department'),rf('JobTitle','Text','Role'),rf('ShiftTimes','List','Start and end times'),rf('IsMain','True/False','Whether this is your main job shift')]},
+  'ess|List payslips':{note:'Returns a paged list.',fields:[rf('Id','Integer','Payslip ID'),rf('ProcessingDate','Date','When generated'),rf('NetPay','Number','Take home pay'),rf('PayPeriod','Integer','Pay period number'),rf('TaxYear','Integer','Tax year')]},
+  'ess|View a payslip':{fields:[rf('CurrentGrossPay','Number','Gross pay this period'),rf('NetPay','Number','Take home pay'),rf('TaxCode','Text','HMRC tax code'),rf('TaxDueToDate','Number','Tax paid this year'),rf('EmployeePension','Number','Employee pension contribution'),rf('EmployerPensionContribution','Number','Employer pension contribution'),rf('StudentLoanDeduction','Number','Student loan repayment'),rf('GrossNIContribution','Number','National Insurance contribution'),rf('TotalDeductions','Number','Total deductions'),rf('TotalPayments','Number','Total payments'),rf('TotalGrossPayToDate','Number','Cumulative gross pay this year'),rf('PayslipElements','List','Individual line items each with description, units, rate, and amount')]},
+  'ess|Download payslip PDF':{note:'Binary PDF file (application/pdf). No JSON response.',fields:[]},
+  'ess|P45 documents':{note:'Returns a paged list.',fields:[rf('Id','Integer','P45 ID'),rf('TaxYear','Integer','Tax year'),rf('CompanyName','Text','Employer'),rf('TerminationDate','Date','Leaving date'),rf('IsPrimaryEmployment','True/False','Whether main job'),rf('FileName','Text','PDF filename')]},
+  'ess|Download P45':{note:'Binary PDF file (application/pdf). No JSON response.',fields:[]},
+  'ess|P60 documents':{note:'Returns a paged list.',fields:[rf('Id','Integer','P60 ID'),rf('TaxYear','Integer','Tax year'),rf('CompanyName','Text','Employer'),rf('TaxYearStart / TaxYearEnd','Date','Tax year dates'),rf('FileName','Text','PDF filename')]},
+  'ess|Download P60':{note:'Binary PDF file (application/pdf). No JSON response.',fields:[]},
+  'ess|P11D documents':{note:'Returns a paged list.',fields:[rf('Id','Integer','P11D ID'),rf('TaxYear','Integer','Tax year'),rf('CompanyName','Text','Employer'),rf('FileName','Text','PDF filename')]},
+  'ess|Bank details':{fields:[rf('BankName','Text','Bank name'),rf('AccountName','Text','Account name'),rf('AccountNumber','Text','Account number'),rf('SortCode','Text','Sort code'),rf('BSocRollNumber','Text','Building society roll number if applicable'),rf('IBAN','Text','International account number if applicable')]},
+  'ess|Next of kin':{fields:[rf('PersonTitle / FirstName / SurName','Text','Primary contact name'),rf('Relationship','Text','Relationship to you'),rf('Phone / Email','Text','Contact details'),rf('Title2 / Firstname2 / Surname2','Text','Second contact details if provided'),rf('Relationship2 / Phone2 / Email2','Text','Second contact relationship and details'),rf('CanEdit','True/False','Whether you can edit this')]},
+  'ess|Diversity information':{fields:[rf('EthnicOriginDisplay','Text','Ethnic origin'),rf('DisabilityDisplay','Text','Disability status'),rf('DisabledNotes','Text','Disability notes'),rf('LanguageDisplay','Text','Preferred language'),rf('ReligionDisplay','Text','Religion'),rf('HasDependents','True/False','Whether has dependents'),rf('DependentChildren / DependentDisabled / DependentElderly','Integer','Number of each dependent type'),rf('SexualOrientationDisplay','Text','Sexual orientation'),rf('GenderDisplay','Text','Gender identity')]},
+  'ess|Right to work expiry':{fields:[rf('PassportNumber / PassportExpiryDate','Text','Passport details'),rf('SettledStatus','Text','UK settled status'),rf('WorkPermit / PermitExpiryDate','Text','Work permit details'),rf('TrustID_RTWStatus / TrustID_RTWExpiryDate','Text','Trust ID check status and expiry')]},
+  'ess|My documents':{note:'Returns a list.',fields:[rf('FileName','Text','Document filename'),rf('DocumentType','Text','Type of document')]},
+
+  // ── PeopleSystem Integration ──
+  'peoplesystem|Get employees':{note:'Returns a list of employees.',fields:[rf('EmployeeID','Integer','Internal ID'),rf('FAID','Text','Fourth Account ID — 18 character unique identifier'),rf('PayrollNumber','Text','Payroll reference'),rf('CompanyName','Text','Company'),rf('Paybasis','Text','Pay schedule'),rf('FirstName / LastName','Text','Name'),rf('DateOfBirth','Date','Date of birth'),rf('Gender','Text','Gender'),rf('NationalInsuranceNumber','Text','NI number'),rf('IR35','True/False','Whether within IR35'),rf('EthnicOrigin / Religion / SexualOrientation','Text','Diversity data where provided')]},
+  'peoplesystem|Create or update employees':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
+  'peoplesystem|Absences':{note:'GET returns a list. For POST/PUT/DELETE: HTTP 202 Accepted — SubmissionID returned as a tracking reference.',fields:[rf('EmployeeNumber','Text','Employee reference'),rf('StartDate / EndDate','Date','Absence dates'),rf('Days','Number','Number of days'),rf('Type','Text','Days, shifts, or hours'),rf('Reason','Text','Reason'),rf('Paid','Text','Whether paid'),rf('Status','Text','Added, Deleted, or Validation Error')]},
+  'peoplesystem|Payments':{note:'GET returns a list. For POST/DELETE: HTTP 202 Accepted, or HTTP 400 with error details if validation fails.',fields:[rf('EmployerPaymentTypeID','Integer','Payment type'),rf('Units','Number','Units'),rf('Amount','Number','Amount'),rf('StartDate / EndDate','Date','Date range')]},
+  'peoplesystem|Submit payment batch':{note:'HTTP 202 Accepted, or HTTP 400 with error details if validation fails.',fields:[rf('SubmissionID','GUID','Reference')]},
+  'peoplesystem|Book or cancel holiday':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
+  'peoplesystem|Payslips':{note:'Returns a list.',fields:[rf('PayslipDate / PaymentDate','Date','Payslip and payment dates'),rf('ElementName','Text','Pay element name'),rf('Units / Rate / Value','Number','Quantity, rate, and amount'),rf('Department / JobDescription / SiteDescription','Text','Attribution')]},
+  'peoplesystem|Payroll periods':{note:'Returns a list.',fields:[rf('CompanyName','Text','Company'),rf('PeriodName','Text','Period name'),rf('PeriodNumber','Integer','Period number'),rf('PeriodTaxYear','Integer','Tax year'),rf('PayDate','Date','Pay date'),rf('PeriodStartDate / PeriodEndDate','Date','Period dates')]},
+  'peoplesystem|Labour costs':{note:'Returns a list.',fields:[rf('ShiftDate','Date','Date'),rf('basicpaytotal','Number','Basic pay cost'),rf('totalpay','Number','Total pay'),rf('holidaypay','Number','Holiday pay cost'),rf('overtime','Number','Overtime'),rf('employersnationalinsurance','Number','Employer NI'),rf('wagecost','Number','Total wage cost'),rf('totalacthrs','Number','Total hours worked')]},
+  'peoplesystem|Accrual data':{note:'Returns a list.',fields:[rf('ElementName','Text','Usually Holiday Balance'),rf('Units','Number','Days or hours accrued'),rf('UnitType','Text','Days or Hours'),rf('IsFlexible','Text','Yes or No'),rf('DayRate','Number','Daily rate')]},
+  'peoplesystem|Companies':{note:'Returns a list.',fields:[rf('CompanyName','Text','Company name'),rf('Companyid','Integer','Internal ID'),rf('EmployerPayBasisID','Integer','Pay basis ID')]},
+  'peoplesystem|Locations':{note:'Returns a list.',fields:[rf('LocationID','Integer','Internal ID'),rf('Description','Text','Location name'),rf('Country','Text','UK, Ireland, or Jersey'),rf('LocationGUID','Text','Globally unique ID')]},
+  'peoplesystem|Job titles':{note:'Returns a list.',fields:[rf('JobTitleID','Integer','Internal ID'),rf('JobTitleName','Text','Job title name'),rf('LocationName / DivisionName','Text','Location and division'),rf('PayMethod','Text','How this role is paid')]},
+  'peoplesystem|Divisions':{note:'Returns a list.',fields:[rf('DivisionId','Integer','Internal ID'),rf('DivisionName','Text','Division name'),rf('DivisionGUID','Text','Globally unique ID')]},
+  'peoplesystem|Rotas':{note:'Returns a list.',fields:[rf('RotaID','Integer','Internal ID'),rf('RotaStartDate / RotaEndDate','Date','Rota dates'),rf('Status','Text','Open, Closed at Location, or Submitted'),rf('LocationName','Text','Location')]},
+  'peoplesystem|Import logs':{note:'Returns a list.',fields:[rf('XmlType','Text','Type of data imported'),rf('Status','Text','Whether succeeded or failed'),rf('DateCreatedUtc','Date','When submitted'),rf('Error','Text','Error message if failed'),rf('Result','Text','Outcome')]},
+  'peoplesystem|Validate employee data':{fields:[rf('IsValid','True/False','Whether the record passed validation'),rf('Errors','List','List of field-level validation errors with field names and messages')]},
+  'peoplesystem|List iQ settings for organisation':{note:'Returns configured iQ settings.',fields:[rf('SettingId','Text','Setting identifier'),rf('SettingName','Text','Setting name'),rf('IsEnabled','True/False','Whether enabled'),rf('Locations','List','Locations this setting applies to')]},
+  'peoplesystem|Is iQ enabled?':{fields:[rf('IsEnabled','True/False','Whether iQ is currently enabled for this organisation')]},
+  'peoplesystem|Locations for a setting':{note:'Returns configured iQ settings.',fields:[rf('SettingId','Text','Setting identifier'),rf('SettingName','Text','Setting name'),rf('IsEnabled','True/False','Whether enabled'),rf('Locations','List','Locations this setting applies to')]},
+  'peoplesystem|All settings for a location':{note:'Returns configured iQ settings.',fields:[rf('SettingId','Text','Setting identifier'),rf('SettingName','Text','Setting name'),rf('IsEnabled','True/False','Whether enabled'),rf('Locations','List','Locations this setting applies to')]},
+  'peoplesystem|Single setting for single location':{note:'Returns configured iQ settings.',fields:[rf('SettingId','Text','Setting identifier'),rf('SettingName','Text','Setting name'),rf('IsEnabled','True/False','Whether enabled'),rf('Locations','List','Locations this setting applies to')]},
+  'peoplesystem|Look up group ID':{fields:[rf('GroupID','Integer','The GroupID for the provided canonical ID')]},
+
+  // ── PeopleSystem Gateway ──
+  'peoplesystem-gateway|Validate token':{note:'Returns the validated token value from cache if valid. HTTP 401 if invalid.',fields:[rf('Result','Text','The validated token value from cache')]},
+  'peoplesystem-gateway|Employee summary':{note:'Returns a list.',fields:[rf('ClientId','Integer','Employee ID'),rf('FirstNames / Surname','Text','Name'),rf('Email','Text','Email'),rf('FourthAccountId','Text','Fourth account identifier')]},
+  'peoplesystem-gateway|Pay date ranges':{note:'Returns a list.',fields:[rf('ProcessingDate','Date','Processing date'),rf('StartRange / EndRange','Date','Period start and end'),rf('TaxYear','Integer','Tax year'),rf('PayPeriod','Integer','Period number')]},
+  'peoplesystem-gateway|List companies':{note:'Returns a list.',fields:[rf('CompanyName','Text','Company name'),rf('CompanyId','Integer','Internal ID'),rf('EmployerPayBasisID','Integer','Pay basis ID')]},
+  'peoplesystem-gateway|Get unique upload ID':{fields:[rf('FileIdentifier','GUID','Unique ID to use when submitting the file')]},
+  'peoplesystem-gateway|Validate data load':{fields:[rf('IsValid','True/False','Whether the file passed validation'),rf('Errors','List','Any validation errors found')]},
+  'peoplesystem-gateway|Create and send document batch':{note:'HTTP 200 OK on success with batch reference.',fields:[]},
+  'peoplesystem-gateway|Create batch':{note:'HTTP 200 OK on success with batch reference.',fields:[]},
+  'peoplesystem-gateway|Send batch':{note:'HTTP 200 OK on success with batch reference.',fields:[]},
+  'peoplesystem-gateway|Document check status':{fields:[rf('Status','Text','Current status of the check'),rf('LastUpdated','Date','When status last changed')]},
+
+  // ── Auth Token Service ──
+  'auth-token|Generate token':{note:'Returns a token string e.g. "Bearer eyJ..." on success. HTTP 401 if credentials are invalid. HTTP 400 if an error occurs.',fields:[]},
+  'auth-token|Generate token with custom claims':{note:'Returns a token string e.g. "Bearer eyJ..." on success. HTTP 401 if credentials are invalid. HTTP 400 if an error occurs.',fields:[]},
+  'auth-token|Validate token':{note:'Returns true if the token is valid and not expired. HTTP 401 if invalid or expired. HTTP 400 if an error occurs.',fields:[]},
+
+  // ── iQ HCM UK Service ──
+  'iq-hcm|Work anniversary alert':{note:'No direct HTTP response — triggered automatically by Azure Service Bus. The system processes events internally and creates actions or notifications as a result.',fields:[]},
+  'iq-hcm|Birthday alert':{note:'No direct HTTP response — triggered automatically by Azure Service Bus. The system processes events internally and creates actions or notifications as a result.',fields:[]},
+  'iq-hcm|Right to work expiry':{note:'No direct HTTP response — triggered automatically by Azure Service Bus. The system processes events internally and creates actions or notifications as a result.',fields:[]},
+  'iq-hcm|Right to work missing':{note:'No direct HTTP response — triggered automatically by Azure Service Bus. The system processes events internally and creates actions or notifications as a result.',fields:[]},
+  'iq-hcm|Probation period alert':{note:'No direct HTTP response — triggered automatically by Azure Service Bus. The system processes events internally and creates actions or notifications as a result.',fields:[]},
+  'iq-hcm|Fixed term contract expiry':{note:'No direct HTTP response — triggered automatically by Azure Service Bus. The system processes events internally and creates actions or notifications as a result.',fields:[]},
+  'iq-hcm|Pay rate bracket change':{note:'No direct HTTP response — triggered automatically by Azure Service Bus. The system processes events internally and creates actions or notifications as a result.',fields:[]},
+  'iq-hcm|Onboarding not completed':{note:'No direct HTTP response — triggered automatically by Azure Service Bus. The system processes events internally and creates actions or notifications as a result.',fields:[]},
+  'iq-hcm|Rota overdue':{note:'No direct HTTP response — triggered automatically by Azure Service Bus. The system processes events internally and creates actions or notifications as a result.',fields:[]},
+  'iq-hcm|First shift on rota':{note:'No direct HTTP response — triggered automatically by Azure Service Bus. The system processes events internally and creates actions or notifications as a result.',fields:[]},
+  'iq-hcm|Last shift on rota':{note:'No direct HTTP response — triggered automatically by Azure Service Bus. The system processes events internally and creates actions or notifications as a result.',fields:[]},
+  'iq-hcm|ECR approval or rejection':{note:'No direct HTTP response — triggered automatically by Azure Service Bus. The system processes events internally and creates actions or notifications as a result.',fields:[]},
+  'iq-hcm|Trust ID alert':{note:'No direct HTTP response — triggered automatically by Azure Service Bus. The system processes events internally and creates actions or notifications as a result.',fields:[]},
+  'iq-hcm|Get action':{fields:[rf('ActionId','Text','Action identifier'),rf('InsightId','Text','Linked insight ID'),rf('CustomerCanonicalId','Text','Customer'),rf('LocationCanonicalId','Text','Location'),rf('TemplateId','Text','Template used'),rf('StartDateUtc / EndDateUtc / DueDateUtc','Date','Action dates'),rf('Severity','Text','Urgency level'),rf('Active','True/False','Whether currently live'),rf('ActionArguments','List','Data populating the action e.g. employee name, expiry date'),rf('CompletedByUserName','Text','Who completed it if done'),rf('CompletedDateUtc','Date','When completed if done')]},
+  'iq-hcm|Get all actions for insight':{note:'Returns a list of actions. Each action has the same fields as Get action.',fields:[rf('ActionId','Text','Action identifier'),rf('InsightId','Text','Linked insight ID'),rf('CustomerCanonicalId','Text','Customer'),rf('LocationCanonicalId','Text','Location'),rf('TemplateId','Text','Template used'),rf('StartDateUtc / EndDateUtc / DueDateUtc','Date','Action dates'),rf('Severity','Text','Urgency level'),rf('Active','True/False','Whether currently live'),rf('ActionArguments','List','Data populating the action'),rf('CompletedByUserName','Text','Who completed it if done'),rf('CompletedDateUtc','Date','When completed if done')]},
+  'iq-hcm|Create action':{fields:[rf('ActionId','Text','The ID of the created action'),rf('Active','True/False','Whether now live')]},
+  'iq-hcm|Update action':{fields:[rf('ActionId','Text','The ID of the updated action'),rf('Active','True/False','Whether now live')]},
+  'iq-hcm|Is iQ enabled?':{fields:[rf('IsEnabled','True/False','Whether iQ is currently enabled')]},
+  'iq-hcm|Get iQ settings':{note:'Returns the current iQ configuration for the customer.',fields:[]},
+  'iq-hcm|Holiday request submitted':{note:'No direct HTTP response — triggered automatically by Azure Service Bus.',fields:[]},
+  'iq-hcm|Holiday approved or rejected':{note:'No direct HTTP response — triggered automatically by Azure Service Bus.',fields:[]},
+  'iq-hcm|Onboarding completed':{note:'No direct HTTP response — triggered automatically by Azure Service Bus.',fields:[]},
+  'iq-hcm|Check iQ enabled for group':{fields:[rf('IsEnabled','True/False','Whether iQ is enabled for this group')]},
+
+  // ── iQ360 Events ──
+  'iq360|Submit feature usage event':{fields:[rf('accepted','True/False','Whether the event was accepted'),rf('eventId','Text','Processed event ID'),rf('originalEventId','Text','Your original event ID'),rf('processedAt','Date','When it was processed'),rf('errorMessage','Text','Error message if rejected'),rf('errorCode','Text','Error code if rejected')]},
+  'iq360|Submit feature usage batch':{fields:[rf('acceptedCount','Integer','Number accepted'),rf('rejectedCount','Integer','Number rejected'),rf('processedAt','Date','When processed'),rf('errors','List','Error messages'),rf('rejectedEvents','List','Details of rejected events each with eventId, errorMessage, and errorCode')]},
+
+  // ── Reporting ──
+  'reporting|Generate PDF report':{note:'Binary PDF file (application/pdf). No JSON response.',fields:[]},
+  'reporting|Generate CSV report':{note:'CSV file (text/csv). No JSON response.',fields:[]},
+
+  // ── HMRC Submission ──
+  'hmrc-submission|Submit to HMRC':{fields:[rf('InternalCorrelationId','Text','Our tracking reference'),rf('HMRCCorrelationId','Text','HMRC reference number'),rf('Progress','Integer','Processing progress'),rf('StatusHistory','List','History of status changes'),rf('BlobFiles','List','XML files sent and received')]},
+  'hmrc-submission|Poll submission status':{fields:[rf('Status','Text','Current processing status'),rf('CompletedAt','Date','When finished if complete'),rf('HMRCCorrelationId','Text','HMRC reference')]},
+  'hmrc-submission|Get submission errors':{note:'Returns a list of errors.',fields:[rf('ErrorMessage','Text','Description of why the submission was rejected'),rf('ErrorCode','Text','HMRC error code')]},
+
+  // ── Audit APIs ──
+  'audit-apis|Start audit collection':{note:'HTTP 200 OK on success.',fields:[]},
+  'audit-apis|Stop audit collection':{note:'HTTP 200 OK on success.',fields:[]},
+  'audit-apis|Audit status':{fields:[rf('IsActive','True/False','Whether audit collection is running'),rf('StartedAt','Date','When collection started')]},
+  'audit-apis|Ingest audit records':{note:'HTTP 200 OK on success. HTTP 400 with error details if validation fails.',fields:[]},
+
+  // ── Legacy PeopleSystem ──
+  'legacy-peoplesystem|Employee summary':{note:'Returns a list.',fields:[rf('EmployeeId','Integer','Employee ID'),rf('FirstName / Surname','Text','Name'),rf('Email','Text','Email')]},
+  'legacy-peoplesystem|Terminate benefits':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
+  'legacy-peoplesystem|Reinstate benefits':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
+  'legacy-peoplesystem|Save employment change':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
+  'legacy-peoplesystem|Roll back change':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
+  'legacy-peoplesystem|Check for conflicts':{fields:[rf('IdentifierConflict','GUID','Conflict reference'),rf('EffectiveDate','Date','Proposed change date'),rf('PreviousEffectiveDate / NextEffectiveDate','Date','Surrounding change dates'),rf('approvedItems','List','Already approved changes that conflict'),rf('currentDateItems','List','Same date changes that conflict'),rf('futureDateItems','List','Future changes that conflict')]},
+  'legacy-peoplesystem|Confirm effective date':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
+  'legacy-peoplesystem|Student and council loan data':{note:'Returns a list.',fields:[rf('SclId','Integer','Record ID'),rf('LeaveDate','Date','Leave date'),rf('IsHalfDay','True/False','Half day adjustment'),rf('IsDeducted','True/False','Whether deducted'),rf('NotificationDate','Date','Notification date')]},
+  'legacy-peoplesystem|Update loan record':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
+  'legacy-peoplesystem|Parental leave':{note:'Returns SNCP records.',fields:[rf('NeonatalAdmission / NeonatalDischarge','Date','Neonatal care dates'),rf('NeonatalLeaveWeeksAccrued / NeonatalLeeksTaken','Integer','Weeks earned and taken'),rf('BabyDue / BabyBorn','Date','Birth dates'),rf('AverageEarnings','Number','Weekly earnings for statutory pay')]},
+  'legacy-peoplesystem|Create SNCP record':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
+  'legacy-peoplesystem|Paternity pay record':{fields:[rf('SppEmployeeId','Integer','Record ID'),rf('Notified','Date','Notification date'),rf('Week1Start / Week2Start','Date','Leave week start dates'),rf('BabyDue / BabyBorn','Date','Birth dates'),rf('AverageEarnings','Number','Weekly earnings')]},
+  'legacy-peoplesystem|RTI post-processing':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
+  'legacy-peoplesystem|Is iQ enabled?':{fields:[rf('IsEnabled','True/False','Whether iQ is on for this customer')]},
+  'legacy-peoplesystem|Toggle iQ on or off':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
+  'legacy-peoplesystem|Update SSO account':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
+  'legacy-peoplesystem|Reactivate SSO account':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
+
+  // ── LP Sync ──
+  'lp-sync|Create lieu request':{note:'HTTP 200 OK on success.',fields:[]},
+  'lp-sync|Get lieu info':{fields:[rf('ForeignStaffID','Text','Employee identifier'),rf('LieuHours','Number','Total lieu hours available'),rf('LieuType','Integer','Type of lieu entitlement')]},
+  'lp-sync|Get rota data':{fields:[rf('ClientID','Integer','Location ID'),rf('ShiftDate','Date','Date'),rf('TotalHours','Number','Total scheduled hours'),rf('TotalTips','Number','Total tips')]},
+  'lp-sync|Get menus':{note:'Returns a list.',fields:[rf('Id','Integer','Menu ID'),rf('Name','Text','Menu name')]},
+  'lp-sync|Get menu cycles':{note:'Returns a list.',fields:[rf('Id','Integer','Cycle ID'),rf('Name / ShortName','Text','Names'),rf('Description','Text','Description'),rf('StartDate / EndDate','Date','Active dates')]},
+  'lp-sync|Get meal periods':{note:'Returns a list.',fields:[rf('Id','Integer','Meal period ID'),rf('Name','Text','Name e.g. Breakfast, Lunch, Dinner')]},
+  'lp-sync|Get recipes':{note:'Returns a list.',fields:[rf('Id','Integer','Recipe ID'),rf('Name','Text','Recipe name')]},
+};
+
+// ─────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────
 
@@ -2609,6 +2767,13 @@ function matchesSearch(api,q){
       if(ep.name.toLowerCase().includes(lq)||ep.desc.toLowerCase().includes(lq)||ep.path.toLowerCase().includes(lq)) return true;
       for(const fd of ep.fields){
         if(fd.name.toLowerCase().includes(lq)||fd.desc.toLowerCase().includes(lq)) return true;
+      }
+      const resData=RESPONSE_FIELDS[api.id+'|'+ep.name];
+      if(resData){
+        if(resData.note&&resData.note.toLowerCase().includes(lq)) return true;
+        for(const fd of (resData.fields||[])){
+          if(fd.name.toLowerCase().includes(lq)||fd.desc.toLowerCase().includes(lq)) return true;
+        }
       }
     }
   }
@@ -2671,22 +2836,32 @@ function fieldDataType(name){
   return 'Text';
 }
 
-function renderEndpoint(ep,uid){
-  const fieldsHtml=ep.fields.map(fd=>`
-    <tr>
-      <td><span class="field-name">${esc(fd.name)}</span></td>
-      <td>${fieldDataType(fd.name)}</td>
-      <td>${fieldBadge(fd.type)}</td>
-      <td class="field-desc">${esc(fd.desc)}</td>
-    </tr>`).join('');
+function renderEndpoint(ep,uid,apiId){
+  const reqFields=ep.fields||[];
+  const resData=RESPONSE_FIELDS[(apiId||'')+'|'+ep.name]||{};
+  const resFields=resData.fields||[];
+  const resNote=resData.note||'';
+  const hasContent=reqFields.length||resFields.length||resNote;
 
-  const fieldsBlock=ep.fields.length?`
-    <button class="toggle-fields" onclick="toggleFields('${uid}',this)">Show fields</button>
-    <div class="fields-wrap" id="${uid}">
-      <table class="fields-table">
-        <thead><tr><th>Field name</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
-        <tbody>${fieldsHtml}</tbody>
-      </table>
+  const reqHtml=reqFields.map(fd=>
+    `<tr><td><span class="field-name">${esc(fd.name)}</span></td><td>${fieldDataType(fd.name)}</td><td>${fieldBadge(fd.type)}</td><td class="field-desc">${esc(fd.desc)}</td></tr>`
+  ).join('');
+
+  const resHtml=resFields.map(fd=>
+    `<tr><td><span class="field-name">${esc(fd.name)}</span></td><td>${esc(fd.type)}</td><td class="field-desc">${esc(fd.desc)}</td></tr>`
+  ).join('');
+
+  const fieldsBlock=hasContent?`
+    <div class="ep-tabs">
+      <button class="ep-tab" onclick="switchTab('${uid}','req',this)">Request fields</button>
+      <button class="ep-tab" onclick="switchTab('${uid}','res',this)">Response fields</button>
+    </div>
+    <div class="fields-wrap" id="${uid}-req">
+      ${reqFields.length?`<table class="fields-table"><thead><tr><th>Field name</th><th>Type</th><th>Required</th><th>Description</th></tr></thead><tbody>${reqHtml}</tbody></table>`:'<p class="fields-empty">No request fields for this endpoint.</p>'}
+    </div>
+    <div class="fields-wrap" id="${uid}-res">
+      ${resNote?`<div class="response-note">${esc(resNote)}</div>`:''}
+      ${resFields.length?`<table class="fields-table fields-table-res"><thead><tr><th>Field name</th><th>Type</th><th>Description</th></tr></thead><tbody>${resHtml}</tbody></table>`:(!resNote?'<p class="fields-empty">No structured response fields defined.</p>':'')}
     </div>`:'';
 
   return `
@@ -2736,7 +2911,7 @@ function renderApi(api,autoOpen){
   const auth=AUTH_META[api.id];
   const groupsHtml=api.groups.map((g,gi)=>
     `<div class="group-heading">${esc(g.name)}</div>`+
-    g.endpoints.map((ep,ei)=>renderEndpoint(ep,`${api.id}-g${gi}e${ei}`)).join('')
+    g.endpoints.map((ep,ei)=>renderEndpoint(ep,`${api.id}-g${gi}e${ei}`,api.id)).join('')
   ).join('');
 
   return `
@@ -2833,6 +3008,21 @@ function toggleFields(uid,btn){
   if(!wrap) return;
   const open=wrap.classList.toggle('open');
   btn.textContent=open?'Hide fields':'Show fields';
+}
+
+function switchTab(uid,tab,btn){
+  const reqWrap=document.getElementById(uid+'-req');
+  const resWrap=document.getElementById(uid+'-res');
+  const allBtns=btn.parentElement.querySelectorAll('.ep-tab');
+  const isActive=btn.classList.contains('active');
+  allBtns.forEach(b=>b.classList.remove('active'));
+  if(reqWrap) reqWrap.classList.remove('open');
+  if(resWrap) resWrap.classList.remove('open');
+  if(!isActive){
+    btn.classList.add('active');
+    const target=tab==='req'?reqWrap:resWrap;
+    if(target) target.classList.add('open');
+  }
 }
 
 function toggleParamTypes(id){
