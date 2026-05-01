@@ -132,6 +132,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .f-optional{background:#f3f4f6;color:#6b7280}
 .f-readonly{background:#dbeafe;color:#1e40af}
 .f-system{background:#e2e8f0;color:#475569}
+.f-conditional{background:#fef3c7;color:#92400e}
+.field-note-row td{padding:5px 8px;font-size:11px;color:#6b7280;font-style:italic;background:#fafafa;border-bottom:1px solid #f3f4f6}
+.field-section-row td{padding:5px 8px;font-size:11px;font-weight:700;color:#374151;background:#f3f4f6;border-top:2px solid #e5e7eb;border-bottom:1px solid #e5e7eb;letter-spacing:.03em;text-transform:uppercase}
+.field-sub-row td:first-child .field-name{padding-left:16px;display:inline-block;color:#374151}
 
 /* ── No results ── */
 .no-results{text-align:center;padding:56px 0;color:#9ca3af}
@@ -249,8 +253,11 @@ const TABS = [
   {id:'int',  label:'Internal APIs'},
 ];
 
-const R='required', O='optional', RO='readonly', S='system';
+const R='required', O='optional', RO='readonly', S='system', C='conditional';
 function f(name,type,desc){return{name,type,desc};}
+function sf(name,type,desc){return{name,type,desc,sub:true};}
+function note(txt){return{name:txt,type:'note',desc:''};}
+function section(name){return{name,type:'section',desc:''};}
 function pt(param,type,notes){return{param,type,notes};}
 function rf(name,type,desc){return{name,type,desc};}
 
@@ -1207,16 +1214,31 @@ const APIS = [
             desc:'Start a new hire record when someone is offered a job',
             path:'POST /',
             fields:[
-              f('OrgAlias',O,'Which organisation this candidate belongs to'),
-              f('ESignInProgress',S,'Whether signing has started — set automatically'),
-              f('ESignCompleted',S,'Whether signing is complete — set automatically'),
-              f('DocumentUploadCompleted',S,'Whether all documents have been uploaded — set automatically'),
-              f('PersonalInformation',O,"The new hire's personal details — see personal information fields"),
-              f('BankAccount',O,'Bank account for pay — see bank details fields'),
-              f('EmergencyContact1 / EmergencyContact2',O,'Up to two emergency contacts'),
-              f('Reference1 / Reference2',O,'Employment references'),
-              f('SensitiveInformation',O,'Diversity data provided voluntarily'),
-              f('ImmutData',O,'Job and employment details set by the employer that the candidate cannot change'),
+              f('RequestId',R,'Unique identifier for this onboarding request - must be between 30 and 40 characters'),
+              f('OrgAlias',R,'Organisation short name - must be between 2 and 255 characters'),
+              note('The body accepts both JSON and form-encoded format using dot-notation keys e.g. ImmutableData.FirstName'),
+              f('ImmutableData',R,'Employment and right-to-work details set by the employer - always required. Contains name, email, job title, location, pay and immigration fields.'),
+              f('PersonalInformation',R,'The new hires personal details - address, gender, date of birth, NI number - always required'),
+              f('BankAccount',R,'Bank account details for pay - always required'),
+              f('EmergencyContact1',R,'First emergency contact - always required'),
+              f('EmergencyContact2',C,'Second emergency contact - only required when the brand setting BothEmergencyContactsMandatory is enabled'),
+              f('Reference1',C,'First employment reference - required when the brand setting ReferencesMandatory is 1 or 2'),
+              f('Reference2',C,'Second employment reference - only required when the brand setting ReferencesMandatory is set to 2'),
+              f('SensitiveInformation',C,'Diversity and equality information - only required when the brand setting IsDiversityandInclusionRequired is enabled'),
+              section('ImmutableData fields'),
+              sf('FirstName',R,'2 to 60 characters, must start with a letter'),
+              sf('SurName',R,'2 to 60 characters, must start with a letter'),
+              sf('Email',R,'The new hires email address'),
+              sf('MobileNumber',R,'Must be a valid phone number format'),
+              sf('JobTitle',R,'Minimum 2 characters'),
+              sf('LocationName',R,'Minimum 2 characters'),
+              sf('Division',R,'Minimum 1 character'),
+              sf('HolidayDaysTaken',O,'Holiday days taken to date'),
+              sf('HolidayAverageHoursPerWeek',O,'Average holiday hours per week'),
+              sf('HolidayAverageDaysPerWeek',O,'Average holiday days per week'),
+              sf('HolidayEffectiveDate',O,'Date from which holiday calculations take effect'),
+              sf('EmployeeSourceDesc',O,'Description of the recruitment source'),
+              sf('EffectiveDate',O,'The date these employment details take effect'),
             ]
           },
           {
@@ -1224,13 +1246,31 @@ const APIS = [
             desc:"Update a new hire's details as they change",
             path:'PATCH /',
             fields:[
-              f('OrgAlias',O,'Which organisation this candidate belongs to'),
-              f('PersonalInformation',O,"The new hire's personal details"),
-              f('BankAccount',O,'Bank account for pay'),
-              f('EmergencyContact1 / EmergencyContact2',O,'Up to two emergency contacts'),
-              f('Reference1 / Reference2',O,'Employment references'),
-              f('SensitiveInformation',O,'Diversity data provided voluntarily'),
-              f('ImmutData',O,'Job and employment details set by the employer'),
+              f('RequestId',R,'Unique identifier for this onboarding request - must be between 30 and 40 characters'),
+              f('OrgAlias',R,'Organisation short name - must be between 2 and 255 characters'),
+              note('The body accepts both JSON and form-encoded format using dot-notation keys e.g. ImmutableData.FirstName'),
+              f('ImmutableData',R,'Employment and right-to-work details set by the employer - always required. Contains name, email, job title, location, pay and immigration fields.'),
+              f('PersonalInformation',R,'The new hires personal details - address, gender, date of birth, NI number - always required'),
+              f('BankAccount',R,'Bank account details for pay - always required'),
+              f('EmergencyContact1',R,'First emergency contact - always required'),
+              f('EmergencyContact2',C,'Second emergency contact - only required when the brand setting BothEmergencyContactsMandatory is enabled'),
+              f('Reference1',C,'First employment reference - required when the brand setting ReferencesMandatory is 1 or 2'),
+              f('Reference2',C,'Second employment reference - only required when the brand setting ReferencesMandatory is set to 2'),
+              f('SensitiveInformation',C,'Diversity and equality information - only required when the brand setting IsDiversityandInclusionRequired is enabled'),
+              section('ImmutableData fields'),
+              sf('FirstName',R,'2 to 60 characters, must start with a letter'),
+              sf('SurName',R,'2 to 60 characters, must start with a letter'),
+              sf('Email',R,'The new hires email address'),
+              sf('MobileNumber',R,'Must be a valid phone number format'),
+              sf('JobTitle',R,'Minimum 2 characters'),
+              sf('LocationName',R,'Minimum 2 characters'),
+              sf('Division',R,'Minimum 1 character'),
+              sf('HolidayDaysTaken',O,'Holiday days taken to date'),
+              sf('HolidayAverageHoursPerWeek',O,'Average holiday hours per week'),
+              sf('HolidayAverageDaysPerWeek',O,'Average holiday days per week'),
+              sf('HolidayEffectiveDate',O,'Date from which holiday calculations take effect'),
+              sf('EmployeeSourceDesc',O,'Description of the recruitment source'),
+              sf('EffectiveDate',O,'The date these employment details take effect'),
             ]
           },
           {
@@ -4519,7 +4559,7 @@ function methodBadge(method){
 }
 
 function fieldBadge(type){
-  const MAP={required:['f-required','Required'],optional:['f-optional','Optional'],readonly:['f-readonly','Read only'],system:['f-system','System']};
+  const MAP={required:['f-required','Required'],optional:['f-optional','Optional'],readonly:['f-readonly','Read only'],system:['f-system','System'],conditional:['f-conditional','Conditional']};
   const [cls,label]=MAP[type]||MAP.optional;
   return `<span class="badge-field ${cls}">${label}</span>`;
 }
@@ -4584,9 +4624,12 @@ function renderEndpoint(ep,uid,apiId){
   const resNote=resData.note||'';
   const hasContent=reqFields.length||resFields.length||resNote;
 
-  const reqHtml=reqFields.map(fd=>
-    `<tr><td><span class="field-name">${esc(fd.name)}</span></td><td>${fieldDataType(fd.name)}</td><td>${fieldBadge(fd.type)}</td><td class="field-desc">${esc(fd.desc)}</td></tr>`
-  ).join('');
+  const reqHtml=reqFields.map(fd=>{
+    if(fd.type==='note') return `<tr class="field-note-row"><td colspan="4">${esc(fd.name)}</td></tr>`;
+    if(fd.type==='section') return `<tr class="field-section-row"><td colspan="4">${esc(fd.name)}</td></tr>`;
+    const subCls=fd.sub?' field-sub-row':'';
+    return `<tr class="${subCls}"><td><span class="field-name">${esc(fd.name)}</span></td><td>${fieldDataType(fd.name)}</td><td>${fieldBadge(fd.type)}</td><td class="field-desc">${esc(fd.desc)}</td></tr>`;
+  }).join('');
 
   const resHtml=resFields.map(fd=>
     `<tr><td><span class="field-name">${esc(fd.name)}</span></td><td>${esc(fd.type)}</td><td class="field-desc">${esc(fd.desc)}</td></tr>`
