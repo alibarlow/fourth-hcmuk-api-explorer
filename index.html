@@ -745,7 +745,7 @@ const APIS = [
   // ── API 3: PeopleSystem Integration API ───
   {
     id:'peoplesystem',
-    title:'PeopleSystem Integration API',
+    title:'PeopleSystem Integration API (UK HR API)',
     area:'people',
     exposure:'open',
     icon:'🔗',
@@ -793,6 +793,7 @@ const APIS = [
               f('ContractHours / Contract',O,'Contract details'),
               f('BankName / SortCode / BankAccountNumber',O,'Payment bank account'),
               f('NOK1 and NOK2 fields',O,'Up to two emergency contacts'),
+              f('HolidaysIn',O,'Whether holidays are included in pay calculations'),
               f('SettledStatus / PreSettledStatus',O,'UK immigration status — yes or no'),
               f('WorkPermit fields',O,'Work permit type, number, and expiry'),
               f('PassportNumber / PassportExpiryDate',O,'Passport details for right to work'),
@@ -819,16 +820,45 @@ const APIS = [
             desc:'Full employment history and details',
             path:'GET /organisations/{id}/Employees/Employments',
             fields:[
-              f('EmploymentStartDate / EmploymentEndDate',RO,'When employment started and ended'),
-              f('TerminationReason',RO,'Why employment ended'),
-              f('EmploymentType',RO,'Type of employment'),
-              f('JobDescription / JobCode',RO,'Role details'),
-              f('SiteDescription / SiteCode',RO,'Work location'),
-              f('RateOfPay / ContractedHours',RO,'Pay and hours'),
-              f('ReportsTo / ReportsToEmployeeNumber',RO,'Line manager details'),
-              f('ContinuousServiceDate',RO,'Date used for continuous service calculations'),
-              f('TUPE',RO,'Whether the employee transferred in under TUPE'),
-              f('IR35',RO,'Whether within IR35 rules'),
+              f('EmployeeID',RO,'Employee ID'),
+              f('EmploymentReference',RO,'Employment reference'),
+              f('EmploymentStartDate',RO,'Employment start date'),
+              f('EmploymentEndDate',RO,'Employment end date'),
+              f('AssignmentStartDate',RO,'Assignment start date'),
+              f('AssignmentEndDate',RO,'Assignment end date'),
+              f('TerminationReason',RO,'Reason for termination'),
+              f('Rehire',RO,'Whether eligible for rehire'),
+              f('EmploymentStatus',RO,'Current employment status'),
+              f('IsPermanent',RO,'Whether permanent employment'),
+              f('IsFulltime',RO,'Whether full time'),
+              f('IsForeignStudent',RO,'Whether a foreign student'),
+              f('IsLiveIn',RO,'Whether live-in employee'),
+              f('EmploymentType',RO,'Employment type'),
+              f('Department',RO,'Department name'),
+              f('DepartmentDescription',RO,'Department description'),
+              f('JobCode',RO,'Job code'),
+              f('JobDescription',RO,'Job title or description'),
+              f('ShiftType',RO,'Type of shift pattern'),
+              f('SiteCode',RO,'Site or location code'),
+              f('SiteDescription',RO,'Site or location description'),
+              f('RateOfPay',RO,'Rate of pay'),
+              f('RateOfPayEffectiveDate',RO,'Date rate of pay took effect'),
+              f('ContractedHours',RO,'Contracted hours'),
+              f('RateOfPayType',RO,'How pay rate is calculated'),
+              f('PayGroup',RO,'Pay group'),
+              f('WorkingPattern',RO,'Working pattern'),
+              f('JobGrade',RO,'Job grade'),
+              f('JobGradeDescription',RO,'Job grade description'),
+              f('SectionID',RO,'Section identifier'),
+              f('SectionDescription',RO,'Section description'),
+              f('UD_Group01–UD_Group10',RO,'User-defined grouping fields 01 to 10'),
+              f('IR35',RO,'Whether within IR35'),
+              f('ReportsTo',RO,'Manager name — max 99 characters'),
+              f('ReportsToEmployeeNumber',RO,'Manager employee number'),
+              f('ReportsToFAID',RO,'Manager Fourth Account ID'),
+              f('ContinuousServiceDate',RO,'Continuous service start date'),
+              f('Contract',RO,'Contract type or name'),
+              f('TUPE',RO,'Whether subject to Transfer of Undertakings'),
             ]
           },
           {
@@ -898,6 +928,54 @@ const APIS = [
               f('EmailWork / EmailHome',RO,'Contact email addresses'),
             ]
           },
+          {
+            method:'GET',name:'Get employee birthdays',
+            desc:'Employee birthday dates',
+            path:'GET /organisations/{id}/Employees/Birthdays',
+            fields:[]
+          },
+          {
+            method:'GET',name:'Get country specific data',
+            desc:'Country-specific property values per employee',
+            path:'GET /organisations/{id}/Employees/CountrySpecific',
+            fields:[]
+          },
+          {
+            method:'GET',name:'Get dependents',
+            desc:'Dependent records linked to employees',
+            path:'GET /organisations/{id}/Employees/Dependents',
+            fields:[]
+          },
+          {
+            method:'GET',name:'Get passports',
+            desc:'Passport details for employees',
+            path:'GET /organisations/{id}/Employees/Passports',
+            fields:[]
+          },
+          {
+            method:'GET',name:'Get payment details',
+            desc:'Bank account and payment method details per employee',
+            path:'GET /organisations/{id}/Employees/PaymentDetails',
+            fields:[]
+          },
+          {
+            method:'GET',name:'Get Trust ID details',
+            desc:'Trust ID right to work check results per employee',
+            path:'GET /organisations/{id}/Employees/TrustID',
+            fields:[]
+          },
+          {
+            method:'GET',name:'Get ECR data',
+            desc:'Employment change request records and approval workflow state',
+            path:'GET /organisations/{id}/Employees/Ecr',
+            fields:[]
+          },
+          {
+            method:'GET',name:'Get documents',
+            desc:'Employee document records',
+            path:'GET /organisations/{id}/Documents',
+            fields:[]
+          },
         ]
       },
       {
@@ -950,6 +1028,10 @@ const APIS = [
               f('ElementName / ElementCode',RO,'Name and code of each pay element'),
               f('Units / Rate / Value',RO,'Quantity, rate, and amount for each element'),
               f('JobDescription / SiteDescription / Department',RO,'Where the pay is attributed'),
+              f('SocialSecurityCategory',RO,'Social security category'),
+              f('SocialSecurityRate',RO,'Social security rate'),
+              f('JobGrade',RO,'Job grade'),
+              f('JobGradeDescription',RO,'Job grade description'),
             ]
           },
           {
@@ -962,6 +1044,19 @@ const APIS = [
               f('PeriodTaxYear',RO,'Which tax year'),
               f('PayDate',RO,'When employees are paid'),
               f('PeriodStartDate / PeriodEndDate',RO,'The dates this period covers'),
+              f('PaperworkSubmissionDueTime',RO,'Time paperwork submission is due'),
+              f('RotaSubmissionDueTime',RO,'Time rota submission is due'),
+              f('PreviewReadyTime',RO,'Time preview will be ready'),
+              f('NetFigureDueTime',RO,'Time net figures are due'),
+              f('PayrollApprovalTime',RO,'Time payroll approval is due'),
+              f('BACSOverrideDate',RO,'BACS override date if applicable'),
+              f('BACSPaymentOverrideDate',RO,'BACS payment override date if applicable'),
+              f('TRONCStartDate',RO,'TRONC scheme start date'),
+              f('TRONCEndDate',RO,'TRONC scheme end date'),
+              f('TaxPeriod',RO,'Tax period number'),
+              f('PayrunFrequency',RO,'How frequently payroll runs'),
+              f('DateCreated',RO,'When this diary entry was created'),
+              f('LastModified',RO,'When this entry was last modified'),
             ]
           },
           {
@@ -1002,6 +1097,20 @@ const APIS = [
               f('IsFlexible',RO,'Whether this is a flexible entitlement — yes or no'),
               f('AvgSummary',RO,'Average hours per day — used in calculations'),
               f('DayRate',RO,'The daily rate for this accrual'),
+            ]
+          },
+          {
+            method:'GET',name:'Get employer payments',
+            desc:'Payment types and pay basis definitions configured for the organisation',
+            path:'GET /organisations/{id}/EmployerPayments',
+            fields:[]
+          },
+          {
+            method:'GET',name:'Get forecast labour cost',
+            desc:'Forecasted labour cost by location and date',
+            path:'GET /organisations/{id}/LabourCost/Forecast',
+            fields:[
+              f('locationid',R,'Location ID'),
             ]
           },
         ]
@@ -1094,6 +1203,34 @@ const APIS = [
               f('SubmissionID',RO,'The submission reference'),
               f('Result',RO,'The outcome of the import'),
             ]
+          },
+        ]
+      },
+      {
+        name:'Pay rates',
+        endpoints:[
+          {
+            method:'GET',name:'Get pay rate brackets',
+            desc:'Pay rate brackets defined by job title and age',
+            path:'GET /organisations/{id}/Employees/PayRateBracket',
+            fields:[]
+          },
+          {
+            method:'GET',name:'Get next pay rate bracket',
+            desc:'Employees approaching a pay rate bracket change',
+            path:'GET /organisations/{id}/Employees/NextPayRateBracket',
+            fields:[]
+          },
+        ]
+      },
+      {
+        name:'Exports',
+        endpoints:[
+          {
+            method:'GET',name:'Get pay parts export',
+            desc:'Pay parts broken down by nominal code for export to accounting systems',
+            path:'GET /organisations/{id}/Exports/PayPartsExport',
+            fields:[]
           },
         ]
       },
@@ -4391,6 +4528,24 @@ const RESPONSE_FIELDS = {
   'peoplesystem|All settings for a location':{note:'Returns configured iQ settings.',fields:[rf('SettingId','Text','Setting identifier'),rf('SettingName','Text','Setting name'),rf('IsEnabled','True/False','Whether enabled'),rf('Locations','List','Locations this setting applies to')]},
   'peoplesystem|Single setting for single location':{note:'Returns configured iQ settings.',fields:[rf('SettingId','Text','Setting identifier'),rf('SettingName','Text','Setting name'),rf('IsEnabled','True/False','Whether enabled'),rf('Locations','List','Locations this setting applies to')]},
   'peoplesystem|Look up group ID':{fields:[rf('GroupID','Integer','The GroupID for the provided canonical ID')]},
+  'peoplesystem|Approved hours':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('ElementName','Text','Pay element name'),rf('ElementLocalRef','Text','Element local reference'),rf('StartDateTime','Date','Start date and time'),rf('EndDateTime','Date','End date and time'),rf('Units','Number','Number of units'),rf('UnitType','Text','Type of unit e.g. hours'),rf('Rate','Number','Rate of pay'),rf('Value','Number','Total value'),rf('ActHours','Number','Actual hours worked'),rf('Reference','Text','Reference code'),rf('Department','Text','Department name'),rf('DepartmentDescription','Text','Department description'),rf('JobCode','Text','Job code'),rf('JobDescription','Text','Job description'),rf('SiteCode','Text','Site code'),rf('SiteDescription','Text','Site description'),rf('SubmittedToPayroll','Text','Whether submitted to payroll')]},
+  'peoplesystem|Get employee birthdays':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('EmployeeCanonicalID','Text','Employee canonical identifier'),rf('EmployeeName','Text','Employee full name'),rf('EmployeeNumber','Text','Employee reference number'),rf('Location','Text','Work location'),rf('JobTitle','Text','Job title'),rf('BirthDate','Text','Date of birth'),rf('LocationCanonicalId','Text','Location canonical identifier')]},
+  'peoplesystem|Get country specific data':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('Country','Text','Country code'),rf('Property','Text','Country-specific property name'),rf('Value','Text','Property value')]},
+  'peoplesystem|Get dependents':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('DependentReference','Text','Dependent reference'),rf('Name','Text','Dependent name'),rf('DependentType','Text','Type of dependent'),rf('DateOfBirth','Date','Dependent date of birth'),rf('DependentID','Text','Dependent identifier'),rf('Nationality','Text','Nationality'),rf('PassportNumber','Text','Passport number'),rf('DependentPercent','Number','Dependent percentage'),rf('Gender','Text','Gender'),rf('Occupation','Text','Occupation'),rf('Income','Number','Income'),rf('Address','Text','Address'),rf('Telephone','Text','Telephone number')]},
+  'peoplesystem|Get documents':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('Reference','Text','Document reference'),rf('Type','Text','Document type'),rf('Number','Text','Document number'),rf('Country','Text','Issuing country'),rf('IssueDate','Date','Date issued'),rf('ArrivalDate','Date','Arrival date if applicable'),rf('ExpiryDate','Date','Expiry date'),rf('HolidayStart','Date','Holiday start date if applicable'),rf('HolidayEnd','Date','Holiday end date if applicable'),rf('IsRequired','True/False','Whether this document is required'),rf('Processed','Text','Whether processed')]},
+  'peoplesystem|Get ECR data':{note:'Returns a list.',fields:[rf('ApproverClientId','Integer','Approver client ID'),rf('UserCanonicalId','Text','Approver canonical ID'),rf('FirstNames','Text','Approver first name'),rf('Surname','Text','Approver surname'),rf('EcrId','Integer','ECR record ID'),rf('StageLevel','Integer','Approval stage level'),rf('StageName','Text','Approval stage name'),rf('IsFinalised','True/False','Whether finalised'),rf('IsFinalStage','True/False','Whether this is the final approval stage'),rf('JobTitleId','Integer','Job title ID'),rf('JobTitleName','Text','Job title name'),rf('ReportDate','Date','Report date')]},
+  'peoplesystem|Fixed term contracts':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('EmployeeCanonicalID','Text','Employee canonical identifier'),rf('EmployeeName','Text','Employee full name'),rf('EmployeeNumber','Text','Employee reference number'),rf('Location','Text','Work location'),rf('JobTitle','Text','Job title'),rf('FixedTermContractEnd','Date','Fixed term contract end date'),rf('LocationCanonicalId','Text','Location canonical identifier')]},
+  'peoplesystem|Get next pay rate bracket':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('EmployeeCanonicalID','Text','Employee canonical identifier'),rf('EmployeeName','Text','Employee full name'),rf('EmployeeNumber','Text','Employee reference number'),rf('Location','Text','Work location'),rf('JobTitle','Text','Job title'),rf('Age','Integer','Employee age'),rf('CurrentPayRate','Text','Current pay rate'),rf('NewPayRate','Text','Upcoming pay rate'),rf('PayIncrease','Text','Pay increase amount'),rf('EffectiveDate','Text','Date the new rate takes effect'),rf('LocationCanonicalId','Text','Location canonical identifier')]},
+  'peoplesystem|Get pay rate brackets':{note:'Returns a list.',fields:[rf('JobTitle','Text','Job title'),rf('Age','Integer','Age bracket'),rf('HourlyMinimum','Text','Minimum hourly rate'),rf('HourlyMaximum','Text','Maximum hourly rate'),rf('ShiftMinimum','Text','Minimum shift rate'),rf('ShiftMaximum','Text','Maximum shift rate'),rf('SalaryMinimum','Text','Minimum salary'),rf('SalaryMaximum','Text','Maximum salary'),rf('IsApprenticeRate','Text','Whether this is an apprentice rate'),rf('RateSource','Text','Source of the rate e.g. NMW'),rf('CountryName','Text','Country this rate applies to')]},
+  'peoplesystem|Probation periods':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('EmployeeCanonicalID','Text','Employee canonical identifier'),rf('EmployeeName','Text','Employee full name'),rf('EmployeeNumber','Text','Employee reference number'),rf('Location','Text','Work location'),rf('JobTitle','Text','Job title'),rf('ProbationEndDate','Date','Probation period end date'),rf('LocationCanonicalId','Text','Location canonical identifier')]},
+  'peoplesystem|Right to work':{note:'Returns a list.',fields:[rf('EmployeeNumber','Text','Employee reference number'),rf('EmployeeID','Integer','Employee ID'),rf('EmployeeCanonicalID','Text','Employee canonical identifier'),rf('EmployeeName','Text','Employee full name'),rf('PreferredName','Text','Preferred name'),rf('Location','Text','Work location'),rf('LocationCanonicalID','Text','Location canonical identifier'),rf('JobTitle','Text','Job title'),rf('StartDate','Date','Employment start date'),rf('RTWExpiryDate','Date','Right to work document expiry date')]},
+  'peoplesystem|Get Trust ID details':{note:'Returns a list.',fields:[rf('EmployeeNumber','Text','Employee reference number'),rf('EmployeeID','Integer','Employee ID'),rf('EmployeeCanonicalID','Text','Employee canonical identifier'),rf('EmployeeName','Text','Employee full name'),rf('PreferredName','Text','Preferred name'),rf('Location','Text','Work location'),rf('LocationCanonicalID','Text','Location canonical identifier'),rf('JobTitle','Text','Job title'),rf('StartDate','Date','Employment start date'),rf('RTWExpiryDate','Date','Right to work expiry date'),rf('RTWFollowupDate','Date','Right to work follow-up date'),rf('RTWCheckDate','Date','Date right to work was checked'),rf('RTWResponse','Text','Response from right to work check')]},
+  'peoplesystem|Work anniversaries':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('EmployeeCanonicalID','Text','Employee canonical identifier'),rf('EmployeeName','Text','Employee full name'),rf('EmployeeNumber','Text','Employee reference number'),rf('Location','Text','Work location'),rf('JobTitle','Text','Job title'),rf('StartDate','Date','Employment start date'),rf('NumberOfYearsEmployed','Integer','Years employed'),rf('LocationCanonicalId','Text','Location canonical identifier'),rf('CompanyName','Text','Company name')]},
+  'peoplesystem|Get employer payments':{note:'Returns a list.',fields:[rf('EmployerPayTypeID','Integer','Employer payment type ID'),rf('PayTypeDescription','Text','Description of the payment type'),rf('PayBases','List','List of pay bases this payment type applies to — each with EmployerPayBasisID and PayBasisDescription')]},
+  'peoplesystem|Get forecast labour cost':{note:'Returns a list.',fields:[rf('locationid','Integer','Location ID'),rf('shiftdate','Date','The date'),rf('forecastlabourcost','Number','Forecast labour cost for this date and location')]},
+  'peoplesystem|Get passports':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('PassportText','Text','Passport description text'),rf('PassportReference','Text','Passport reference'),rf('PassportNumber','Text','Passport number'),rf('IssuingCountry','Text','Country that issued the passport'),rf('IssueDate','Date','Date issued'),rf('ExpiryDate','Date','Expiry date')]},
+  'peoplesystem|Get payment details':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('PayMethod','Text','Payment method e.g. BACS'),rf('AccountDetails','Text','Account details summary'),rf('AccountName','Text','Account name'),rf('AccountNumber','Text','Account number'),rf('IBAN','Text','International bank account number'),rf('BranchCode','Text','Branch sort code'),rf('BICSwift','Text','BIC or SWIFT code'),rf('BranchName','Text','Bank branch name'),rf('Bank','Text','Bank name'),rf('AccountType','Text','Type of account'),rf('AccountCurrency','Text','Account currency'),rf('PaymentReference','Text','Payment reference'),rf('SplitPayment','Text','Whether pay is split'),rf('SplitType','Text','Type of split'),rf('SplitValue','Text','Split value'),rf('SplitOrder','Text','Order of split payments'),rf('BSocRollNumber','Text','Building society roll number')]},
+  'peoplesystem|Get pay parts export':{note:'Returns a list.',fields:[rf('NominalCode','Text','Nominal ledger code'),rf('Amount','Number','Amount'),rf('Description','Text','Description of the pay part'),rf('LocationCode','Text','Location code'),rf('DivisionCode','Text','Division code'),rf('JobCode','Text','Job code'),rf('EmployeeNo','Text','Employee number')]},
 
   // ── PeopleSystem Gateway ──
   'peoplesystem-gateway|Validate token':{note:'Returns the validated token value from cache if valid. HTTP 401 if invalid.',fields:[rf('Result','Text','The validated token value from cache')]},
