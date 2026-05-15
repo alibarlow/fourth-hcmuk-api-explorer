@@ -2016,6 +2016,11 @@ const APIS = [
     icon:'💡',
     subtitle:'The intelligent layer - proactive alerts insights and actions for managers',
     exposeNote:'Internal - event-driven via Azure Service Bus. Not externally accessible.',
+    lastUpdated:'May 2026',
+    infoSections:[
+      {id:'iqsettings-note',name:'iQSettings - not exposed as an HTTP endpoint',type:'text',
+       content:'iQ HCM UK does not expose an iQSettings HTTP endpoint. The GetIsIQEnabled and GetIQSettings queries make outbound calls to the Integration API at /Organisations/{GroupId}/IQSettings/IsiQEnabled/{CustomerCanonicalID} and /Organisations/{GroupId}/IQSettings/{CustomerCanonicalID} respectively.'},
+    ],
     groups:[
       {
         name:'Alerts - automatic',
@@ -2303,21 +2308,6 @@ const APIS = [
               f('EmployeeId',S,'The new employees ID'),
               f('OrgAlias',S,'Which organisation'),
               f('CompletedAt',S,'When onboarding was completed'),
-            ]
-          },
-        ]
-      },
-      {
-        name:'Configuration',
-        endpoints:[
-          {
-            method:'GET',name:'Check iQ enabled for group',
-            desc:'Internal check whether iQ is enabled for a given group ID',
-            path:'GET /API/iQSettings/IsiQEnabled/{GroupID}',
-            fields:[
-              f('GroupID',R,'The group identifier to check'),
-              f('Authorization',R,'Authentication key passed in the Authorization header'),
-              f('IsEnabled',RO,'Whether iQ is enabled for this group'),
             ]
           },
         ]
@@ -2769,6 +2759,21 @@ const APIS = [
             fields:[
               f('groupidOrCanonical',R,'The group ID or canonical ID'),
               f('Enable',R,'True to turn iQ on false to turn it off'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Dataload',
+        endpoints:[
+          {
+            method:'POST',name:'Upload absence in hours update',
+            desc:'Upload an AbsenceInHoursUpdateImport dataload file to update absence-in-hours records. Added in April 2026 (US217536).',
+            path:'POST /api/dataload/startdataload/{groupId}',
+            fields:[
+              f('groupId',R,'The group identifier - in the URL path'),
+              f('fileType',R,'The dataload file type - use AbsenceInHoursUpdateImport for this dataload'),
+              f('file',R,'The dataload file to upload'),
             ]
           },
         ]
@@ -5048,7 +5053,7 @@ function renderApi(api,autoOpen){
           <div class="api-title-row">
             <span class="api-title">${esc(api.title)}</span>
             ${expBadge(api.exposure)}
-            <span class="badge-updated">Last updated: April 2026</span>
+            <span class="badge-updated">Last updated: ${esc(api.lastUpdated||'April 2026')}</span>
             ${auth?`<span class="badge-auth">Auth: ${esc(auth)}</span>`:''}
           </div>
           <div class="api-subtitle">${esc(api.subtitle)}</div>
