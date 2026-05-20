@@ -797,6 +797,20 @@ const APIS = [
               f('SettledStatus / PreSettledStatus',O,'UK immigration status — yes or no'),
               f('WorkPermit fields',O,'Work permit type, number, and expiry'),
               f('PassportNumber / PassportExpiryDate',O,'Passport details for right to work'),
+              section('SensitiveInfo fields (nested object)'),
+              note('Sent as a nested SensitiveInfo object within the Import.Employee payload, not as a separate endpoint. The same nested object applies to both POST and PUT.'),
+              sf('EthnicOrigin',O,'Employee ethnic origin'),
+              sf('IsDisabled',O,'Whether the employee considers themselves disabled: Yes or No'),
+              sf('DisabledNotes',O,'Free text notes about disability or adjustments needed'),
+              sf('Religion',O,'Religion or belief'),
+              sf('HasDependants',O,'Whether the employee has dependants: Yes or No'),
+              sf('DependentChildren',O,'Number of dependent children'),
+              sf('DependentDisabled',O,'Number of disabled dependants'),
+              sf('DependentElderly',O,'Number of elderly dependants'),
+              sf('Languages',O,'Preferred language'),
+              sf('SexualOrientation',O,'Sexual orientation'),
+              sf('Disability',O,'Disability types'),
+              sf('GenderIdentity',O,'Gender identity'),
             ]
           },
           {
@@ -983,7 +997,7 @@ const APIS = [
         endpoints:[
           {
             method:'GET',name:'Payments',
-            desc:'Get payment records — can also create, delete and cancel',
+            desc:'Get payment records — can also create, delete and cancel (hidden from Swagger)',
             path:'GET /organisations/{id}/Employees/Payments',
             fields:[
               f('EmployerPaymentTypeID',R,'The type of payment — required when creating'),
@@ -996,7 +1010,7 @@ const APIS = [
           },
           {
             method:'POST',name:'Submit payment batch',
-            desc:'Send multiple payment records at once',
+            desc:'Send multiple payment records at once (body manually deserialized — not visible in Swagger)',
             path:'POST /organisations/{id}/Employees/Payments/batch',
             fields:[
               f('EmployerPaymentTypeID',R,'The type of payment'),
@@ -1120,7 +1134,7 @@ const APIS = [
         endpoints:[
           {
             method:'GET',name:'Companies',
-            desc:'Company and employer pay basis data',
+            desc:'Company and employer pay basis data (hidden from Swagger)',
             path:'GET /organisations/{id}/Company',
             fields:[
               f('CompanyName',RO,'The company name'),
@@ -1254,57 +1268,12 @@ const APIS = [
         name:'iQ Settings',
         endpoints:[
           {
-            method:'GET',name:'List iQ settings for organisation',
-            desc:'See all iQ actions and alerts configured for an organisation',
-            path:'GET /Organisations/{GroupID}/IQSettings/{CustomerCanonicalID}',
+            method:'GET',name:'iQ settings (wildcard proxy)',
+            desc:'Wildcard proxy to Salesforce. The five documented sub-paths (IsiQEnabled, LocationsForSetting, SettingsForLocation, SingleSettingForSingleLocation, and the root listing) describe the Salesforce backend paths being forwarded to — they are not separate controller actions. Parameters are passed through without validation.',
+            path:'GET /organisations/{organisationId}/IQSettings/{*iqPatch}',
             fields:[
-              f('GroupID',R,'The group identifier'),
-              f('CustomerCanonicalID',R,'The customer canonical ID'),
-              f('Settings',RO,'All iQ actions and alerts configured for this organisation'),
-            ]
-          },
-          {
-            method:'GET',name:'Is iQ enabled?',
-            desc:'Check whether iQ is switched on for an organisation',
-            path:'GET /Organisations/{GroupID}/IQSettings/IsiQEnabled/{CustomerCanonicalID}',
-            fields:[
-              f('GroupID',R,'The group identifier'),
-              f('CustomerCanonicalID',R,'The customer canonical ID'),
-              f('IsEnabled',RO,'Whether iQ is currently enabled for this organisation'),
-            ]
-          },
-          {
-            method:'GET',name:'Locations for a setting',
-            desc:'See which locations have a specific iQ setting configured',
-            path:'GET /Organisations/{GroupID}/IQSettings/LocationsForSetting/{CustomerCanonicalID}/{iQID}',
-            fields:[
-              f('GroupID',R,'The group identifier'),
-              f('CustomerCanonicalID',R,'The customer canonical ID'),
-              f('iQID',R,'The specific iQ setting to check'),
-              f('Locations',RO,'List of locations that have this setting configured'),
-            ]
-          },
-          {
-            method:'GET',name:'All settings for a location',
-            desc:'See all iQ settings configured for a specific location',
-            path:'GET /Organisations/{GroupID}/IQSettings/SettingsForLocation/{CustomerCanonicalID}/{LocationCanonicalID}',
-            fields:[
-              f('GroupID',R,'The group identifier'),
-              f('CustomerCanonicalID',R,'The customer canonical ID'),
-              f('LocationCanonicalID',R,'The location to check'),
-              f('Settings',RO,'All iQ settings configured for this location'),
-            ]
-          },
-          {
-            method:'GET',name:'Single setting for single location',
-            desc:'Check a specific iQ setting for a specific location',
-            path:'GET /Organisations/{GroupID}/IQSettings/SingleSettingForSingleLocation/{CustomerCanonicalID}/{LocationCanonicalID}/{iQID}',
-            fields:[
-              f('GroupID',R,'The group identifier'),
-              f('CustomerCanonicalID',R,'The customer canonical ID'),
-              f('LocationCanonicalID',R,'The location to check'),
-              f('iQID',R,'The specific setting to check'),
-              f('Result',RO,'The configured value for this setting at this location'),
+              f('organisationId',R,'The group identifier'),
+              f('iqPatch',R,'Wildcard sub-path forwarded to Salesforce — e.g. {CustomerCanonicalID}, IsiQEnabled/{CustomerCanonicalID}, LocationsForSetting/{CustomerCanonicalID}/{iQID}, SettingsForLocation/{CustomerCanonicalID}/{LocationCanonicalID}, SingleSettingForSingleLocation/{CustomerCanonicalID}/{LocationCanonicalID}/{iQID}'),
             ]
           },
           {
