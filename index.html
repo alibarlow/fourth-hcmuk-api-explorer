@@ -775,11 +775,10 @@ const APIS = [
             ]
           },
           {
-            method:'POST',name:'Create or update employees',
-            desc:'Add new employees or update existing records in bulk',
+            method:'POST',name:'Create employee',
+            desc:'Add a new employee record',
             path:'POST /organisations/{id}/Employees',
             fields:[
-              f('ActionType',O,'What to do: CREATE, UPDATE, or DELETE'),
               f('EmployeeNumber',O,'Unique reference number — max 49 characters'),
               f('Title / FirstName / MiddleName / Surname',O,'Full name'),
               f('PreferredName',O,'Preferred name'),
@@ -798,7 +797,7 @@ const APIS = [
               f('WorkPermit fields',O,'Work permit type, number, and expiry'),
               f('PassportNumber / PassportExpiryDate',O,'Passport details for right to work'),
               section('SensitiveInfo fields (nested object)'),
-              note('Sent as a nested SensitiveInfo object within the Import.Employee payload, not as a separate endpoint. The same nested object applies to both POST and PUT.'),
+              note('Sent as a nested SensitiveInfo object within the Import.Employee payload. The same nested object applies to both POST and PUT.'),
               sf('EthnicOrigin',O,'Employee ethnic origin'),
               sf('IsDisabled',O,'Whether the employee considers themselves disabled: Yes or No'),
               sf('DisabledNotes',O,'Free text notes about disability or adjustments needed'),
@@ -814,19 +813,96 @@ const APIS = [
             ]
           },
           {
-            method:'GET',name:'Absences',
-            desc:'Get, create, update and delete absence records',
+            method:'PUT',name:'Update employee',
+            desc:'Update an existing employee record',
+            path:'PUT /organisations/{id}/Employees',
+            fields:[
+              f('EmployeeNumber',R,'Identifies which employee to update'),
+              f('Title / FirstName / MiddleName / Surname',O,'Full name'),
+              f('PreferredName',O,'Preferred name'),
+              f('DateOfBirth / Gender / MaritalStatus',O,'Personal details'),
+              f('Address fields',O,'Home address'),
+              f('HomeTel / MobileTel / Email',O,'Contact details'),
+              f('NIN',O,'National Insurance number'),
+              f('Location / Division / JobTitle',O,'Where they work and what they do'),
+              f('StartDate / TerminationDate',O,'Employment start and end dates'),
+              f('PayType / RateOfPay / AnnualSalary',O,'Pay details'),
+              f('ContractHours / Contract',O,'Contract details'),
+              f('BankName / SortCode / BankAccountNumber',O,'Payment bank account'),
+              f('NOK1 and NOK2 fields',O,'Up to two emergency contacts'),
+              f('HolidaysIn',O,'Whether holidays are included in pay calculations'),
+              f('SettledStatus / PreSettledStatus',O,'UK immigration status — yes or no'),
+              f('WorkPermit fields',O,'Work permit type, number, and expiry'),
+              f('PassportNumber / PassportExpiryDate',O,'Passport details for right to work'),
+              section('SensitiveInfo fields (nested object)'),
+              note('Sent as a nested SensitiveInfo object within the Import.Employee payload. The same nested object applies to both POST and PUT.'),
+              sf('EthnicOrigin',O,'Employee ethnic origin'),
+              sf('IsDisabled',O,'Whether the employee considers themselves disabled: Yes or No'),
+              sf('DisabledNotes',O,'Free text notes about disability or adjustments needed'),
+              sf('Religion',O,'Religion or belief'),
+              sf('HasDependants',O,'Whether the employee has dependants: Yes or No'),
+              sf('DependentChildren',O,'Number of dependent children'),
+              sf('DependentDisabled',O,'Number of disabled dependants'),
+              sf('DependentElderly',O,'Number of elderly dependants'),
+              sf('Languages',O,'Preferred language'),
+              sf('SexualOrientation',O,'Sexual orientation'),
+              sf('Disability',O,'Disability types'),
+              sf('GenderIdentity',O,'Gender identity'),
+            ]
+          },
+          {
+            method:'GET',name:'Get absences',
+            desc:'Retrieve absence records created via the API — absences entered directly in PeopleSystem are not returned',
             path:'GET /organisations/{id}/Employees/Absences',
+            fields:[]
+          },
+          {
+            method:'POST',name:'Create absence',
+            desc:'Submit a new absence record',
+            path:'POST /organisations/{id}/Employees/Absences',
             fields:[
               f('EmployeeNumber',R,'Which employee'),
-              f('StartDate / EndDate',R,'When the absence started and ended'),
+              f('StartDate',R,'When the absence started — datetime format'),
+              f('EndDate',R,'When the absence ended — datetime format'),
               f('Days',R,'Number of days — can be decimal for partial days'),
-              f('Type',O,'Whether measured in days, shifts, or hours'),
-              f('Reason',O,'Reason for absence'),
-              f('Paid',O,'Whether paid or unpaid — yes or no'),
-              f('Status',RO,'Current state: Added, Deleted, or Validation Error'),
-              f('MaternityDueDate / MaternityDeliveryDate',O,'For maternity absences'),
-              f('AbsenceInHoursDetails',O,'For hour-based absences — individual days with hours absent'),
+              f('Description',O,'Description or notes for this absence'),
+              f('DocumentsSeen',O,'Whether supporting documents have been seen'),
+              f('DoctorsNote',O,'Whether a doctors note was provided'),
+              f('DoctorsNoteStartDate / DoctorsNoteEndDate',O,'Date range covered by the doctors note'),
+              f('SubmissionID',O,'GUID for submission tracking'),
+              section('QualifyingDays (object)'),
+              note('Day-of-week keys — used for SSP qualifying day calculations'),
+              sf('Monday / Tuesday / Wednesday / Thursday / Friday / Saturday / Sunday',O,'Whether the employee works this day'),
+            ]
+          },
+          {
+            method:'PUT',name:'Update absence',
+            desc:'Update an existing absence record',
+            path:'PUT /organisations/{id}/Employees/Absences',
+            fields:[
+              f('EmployeeNumber',R,'Which employee'),
+              f('AbsenceID',R,'ID of the absence to update'),
+              f('StartDate',R,'When the absence started — datetime format'),
+              f('EndDate',R,'When the absence ended — datetime format'),
+              f('Days',R,'Number of days — can be decimal for partial days'),
+              f('Description',O,'Description or notes for this absence'),
+              f('DocumentsSeen',O,'Whether supporting documents have been seen'),
+              f('DoctorsNote',O,'Whether a doctors note was provided'),
+              f('DoctorsNoteStartDate / DoctorsNoteEndDate',O,'Date range covered by the doctors note'),
+              f('SubmissionID',O,'GUID for submission tracking'),
+              section('QualifyingDays (object)'),
+              note('Day-of-week keys — used for SSP qualifying day calculations'),
+              sf('Monday / Tuesday / Wednesday / Thursday / Friday / Saturday / Sunday',O,'Whether the employee works this day'),
+            ]
+          },
+          {
+            method:'DELETE',name:'Delete absence',
+            desc:'Remove an absence record',
+            path:'DELETE /organisations/{id}/Employees/Absences',
+            fields:[
+              f('EmployeeNumber',R,'Which employee'),
+              f('AbsenceID',R,'ID of the absence to delete'),
+              f('SubmissionID',O,'GUID for submission tracking'),
             ]
           },
           {
@@ -973,6 +1049,25 @@ const APIS = [
             fields:[]
           },
           {
+            method:'POST',name:'Import payment details',
+            desc:'Submit bank account and payment details for one or more employees',
+            path:'POST /organisations/{id}/Employees/PaymentDetails',
+            fields:[
+              f('EmployeeNumber',R,'Which employee'),
+              f('PayMethod',O,'Payment method e.g. BACS'),
+              f('AccountName',O,'Account holder name'),
+              f('AccountNumber',O,'Account number'),
+              f('BranchCode',O,'Sort code'),
+              f('Bank',O,'Bank name'),
+              f('BICSwift',O,'BIC or SWIFT code'),
+              f('IBAN',O,'International bank account number'),
+              f('SplitPayment',O,'Whether pay should be split across accounts'),
+              f('SplitType',O,'Type of split — percentage or fixed amount'),
+              f('SplitValue',O,'Split amount or percentage'),
+              f('SplitOrder',O,'Order of priority for split payments'),
+            ]
+          },
+          {
             method:'GET',name:'Get Trust ID details',
             desc:'Trust ID right to work check results per employee',
             path:'GET /organisations/{id}/Employees/TrustID',
@@ -987,8 +1082,39 @@ const APIS = [
           {
             method:'GET',name:'Get documents',
             desc:'Employee document records',
-            path:'GET /organisations/{id}/Documents',
+            path:'GET /organisations/{id}/Employees/Documents',
             fields:[]
+          },
+          {
+            method:'GET',name:'Get employee sources',
+            desc:'Recruitment source values configured for the organisation — customer-defined, not per-employee',
+            path:'GET /organisations/{id}/EmployeeSource',
+            fields:[]
+          },
+          {
+            method:'GET',name:'Get multiple employments',
+            desc:'Retrieve multiple employment records for an employee — beta endpoint',
+            path:'GET /organisations/{id}/Employees/MultipleEmployments',
+            fields:[
+              f('employeenumber',R,'The employee to retrieve records for'),
+            ]
+          },
+          {
+            method:'POST',name:'Create multiple employment',
+            desc:'Add an additional employment record for an employee — beta endpoint',
+            path:'POST /organisations/{id}/Employees/MultipleEmployments',
+            fields:[
+              f('EmployeeNumber',R,'Which employee'),
+              f('ME_ID',O,'Multiple employment identifier'),
+              f('Location',O,'Work location'),
+              f('Division',O,'Division'),
+              f('Jobtitle',O,'Job title'),
+              f('StartDate',O,'Start date for this employment'),
+              f('EndDate',O,'End date for this employment'),
+              f('PayType',O,'How this employment is paid'),
+              f('PayAmount',O,'Pay amount'),
+              f('PaidByRota',O,'Whether pay is driven by rota — yes or no'),
+            ]
           },
         ]
       },
@@ -1022,8 +1148,8 @@ const APIS = [
             ]
           },
           {
-            method:'POST',name:'Book or cancel holiday',
-            desc:'Submit or remove holiday requests',
+            method:'POST',name:'Create holidays',
+            desc:'Submit holiday requests',
             path:'POST /organisations/{id}/Holidays',
             fields:[
               f('EmployeeNumber',R,'Which employee'),
@@ -1034,9 +1160,18 @@ const APIS = [
             ]
           },
           {
+            method:'DELETE',name:'Delete holidays',
+            desc:'Cancel a holiday request',
+            path:'DELETE /organisations/{id}/Holidays',
+            fields:[
+              f('EmployeeNumber',R,'Which employee'),
+              f('RequestDate',R,'The holiday date to cancel — datetime format'),
+            ]
+          },
+          {
             method:'GET',name:'Payslips',
             desc:'Employee payslips',
-            path:'GET /organisations/{id}/Payslips',
+            path:'GET /organisations/{id}/Employees/Payslips',
             fields:[
               f('PayslipDate / PaymentDate',RO,'When the payslip was generated and when payment was made'),
               f('ElementName / ElementCode',RO,'Name and code of each pay element'),
@@ -1083,6 +1218,12 @@ const APIS = [
               f('Units / Rate / Value',RO,'Quantity, rate, and amount'),
               f('Reference',RO,'Reference number for this deduction'),
             ]
+          },
+          {
+            method:'GET',name:'Get pay parts',
+            desc:'Shift-level pay detail for the current pay period — individual pay elements per shift',
+            path:'GET /organisations/{id}/Employees/PayParts',
+            fields:[]
           },
           {
             method:'GET',name:'Labour costs',
@@ -1243,8 +1384,33 @@ const APIS = [
           {
             method:'GET',name:'Get pay parts export',
             desc:'Pay parts broken down by nominal code for export to accounting systems',
-            path:'GET /organisations/{id}/Exports/PayPartsExport',
-            fields:[]
+            path:'GET /organisations/{id}/Exports/PayPartsExport/{paybasisID}/{taxyear}/{payperiod}',
+            fields:[
+              f('paybasisID',R,'Pay basis identifier'),
+              f('taxyear',R,'Tax year e.g. 2024'),
+              f('payperiod',R,'Pay period number'),
+            ]
+          },
+          {
+            method:'GET',name:'Get pay parts export by employee',
+            desc:'Pay parts export filtered to a specific employee — beta endpoint',
+            path:'GET /organisations/{id}/Exports/PayPartsExport/{paybasisID}/{taxyear}/{payperiod}/{employeenumber}',
+            fields:[
+              f('paybasisID',R,'Pay basis identifier'),
+              f('taxyear',R,'Tax year e.g. 2024'),
+              f('payperiod',R,'Pay period number'),
+              f('employeenumber',R,'Employee number to filter by'),
+            ]
+          },
+          {
+            method:'GET',name:'Get post pay-run export',
+            desc:'Post pay-run data export for accounting — beta endpoint',
+            path:'GET /organisations/{id}/Exports/PostPayrunExport/{paybasisID}/{taxyear}/{payperiod}',
+            fields:[
+              f('paybasisID',R,'Pay basis identifier'),
+              f('taxyear',R,'Tax year e.g. 2024'),
+              f('payperiod',R,'Pay period number'),
+            ]
           },
         ]
       },
@@ -4480,21 +4646,26 @@ const RESPONSE_FIELDS = {
 
   // ── PeopleSystem Integration ──
   'peoplesystem|Get employees':{note:'Returns a list of employees.',fields:[rf('EmployeeID','Integer','Internal ID'),rf('FAID','Text','Fourth Account ID — 18 character unique identifier'),rf('PayrollNumber','Text','Payroll reference'),rf('CompanyName','Text','Company'),rf('Paybasis','Text','Pay schedule'),rf('FirstName / LastName','Text','Name'),rf('DateOfBirth','Date','Date of birth'),rf('Gender','Text','Gender'),rf('NationalInsuranceNumber','Text','NI number'),rf('IR35','True/False','Whether within IR35'),rf('EthnicOrigin / Religion / SexualOrientation','Text','Diversity data where provided')]},
-  'peoplesystem|Create or update employees':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
-  'peoplesystem|Absences':{note:'GET returns a list. For POST/PUT/DELETE: HTTP 202 Accepted — SubmissionID returned as a tracking reference.',fields:[rf('EmployeeNumber','Text','Employee reference'),rf('StartDate / EndDate','Date','Absence dates'),rf('Days','Number','Number of days'),rf('Type','Text','Days, shifts, or hours'),rf('Reason','Text','Reason'),rf('Paid','Text','Whether paid'),rf('Status','Text','Added, Deleted, or Validation Error')]},
+  'peoplesystem|Create employee':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
+  'peoplesystem|Update employee':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
+  'peoplesystem|Get absences':{note:'Returns a list.',fields:[rf('EmployeeNumber','Text','Employee reference'),rf('AbsenceID','Integer','Unique absence identifier'),rf('StartDate / EndDate','Date','Absence start and end dates'),rf('Days','Number','Number of days — can be decimal'),rf('Type','Text','Days, shifts, or hours'),rf('Reason','Text','Reason for absence'),rf('Paid','Text','Whether paid or unpaid'),rf('Status','Text','Added, Deleted, or Validation Error'),rf('MaternityDueDate / MaternityDeliveryDate','Date','For maternity absences'),rf('AbsenceInHoursDetails','List','For hour-based absences — individual days with hours absent'),rf('Reference','Text','Reference code'),rf('ExpectedReturn','Text','Expected return information'),rf('ExpectedReturnDate','Date','Date employee is expected to return'),rf('Documentation','Text','Documentation status')]},
+  'peoplesystem|Create absence':{note:'HTTP 202 Accepted. The AbsenceID assigned to the new record is not returned directly — retrieve it via GET /Employees/Absences once the submission has processed.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
+  'peoplesystem|Update absence':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
+  'peoplesystem|Delete absence':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
   'peoplesystem|Payments':{note:'GET returns a list. For POST/DELETE: HTTP 202 Accepted, or HTTP 400 with error details if validation fails.',fields:[rf('EmployerPaymentTypeID','Integer','Payment type'),rf('Units','Number','Units'),rf('Amount','Number','Amount'),rf('StartDate / EndDate','Date','Date range')]},
   'peoplesystem|Submit payment batch':{note:'HTTP 202 Accepted, or HTTP 400 with error details if validation fails.',fields:[rf('SubmissionID','GUID','Reference')]},
-  'peoplesystem|Book or cancel holiday':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
-  'peoplesystem|Payslips':{note:'Returns a list.',fields:[rf('PayslipDate / PaymentDate','Date','Payslip and payment dates'),rf('ElementName','Text','Pay element name'),rf('Units / Rate / Value','Number','Quantity, rate, and amount'),rf('Department / JobDescription / SiteDescription','Text','Attribution')]},
+  'peoplesystem|Create holidays':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
+  'peoplesystem|Delete holidays':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
+  'peoplesystem|Payslips':{note:'Returns a list — one row per pay element per payslip.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('PayslipReference','Text','Payslip reference number'),rf('PayslipDate','Date','When the payslip was generated'),rf('PaymentDate','Date','When payment was made'),rf('TaxCategory','Text','Tax category'),rf('TaxRate','Number','Tax rate'),rf('SocialSecurityCategory','Text','Social security category'),rf('SocialSecurityRate','Number','Social security rate'),rf('PayGroup','Text','Pay group'),rf('ElementName','Text','Pay element name'),rf('ElementCode','Text','Pay element code'),rf('ElementCategory','Text','Category of pay element'),rf('Units','Number','Number of units'),rf('UnitType','Text','Type of unit e.g. hours or days'),rf('Rate','Number','Rate of pay'),rf('Value','Number','Total value'),rf('Reference','Text','Reference code'),rf('JobCode','Text','Job code'),rf('JobDescription','Text','Job title'),rf('JobGrade','Text','Job grade'),rf('JobGradeDescription','Text','Job grade description'),rf('SiteCode','Text','Site code'),rf('Department','Text','Department code'),rf('DepartmentDescription','Text','Department name'),rf('CostCentre','Text','Cost centre')]},
   'peoplesystem|Payroll periods':{note:'Returns a list.',fields:[rf('CompanyName','Text','Company'),rf('PeriodName','Text','Period name'),rf('PeriodNumber','Integer','Period number'),rf('PeriodTaxYear','Integer','Tax year'),rf('PayDate','Date','Pay date'),rf('PeriodStartDate / PeriodEndDate','Date','Period dates')]},
   'peoplesystem|Labour costs':{note:'Returns a list.',fields:[rf('ShiftDate','Date','Date'),rf('basicpaytotal','Number','Basic pay cost'),rf('totalpay','Number','Total pay'),rf('holidaypay','Number','Holiday pay cost'),rf('overtime','Number','Overtime'),rf('employersnationalinsurance','Number','Employer NI'),rf('wagecost','Number','Total wage cost'),rf('totalacthrs','Number','Total hours worked')]},
-  'peoplesystem|Accrual data':{note:'Returns a list.',fields:[rf('ElementName','Text','Usually Holiday Balance'),rf('Units','Number','Days or hours accrued'),rf('UnitType','Text','Days or Hours'),rf('IsFlexible','Text','Yes or No'),rf('DayRate','Number','Daily rate')]},
+  'peoplesystem|Accrual data':{note:'Returns a list.',fields:[rf('ElementName','Text','Usually Holiday Balance'),rf('ElementType','Text','Type of accrual element'),rf('Units','Number','Days or hours accrued'),rf('UnitType','Text','Days or Hours'),rf('IsFlexible','Text','Yes or No'),rf('StartDateTime','Date','Start date and time of the accrual period'),rf('DayRate','Number','Daily rate'),rf('AvgTime','Number','Average time per day used in calculations'),rf('AvgDays','Number','Average days used in calculations'),rf('AvgSummary','Text','Summary of average hours per day')]},
   'peoplesystem|Companies':{note:'Returns a list.',fields:[rf('CompanyName','Text','Company name'),rf('Companyid','Integer','Internal ID'),rf('EmployerPayBasisID','Integer','Pay basis ID')]},
   'peoplesystem|Locations':{note:'Returns a list.',fields:[rf('LocationID','Integer','Internal ID'),rf('Description','Text','Location name'),rf('Country','Text','UK, Ireland, or Jersey'),rf('LocationGUID','Text','Globally unique ID')]},
   'peoplesystem|Job titles':{note:'Returns a list.',fields:[rf('JobTitleID','Integer','Internal ID'),rf('JobTitleName','Text','Job title name'),rf('LocationName / DivisionName','Text','Location and division'),rf('PayMethod','Text','How this role is paid')]},
   'peoplesystem|Divisions':{note:'Returns a list.',fields:[rf('DivisionId','Integer','Internal ID'),rf('DivisionName','Text','Division name'),rf('DivisionGUID','Text','Globally unique ID')]},
   'peoplesystem|Rotas':{note:'Returns a list.',fields:[rf('RotaID','Integer','Internal ID'),rf('RotaStartDate / RotaEndDate','Date','Rota dates'),rf('Status','Text','Open, Closed at Location, or Submitted'),rf('LocationName','Text','Location')]},
-  'peoplesystem|Import logs':{note:'Returns a list.',fields:[rf('XmlType','Text','Type of data imported'),rf('Status','Text','Whether succeeded or failed'),rf('DateCreatedUtc','Date','When submitted'),rf('Error','Text','Error message if failed'),rf('Result','Text','Outcome')]},
+  'peoplesystem|Import logs':{note:'Returns a list.',fields:[rf('Id','Integer','Import log record ID'),rf('XmlType','Text','Type of data imported'),rf('ReferenceNumber','Text','Reference for this import'),rf('Status','Text','Whether succeeded or failed'),rf('DateCreatedUtc','Date','When submitted'),rf('Error','Text','Error message if failed'),rf('SubmissionID','Text','The submission reference'),rf('Result','Text','Outcome'),rf('Xml','Text','The raw XML payload that was imported'),rf('ClientID','Text','Client identifier')]},
   'peoplesystem|Validate employee data':{fields:[rf('IsValid','True/False','Whether the record passed validation'),rf('Errors','List','List of field-level validation errors with field names and messages')]},
   'peoplesystem|List iQ settings for organisation':{note:'Returns configured iQ settings.',fields:[rf('SettingId','Text','Setting identifier'),rf('SettingName','Text','Setting name'),rf('IsEnabled','True/False','Whether enabled'),rf('Locations','List','Locations this setting applies to')]},
   'peoplesystem|Is iQ enabled?':{fields:[rf('IsEnabled','True/False','Whether iQ is currently enabled for this organisation')]},
@@ -4520,6 +4691,15 @@ const RESPONSE_FIELDS = {
   'peoplesystem|Get passports':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('PassportText','Text','Passport description text'),rf('PassportReference','Text','Passport reference'),rf('PassportNumber','Text','Passport number'),rf('IssuingCountry','Text','Country that issued the passport'),rf('IssueDate','Date','Date issued'),rf('ExpiryDate','Date','Expiry date')]},
   'peoplesystem|Get payment details':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('PayMethod','Text','Payment method e.g. BACS'),rf('AccountDetails','Text','Account details summary'),rf('AccountName','Text','Account name'),rf('AccountNumber','Text','Account number'),rf('IBAN','Text','International bank account number'),rf('BranchCode','Text','Branch sort code'),rf('BICSwift','Text','BIC or SWIFT code'),rf('BranchName','Text','Bank branch name'),rf('Bank','Text','Bank name'),rf('AccountType','Text','Type of account'),rf('AccountCurrency','Text','Account currency'),rf('PaymentReference','Text','Payment reference'),rf('SplitPayment','Text','Whether pay is split'),rf('SplitType','Text','Type of split'),rf('SplitValue','Text','Split value'),rf('SplitOrder','Text','Order of split payments'),rf('BSocRollNumber','Text','Building society roll number')]},
   'peoplesystem|Get pay parts export':{note:'Returns a list.',fields:[rf('NominalCode','Text','Nominal ledger code'),rf('Amount','Number','Amount'),rf('Description','Text','Description of the pay part'),rf('LocationCode','Text','Location code'),rf('DivisionCode','Text','Division code'),rf('JobCode','Text','Job code'),rf('EmployeeNo','Text','Employee number')]},
+  'peoplesystem|Get pay parts export by employee':{note:'Returns a list filtered to a single employee.',fields:[rf('NominalCode','Text','Nominal ledger code'),rf('Amount','Number','Amount'),rf('Description','Text','Description of the pay part'),rf('LocationCode','Text','Location code'),rf('DivisionCode','Text','Division code'),rf('JobCode','Text','Job code'),rf('EmployeeNo','Text','Employee number')]},
+  'peoplesystem|Get post pay-run export':{note:'Returns a list.',fields:[rf('Employee_ID','Text','Employee identifier'),rf('Element_Name','Text','Pay element name'),rf('Element_Type','Text','Type of element'),rf('Element_Local_Ref','Text','Local element reference'),rf('Element_Ledger_Code','Text','Ledger code for accounting'),rf('Pay_Ded','Text','Whether a payment or deduction'),rf('Unit','Number','Number of units'),rf('Rate','Number','Rate'),rf('Value','Number','Amount'),rf('Currency','Text','Currency code'),rf('Division_Code','Text','Division code'),rf('Division_Description','Text','Division name'),rf('Division_Ledger_Code','Text','Division ledger code'),rf('Department_Code','Text','Department code'),rf('Department_Description','Text','Department name'),rf('Job_Code','Text','Job code')]},
+  'peoplesystem|Get employee sources':{note:'Returns a list of customer-defined recruitment source values.',fields:[rf('SourceDescription','Text','Recruitment source label')]},
+  'peoplesystem|Get multiple employments':{note:'Returns a list.',fields:[rf('EmployeeNumber','Text','Employee reference'),rf('ME_ID','Text','Multiple employment identifier'),rf('Location','Text','Work location'),rf('Division','Text','Division'),rf('Jobtitle','Text','Job title'),rf('StartDate','Date','Start date'),rf('EndDate','Date','End date'),rf('PayType','Text','How this employment is paid'),rf('PayAmount','Number','Pay amount'),rf('PaidByRota','Text','Whether pay is driven by rota')]},
+  'peoplesystem|Create multiple employment':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
+  'peoplesystem|Import payment details':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
+  'peoplesystem|Get pay parts':{note:'Returns a list — one row per pay element per shift.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('ElementName','Text','Pay element name'),rf('ElementLocalRef','Text','Element local reference'),rf('StartDateTime','Date','Shift start date and time'),rf('EndDateTime','Date','Shift end date and time'),rf('Units','Number','Number of units'),rf('UnitType','Text','Type of unit'),rf('Rate','Number','Rate of pay'),rf('Value','Number','Total value'),rf('Reference','Text','Reference code'),rf('Department','Text','Department code'),rf('DepartmentDescription','Text','Department name'),rf('JobCode','Text','Job code'),rf('JobDescription','Text','Job title'),rf('JobGrade','Text','Job grade'),rf('JobGradeDescription','Text','Job grade description'),rf('SiteCode','Text','Site code'),rf('SiteDescription','Text','Site name'),rf('ShiftType','Text','Type of shift'),rf('IsCallIn','True/False','Whether this was a call-in shift')]},
+  'peoplesystem|Addresses':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('Reference','Text','Address reference'),rf('EffectiveDate','Date','When this address became current'),rf('AddressLine1 / AddressLine2 / AddressLine3 / AddressLine4','Text','Street address'),rf('AddressTown','Text','Town or city'),rf('AddressCode','Text','Postcode'),rf('AddressCountry','Text','Country'),rf('AddressMunicipality','Text','Municipality if applicable'),rf('AddressDistrict','Text','District if applicable'),rf('AddressProvince','Text','Province if applicable'),rf('EmailWork / EmailHome','Text','Email addresses'),rf('TelephoneWork / TelephoneHome / TelephoneMobile','Text','Phone numbers')]},
+  'peoplesystem|Next of kin':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('NextOfKinReference','Text','Next of kin record reference'),rf('Name','Text','Contact full name'),rf('Relationship','Text','Relationship to employee'),rf('AddressReference','Text','Address record reference'),rf('AddressEffectiveDate','Date','When the address took effect'),rf('AddressLine1 / AddressLine2 / AddressLine3','Text','Street address'),rf('AddressTown','Text','Town or city'),rf('AddressCode','Text','Postcode'),rf('AddressMunicipality','Text','Municipality if applicable'),rf('AddressDistrict','Text','District if applicable'),rf('AddressProvince','Text','Province if applicable'),rf('TelephoneHome / TelephoneWork / TelephoneMobile','Text','Phone numbers'),rf('EmailWork / EmailHome','Text','Email addresses')]},
 
   // ── PeopleSystem Gateway ──
   'peoplesystem-gateway|Validate token':{note:'Returns the validated token value from cache if valid. HTTP 401 if invalid.',fields:[rf('Result','Text','The validated token value from cache')]},
