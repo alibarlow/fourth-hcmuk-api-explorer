@@ -279,17 +279,201 @@ const APIS = [
     area:'onboarding',
     exposure:'open',
     icon:'👤',
-    subtitle:'Brand management and short URL redirects — the externally accessible part of Onboarding',
-    exposeNote:'Open via Layer7 API gateway — accessible to customers and partners',
+    subtitle:'The externally accessible Onboarding API — manage requests, candidates, documents and brands via the Layer7 gateway',
+    exposeNote:'Open via Layer7 API gateway — accessible to customers and ATS partners. Create Request and Upload Document use multipart form-data; Create and Update Candidate use JSON.',
+    infoSections:[
+      {id:'error-codes',name:'Error codes',type:'errorCodes',rows:[
+        {code:'200',status:'OK',desc:'Request succeeded'},
+        {code:'400',status:'Bad Request',desc:'Incorrect authentication token or invalid request'},
+        {code:'401',status:'Unauthorised',desc:'Token has expired or is missing'},
+        {code:'404',status:'Not Found',desc:'Onboarding request, brand or customer not found'},
+        {code:'422',status:'Unprocessable Entity',desc:'Organisation not found'},
+      ]},
+      {id:'webhook-callback',name:'Webhook callback',type:'fields',
+       intro:'When a CallbackUrl is provided on Create Request, Onboarding will POST to it whenever the candidate status changes. The callback body contains these fields:',
+       fields:[
+        {name:'RequestId',type:'Text',desc:'The onboarding request GUID'},
+        {name:'CandidateStatus',type:'Text',desc:'The current status of the candidate'},
+        {name:'ESignInProgress',type:'True/False',desc:'Whether e-sign has started'},
+        {name:'ESignCompleted',type:'True/False',desc:'Whether e-sign is complete'},
+        {name:'OnboardingCompleted',type:'True/False',desc:'Whether the full onboarding is complete'},
+        {name:'EmployeeCreationFailed',type:'True/False',desc:'Whether the HR employee creation failed'},
+        {name:'Description',type:'Text',desc:'Error message if EmployeeCreationFailed is true'},
+      ]},
+      {id:'candidate-url',name:'Candidate registration URL',type:'text',
+       content:'Once a candidate is created they receive an SMS with a shortened link. The full URL format for use in the hiring manager UI is: https://app.onbrd.me?requestId={RequestId}&orgAlias={OrgAlias}'},
+    ],
     groups:[
       {
-        name:'Brands and links',
+        name:'Requests',
         endpoints:[
           {
-            method:'GET',name:'Follow a short link',
-            desc:'Redirects a shortened onboarding URL to its destination',
-            path:'GET /sl/{shortenCode}',
-            fields:[f('shortenCode',R,'The unique code from the shortened URL')]
+            method:'POST',name:'Create request',
+            desc:'Initiate a new onboarding request for a candidate. The server generates and returns the RequestId — store this to use in subsequent calls. Sent as multipart form-data.',
+            path:'POST /Request/create',
+            fields:[
+              f('OrgAlias',R,'Short name identifying the organisation'),
+              f('BrandAlias',R,'The alias of the brand to use for this onboarding journey'),
+              f('CallbackUrl',O,'Webhook URL to receive status change notifications — see Webhook callback info tab for payload details'),
+            ]
+          },
+          {
+            method:'GET',name:'Get request',
+            desc:'Retrieve the current status and details of an onboarding request',
+            path:'GET /Request/Get',
+            fields:[
+              f('orgAlias',R,'Short name identifying the organisation'),
+              f('requestId',R,'The onboarding request GUID returned by Create request'),
+            ]
+          },
+          {
+            method:'PATCH',name:'Pause request',
+            desc:'Pause an active onboarding request — the candidate will not be able to continue until unpaused',
+            path:'PATCH /Request/Pause',
+            fields:[
+              f('orgAlias',R,'Short name identifying the organisation'),
+              f('requestId',R,'The onboarding request GUID to pause'),
+            ]
+          },
+          {
+            method:'PATCH',name:'Unpause request',
+            desc:'Resume a previously paused onboarding request',
+            path:'PATCH /Request/unPause',
+            fields:[
+              f('orgAlias',R,'Short name identifying the organisation'),
+              f('requestId',R,'The onboarding request GUID to unpause'),
+            ]
+          },
+          {
+            method:'PATCH',name:'Cancel request',
+            desc:'Cancel an onboarding request — this cannot be undone',
+            path:'PATCH /request/cancel',
+            fields:[
+              f('OrgAlias',R,'Short name identifying the organisation'),
+              f('RequestId',R,'The onboarding request GUID to cancel'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Candidates',
+        endpoints:[
+          {
+            method:'POST',name:'Create candidate',
+            desc:'Add a candidate to an onboarding request. Sent as JSON. The Candidate object contains employment details and right-to-work information.',
+            path:'POST /Candidate/Create',
+            fields:[
+              f('OrgAlias',R,'Short name identifying the organisation'),
+              f('RequestId',R,'The onboarding request GUID returned by Create request'),
+              f('Candidate',R,'Object containing all candidate details — see sub-fields below'),
+              section('Candidate — required fields'),
+              sf('FirstName',R,'2 to 60 characters, must start with a letter'),
+              sf('SurName',R,'2 to 60 characters, must start with a letter'),
+              sf('Email',R,'The new hire\'s email address'),
+              sf('MobileNumber',R,'Must be a valid phone number format e.g. +447977074823'),
+              sf('JobTitle',R,'Minimum 2 characters'),
+              sf('LocationName',R,'Minimum 2 characters'),
+              sf('Division',R,'Minimum 1 character'),
+              sf('StartDate',R,'When the new hire starts — datetime format e.g. 2024-05-10T00:00:00'),
+              sf('EmploymentType',R,'Must be one of: FullTime, PartTime, Flex, Casual'),
+              sf('PayType',R,'Use empty string for Salary, H for Hourly, S for Shift'),
+              sf('PaidByRota',R,'Whether pay is driven by the rota — Y or N. Must be N for Salary, Y for Hourly or Shift.'),
+              sf('IncludedInRota',R,'Whether to include on the rota — Y or N'),
+              sf('RateOfPay',C,'Hourly or shift rate of pay e.g. 9.20 — required if PayType is H or S. Must be blank if salaried.'),
+              sf('AnnualSalary',C,'Annual salary amount — required if PayType is blank (salary). Must be blank if PayType is H or S.'),
+              section('Candidate — job and structure'),
+              sf('FullName',O,'Full name — can be provided or derived from FirstName and SurName'),
+              sf('JobTitleId',O,'Job title ID from the customer Structure File export — must be at least 2 digits, zero-pad single digits e.g. 02'),
+              sf('LocationId',O,'Location ID from the customer Structure File export — must be at least 2 digits, zero-pad single digits e.g. 01'),
+              sf('LocationCanonicalId',O,'Alternative location identifier'),
+              sf('Contract',O,'Contract type identifier'),
+              sf('ContractHours',O,'Contracted hours e.g. 40'),
+              sf('OverrideFTE / FTEDays / FTEShifts / FTEHours',O,'Full-time equivalent override values'),
+              sf('StartDateString',O,'Human-readable start date e.g. 10/05/2024 — used in document templates'),
+              sf('EffectiveDate',O,'The date these employment details take effect'),
+              sf('TerminationDate',O,'End date for fixed-term contracts'),
+              sf('EmployeeSourceDesc',O,'Recruitment source description e.g. Other'),
+              section('Candidate — holiday'),
+              sf('HolidayDaysTaken',O,'Holiday days taken to date in current holiday year'),
+              sf('HolidayAverageHoursPerWeek',O,'Average hours per week for holiday calculation'),
+              sf('HolidayAverageDaysPerWeek',O,'Average days per week for holiday calculation'),
+              sf('HolidayEffectiveDate',O,'Date from which holiday calculations take effect'),
+              section('Candidate — right to work'),
+              sf('DocumentsSeenAndCopied',O,'Whether right to work documents have been seen and copied — Y or N'),
+              sf('CountryOfResidence',O,'Country of residence e.g. United Kingdom'),
+              sf('Nationality',O,'Nationality e.g. British'),
+              sf('ProofOfEligibility',O,'Type of right to work document e.g. British Passport'),
+              sf('PassportNumber',O,'Passport number'),
+              sf('PassportExpiryDate',O,'Passport expiry date'),
+              sf('WorkPermit',O,'Whether a work permit is held'),
+              sf('WorkPermitNumber',O,'Work permit number'),
+              sf('WorkPermitExpiryDate',O,'Work permit expiry date'),
+              sf('TemporaryLeaveToRemain',O,'Temporary leave to remain status'),
+              sf('SettledStatus',O,'EU settled status'),
+              sf('PreSettledStatus',O,'EU pre-settled status'),
+              sf('PreSettledStatusExpiryDate',O,'Pre-settled status expiry date'),
+              section('Candidate — document templates'),
+              sf('GenericTemplateID',O,'ID of the generic DocuSign template to use'),
+              sf('IndividualTemplateID',O,'ID of an individual-specific DocuSign template'),
+              sf('ExtraDocumentFields',O,'Dictionary of additional DocuSign field mappings — keys must match field names in the customer\'s document templates'),
+            ]
+          },
+          {
+            method:'PATCH',name:'Update candidate',
+            desc:'Update an existing candidate\'s details on an onboarding request. Uses the same JSON structure as Create candidate.',
+            path:'PATCH /Candidate/update',
+            fields:[
+              f('OrgAlias',R,'Short name identifying the organisation'),
+              f('RequestId',R,'The onboarding request GUID'),
+              f('Candidate',R,'Object containing the candidate fields to update — same structure as Create candidate'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Documents',
+        endpoints:[
+          {
+            method:'POST',name:'Upload document',
+            desc:'Upload a document file for a candidate. Sent as multipart form-data. Maximum file size 50MB.',
+            path:'POST /Candidate/UploadDocument',
+            fields:[
+              f('OrgAlias',R,'Short name identifying the organisation'),
+              f('BrandAlias',R,'The alias of the brand associated with this request'),
+              f('RequestId',R,'The onboarding request GUID'),
+              f('fileName',R,'The name of the file being uploaded'),
+              f('documentType',R,'Type of document — must be one of: OnlineShareCode, CV, InterviewNotes, Contracts, RighttoWork'),
+              f('file',R,'The document file to upload'),
+            ]
+          },
+          {
+            method:'POST',name:'Document upload completed',
+            desc:'Signal that all documents for a candidate have been uploaded and the onboarding process can proceed',
+            path:'POST /candidate/DocumentUploadCompleted',
+            fields:[
+              f('orgAlias',R,'Short name identifying the organisation'),
+              f('requestId',R,'The onboarding request GUID'),
+            ]
+          },
+          {
+            method:'DELETE',name:'Delete documents',
+            desc:'Remove all uploaded documents for an onboarding request',
+            path:'DELETE /candidate/DeleteDocuments',
+            fields:[
+              f('OrgAlias',R,'Short name identifying the organisation'),
+              f('RequestId',R,'The onboarding request GUID whose documents should be deleted'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Brands',
+        endpoints:[
+          {
+            method:'GET',name:'Get all brands',
+            desc:'List all brands configured for an organisation',
+            path:'GET /Brand/GetAll',
+            fields:[f('orgAlias',R,'Short name identifying the organisation')]
           },
           {
             method:'POST',name:'Create brand',
@@ -309,7 +493,7 @@ const APIS = [
           },
           {
             method:'POST',name:'Update brand',
-            desc:'Update branding for an organisation',
+            desc:'Update branding configuration for an organisation',
             path:'POST /Brand/{org}/update',
             fields:[
               f('OrgAlias',R,'Short name identifying the organisation'),
@@ -325,18 +509,23 @@ const APIS = [
           },
           {
             method:'POST',name:'Upload brand logo',
-            desc:'Add a logo image to a brand',
+            desc:'Add or replace the logo image for a brand',
             path:'POST /Brand/{org}/{alias}/UploadLogo',
             fields:[f('file',R,'The logo image file to upload')]
           },
+        ]
+      },
+      {
+        name:'Short links',
+        endpoints:[
           {
-            method:'GET',name:'Get all brands',
-            desc:'List all brands for an organisation',
-            path:'GET /Brand/{org}/GetAll',
-            fields:[f('OrgAlias',R,'Which organisation to list brands for')]
+            method:'GET',name:'Follow a short link',
+            desc:'Redirects a shortened onboarding URL to its destination',
+            path:'GET /sl/{shortenCode}',
+            fields:[f('shortenCode',R,'The unique code from the shortened URL')]
           },
         ]
-      }
+      },
     ]
   },
 
@@ -4609,6 +4798,16 @@ const RESPONSE_FIELDS = {
   'onboarding-public|Update brand':{fields:[rf('IsSuccessful','True/False','Whether the operation succeeded'),rf('Errors','Text','Any field-level error messages if it failed'),rf('Result','Text','The created or updated brand details')]},
   'onboarding-public|Upload brand logo':{fields:[rf('IsSuccessful','True/False','Whether the upload succeeded'),rf('Errors','Text','Any error messages if it failed')]},
   'onboarding-public|Get all brands':{note:'Returns a list of brands.',fields:[rf('BrandAlias','Text','Short unique name'),rf('BrandName','Text','Full display name'),rf('PrimaryColour','Text','Brand colour'),rf('Logo','Text','Logo URL'),rf('IsActive','True/False','Whether active'),rf('BothEmergencyContactsMandatory','True/False','Whether two emergency contacts required'),rf('ReferencesMandatory','Integer','Number of references required'),rf('IsDiversityandInclusionRequired','True/False','Whether diversity section required')]},
+  'onboarding-public|Create request':{note:'HTTP 200. Returns the server-generated RequestId — store this to use in Create candidate and all subsequent calls.',fields:[rf('RequestId','GUID','The unique onboarding request identifier generated by the server'),rf('OrgAlias','Text','The organisation alias for this request'),rf('BrandAlias','Text','The brand alias used for this request')]},
+  'onboarding-public|Get request':{fields:[rf('RequestId','GUID','The onboarding request identifier'),rf('OrgAlias','Text','Organisation alias'),rf('BrandAlias','Text','Brand alias'),rf('Status','Text','Current request status'),rf('CandidateStatus','Text','Current candidate status: NotStarted, Started, InProgress, ESignInProgress, CompletedOnboarding, EmployeeCreated, or EmployeeCreationFailed'),rf('ESignInProgress','True/False','Whether e-sign has started'),rf('ESignCompleted','True/False','Whether e-sign is complete'),rf('OnboardingCompleted','True/False','Whether full onboarding is complete'),rf('EmployeeCreationFailed','True/False','Whether HR employee creation failed')]},
+  'onboarding-public|Pause request':{fields:[rf('IsSuccessful','True/False','Whether the request was paused successfully'),rf('Errors','Text','Any error messages if it failed')]},
+  'onboarding-public|Unpause request':{fields:[rf('IsSuccessful','True/False','Whether the request was unpaused successfully'),rf('Errors','Text','Any error messages if it failed')]},
+  'onboarding-public|Cancel request':{fields:[rf('IsSuccessful','True/False','Whether the request was cancelled successfully'),rf('Errors','Text','Any error messages if it failed')]},
+  'onboarding-public|Create candidate':{note:'HTTP 200.',fields:[rf('IsSuccessful','True/False','Whether the candidate was created successfully'),rf('Errors','Text','Validation errors if IsSuccessful is false')]},
+  'onboarding-public|Update candidate':{fields:[rf('IsSuccessful','True/False','Whether the candidate was updated successfully'),rf('Errors','Text','Validation errors if IsSuccessful is false')]},
+  'onboarding-public|Upload document':{fields:[rf('IsSuccessful','True/False','Whether the document was uploaded successfully'),rf('Errors','Text','Any error messages if it failed')]},
+  'onboarding-public|Document upload completed':{fields:[rf('IsSuccessful','True/False','Whether the signal was received successfully'),rf('Errors','Text','Any error messages if it failed')]},
+  'onboarding-public|Delete documents':{fields:[rf('IsSuccessful','True/False','Whether the documents were deleted successfully'),rf('Errors','Text','Any error messages if it failed')]},
 
   // ── ESS ──
   'ess|Get my profile':{fields:[rf('Id','Integer','Your employee ID'),rf('FirstNames / Surname','Text','Your full name'),rf('PreferredName','Text','Preferred name'),rf('DateOfBirth','Date','Date of birth'),rf('Gender','Text','Gender'),rf('Address fields','Text','Home address'),rf('HomeTel / MobileTel','Text','Phone numbers'),rf('WorkEmail / HomeEmail','Text','Email addresses'),rf('NationalInsuranceNumber','Text','NI number'),rf('EmployeeNumber','Text','HR reference'),rf('StartDate','Date','Start date'),rf('LengthOfService','Text','Length of service'),rf('CanEdit','True/False','Whether you can edit your profile'),rf('CanBookHalfDay','True/False','Whether you can book half days'),rf('CasualStaff','True/False','Whether on casual contract'),rf('IfLeaver','True/False','Whether leaving')]},
