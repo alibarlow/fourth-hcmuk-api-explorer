@@ -1394,7 +1394,7 @@ const APIS = [
           },
           {
             method:'GET',name:'Payslips',
-            desc:'Employee payslips',
+            desc:'Payslip records for all employees — use date range filters to scope by pay period',
             path:'GET /organisations/{id}/Employees/Payslips',
             fields:[
               f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
@@ -1454,7 +1454,13 @@ const APIS = [
             method:'GET',name:'Accrual data',
             desc:'Accrued pay and entitlement records',
             path:'GET /organisations/{id}/Employees/Accrual',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Get employer payments',
@@ -1728,7 +1734,7 @@ const APIS = [
           {
             method:'POST',name:'Create candidate',
             desc:'Start a new hire record when someone is offered a job',
-            path:'POST /',
+            path:'POST /Candidate/Create',
             fields:[
               f('RequestId',R,'Unique identifier for this onboarding request - must be between 30 and 40 characters'),
               f('OrgAlias',R,'Organisation short name - must be between 2 and 255 characters'),
@@ -1808,7 +1814,7 @@ const APIS = [
           {
             method:'PATCH',name:'Update candidate',
             desc:"Update a new hire's details as they change",
-            path:'PATCH /',
+            path:'PATCH /Candidate/Update',
             fields:[
               f('RequestId',R,'Unique identifier for this onboarding request - must be between 30 and 40 characters'),
               f('OrgAlias',R,'Organisation short name - must be between 2 and 255 characters'),
@@ -1888,7 +1894,7 @@ const APIS = [
           {
             method:'GET',name:'Get candidate',
             desc:"Fetch a new hire's current status and information",
-            path:'GET /',
+            path:'GET /Candidate',
             fields:[
               f('OrgAlias',R,'Organisation identifier'),
               f('RequestId',R,'The onboarding request ID'),
@@ -4946,6 +4952,7 @@ const RESPONSE_FIELDS = {
   'legacy-peoplesystem|Toggle iQ on or off':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
   'legacy-peoplesystem|Update SSO account':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
   'legacy-peoplesystem|Reactivate SSO account':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
+  'legacy-peoplesystem|Upload absence in hours update':{note:'HTTP 200 OK on success. Returns the dataload job reference which can be used to check processing status.',fields:[rf('JobId','Text','The dataload job identifier'),rf('Status','Text','Initial status of the upload')]},
 
   // ── LP Sync ──
   'lp-sync|Create lieu request':{note:'HTTP 200 OK on success.',fields:[]},
