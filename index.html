@@ -1527,12 +1527,38 @@ const APIS = [
           },
           {
             method:'GET',name:'Import logs',
-            desc:'A record of all data imports — also used to track the status of absence, employee, and other submissions by filtering with importtype',
+            desc:'A record of all data imports — also used to track the status of absence, holiday, employee, and other submissions by filtering with importtype',
             path:'GET /organisations/{id}/ImportLogs',
             fields:[
-              f('importtype',O,'Filter by data type e.g. absence, employee'),
+              f('importtype',O,'Filter by data type — e.g. absence, employee, holidayrequest, HolidayDelete'),
               f('resourceid',O,'Filter by a specific resource identifier'),
               f('submissionid',O,'Filter to a specific submission GUID — use this to check the outcome of a POST/PUT/DELETE'),
+            ]
+          },
+        ]
+      },
+      {
+        name:'Holidays',
+        endpoints:[
+          {
+            method:'POST',name:'Create holiday booking',
+            desc:'Submit a holiday booking for one or more employees. Accepts an array — multiple bookings can be sent in one call. Track the outcome via Import logs using importtype=holidayrequest.',
+            path:'POST /organisations/{id}/holidays',
+            fields:[
+              f('EmployeeNumber',R,'Which employee this booking is for'),
+              f('RequestDate',R,'The date and time of the holiday — datetime format e.g. 2024-04-23T10:00:00'),
+              f('value',R,'Amount of holiday to book — decimal e.g. 0.5, 1, 4.75'),
+              f('Type',R,'Unit for the value — D or Days for days, H or Hours for hours, S or Shifts for shifts'),
+              f('Unpaid',O,'Whether the holiday is unpaid — Y or N'),
+            ]
+          },
+          {
+            method:'DELETE',name:'Delete holiday booking',
+            desc:'Remove a holiday booking. The EmployeeNumber and RequestDate together identify the booking to delete. Accepts an array. Track the outcome via Import logs using importtype=HolidayDelete.',
+            path:'DELETE /organisations/{id}/holidays',
+            fields:[
+              f('EmployeeNumber',R,'Which employee the booking belongs to'),
+              f('RequestDate',R,'The date and time of the booking to delete — must match the original RequestDate exactly'),
             ]
           },
         ]
@@ -4839,6 +4865,8 @@ const RESPONSE_FIELDS = {
   'peoplesystem|Create absence':{note:'HTTP 202 Accepted. The AbsenceID assigned to the new record is not returned directly — retrieve it via GET /Employees/Absences once the submission has processed.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
   'peoplesystem|Update absence':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
   'peoplesystem|Delete absence':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
+  'peoplesystem|Create holiday booking':{note:'HTTP 202 Accepted. Use Import logs with importtype=holidayrequest and the SubmissionID to check the outcome once processed.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
+  'peoplesystem|Delete holiday booking':{note:'HTTP 202 Accepted. Use Import logs with importtype=HolidayDelete and the SubmissionID to check the outcome once processed.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
   'peoplesystem|Payments':{note:'GET returns a list. For POST/DELETE: HTTP 202 Accepted, or HTTP 400 with error details if validation fails.',fields:[rf('EmployerPaymentTypeID','Integer','Payment type'),rf('Units','Number','Units'),rf('Amount','Number','Amount'),rf('StartDate / EndDate','Date','Date range')]},
   'peoplesystem|Submit payment batch':{note:'HTTP 202 Accepted, or HTTP 400 with error details if validation fails.',fields:[rf('SubmissionID','GUID','Reference')]},
   'peoplesystem|Create holidays':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
