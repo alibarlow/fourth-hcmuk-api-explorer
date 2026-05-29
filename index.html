@@ -1892,7 +1892,6 @@ const APIS = [
             fields:[
               f('OrgAlias',R,'Organisation identifier'),
               f('RequestId',R,'The onboarding request ID'),
-              f('Status',RO,'Current candidate status: NotStarted, Started, InProgress, ESignInProgress, CompletedOnboarding, EmployeeCreated, or EmployeeCreationFailed'),
             ]
           },
           {
@@ -1928,7 +1927,6 @@ const APIS = [
             fields:[
               f('OrgAlias',R,'Organisation identifier'),
               f('RequestId',R,'Onboarding request ID'),
-              f('HasStartedESign',RO,'True if the candidate has opened the signing envelope'),
             ]
           },
           {
@@ -1938,7 +1936,6 @@ const APIS = [
             fields:[
               f('OrgAlias',R,'Organisation identifier'),
               f('RequestId',R,'Onboarding request ID'),
-              f('HasCompletedESign',RO,'True if the candidate has fully completed signing'),
             ]
           },
           {
@@ -1982,7 +1979,6 @@ const APIS = [
             fields:[
               f('OrgAlias',R,'Organisation identifier'),
               f('RequestId',R,'Onboarding request ID'),
-              f('Link',RO,'The registration URL to send to the candidate'),
             ]
           },
           {
@@ -2126,7 +2122,6 @@ const APIS = [
             path:'GET /Authenticate',
             fields:[
               f('Authorization',R,'The token to validate - passed in the Authorization header or as a query parameter'),
-              f('Result',RO,'Whether the token is valid - returns cached result if recently validated'),
             ]
           },
         ]
@@ -2141,10 +2136,6 @@ const APIS = [
             fields:[
               f('groupId',R,'The group identifier'),
               f('ClientId',R,'The company identifier'),
-              f('EmployeeId',RO,'Employee ID'),
-              f('FirstNames/Surname',RO,'Employee name'),
-              f('Email',RO,'Employee email'),
-              f('FourthAccountId',RO,'The employees unique Fourth account identifier'),
             ]
           },
           {
@@ -2154,9 +2145,6 @@ const APIS = [
             fields:[
               f('groupId',R,'The group identifier'),
               f('employerPaybasisId',R,'Which pay basis to get dates for'),
-              f('ProcessingDate',RO,'When payroll is processed'),
-              f('StartRange/EndRange',RO,'Start and end of the pay period'),
-              f('TaxYear/PayPeriod',RO,'Which tax year and period number'),
             ]
           },
           {
@@ -2172,12 +2160,7 @@ const APIS = [
             method:'GET',name:'List companies',
             desc:'Get all companies in the system',
             path:'GET /Employer/ListOfCompanies',
-            fields:[
-              f('CompanyName',RO,'Company name'),
-              f('CompanyId',RO,'Internal company ID'),
-              f('Description',RO,'Company description'),
-              f('EmployerPayBasisID',RO,'Pay basis identifier'),
-            ]
+            fields:[]
           },
         ]
       },
@@ -2188,9 +2171,7 @@ const APIS = [
             method:'POST',name:'Get unique upload ID',
             desc:'Generate a unique ID before uploading a file',
             path:'POST /FileUpload/GetUniqueID',
-            fields:[
-              f('FileIdentifier',RO,'The unique ID generated for this upload - use this when submitting the file'),
-            ]
+            fields:[]
           },
           {
             method:'GET',name:'Validate data load',
@@ -2198,9 +2179,6 @@ const APIS = [
             path:'GET /FileUpload/ValidateDataload',
             fields:[
               f('groupId',R,'The group identifier'),
-              f('FileName',RO,'Name of the file being validated'),
-              f('Status',RO,'Whether the file passed validation'),
-              f('Errors',RO,'Any validation errors found'),
             ]
           },
           {
@@ -2216,9 +2194,7 @@ const APIS = [
             method:'GET',name:'List file types',
             desc:'What kinds of files can be uploaded?',
             path:'GET /FileUpload/GetFileTypes',
-            fields:[
-              f('FileType',RO,'The name of each supported file type'),
-            ]
+            fields:[]
           },
         ]
       },
@@ -2262,8 +2238,6 @@ const APIS = [
             fields:[
               f('groupId',R,'The group identifier'),
               f('EmployeeId',R,'Which employee'),
-              f('Status',RO,'Current status of the document check'),
-              f('LastUpdated',RO,'When the status last changed'),
             ]
           },
           {
@@ -2344,7 +2318,6 @@ const APIS = [
             path:'POST /api/Auth/Validate',
             fields:[
               f('token',R,'The full token string to validate including the type prefix e.g. Bearer eyJ...'),
-              f('Result',RO,'True if valid false if expired or invalid'),
             ]
           },
         ]
@@ -2545,7 +2518,6 @@ const APIS = [
             path:'MediatR query',
             fields:[
               f('InsightId',R,'The insight ID to find actions for'),
-              f('Actions',RO,'List of all actions linked to this insight'),
             ]
           },
           {
@@ -2603,7 +2575,6 @@ const APIS = [
             path:'MediatR query',
             fields:[
               f('CustomerId',R,'The customer to check'),
-              f('IsEnabled',RO,'Whether iQ is currently enabled for this customer'),
             ]
           },
           {
@@ -2612,7 +2583,6 @@ const APIS = [
             path:'MediatR query',
             fields:[
               f('CustomerId',R,'The customer to get settings for'),
-              f('Settings',RO,'The current iQ configuration for this customer'),
             ]
           },
           {
@@ -2728,9 +2698,6 @@ const APIS = [
               f('status',O,'The status of the operation'),
               f('outcome',O,'The outcome of the operation'),
               f('context',O,'Any additional key-value information about the event'),
-              f('acceptedCount',RO,'How many events were accepted'),
-              f('rejectedCount',RO,'How many were rejected'),
-              f('rejectedEvents',RO,'Details of any rejected events including the reason why'),
             ]
           },
         ]
@@ -2809,10 +2776,6 @@ const APIS = [
               f('XmlContent',R,'The actual payroll data in the XML format HMRC requires'),
               f('EmployerReference',R,'The employers PAYE reference'),
               f('TaxYear',R,'The tax year this submission covers'),
-              f('HMRCCorrelationId',RO,'The reference HMRC gives us when they receive it'),
-              f('Progress',RO,'How far through processing the submission is'),
-              f('StatusHistory',RO,'Full history of every status change including any errors'),
-              f('BlobFiles',RO,'The XML files sent to and received from HMRC'),
             ]
           },
           {
@@ -2823,8 +2786,6 @@ const APIS = [
               f('CorrelationId',R,'The submission reference to check'),
               f('groupId',R,'Which group'),
               f('companyId',R,'Which company'),
-              f('Status',RO,'Current processing status'),
-              f('CompletedAt',RO,'When HMRC finished processing if complete'),
             ]
           },
           {
@@ -2835,7 +2796,6 @@ const APIS = [
               f('hmrcCorrelationId',R,'The HMRC reference for the submission'),
               f('groupId',R,'Which group'),
               f('companyId',R,'Which company'),
-              f('Errors',RO,'List of error messages returned by HMRC explaining why the submission was rejected'),
             ]
           },
         ]
@@ -2884,8 +2844,6 @@ const APIS = [
             path:'GET /api/audit-control/status',
             fields:[
               f('GroupId',R,'Which group to check'),
-              f('IsActive',RO,'Whether audit collection is currently running'),
-              f('StartedAt',RO,'When collection started'),
             ]
           },
           {
@@ -2987,11 +2945,6 @@ const APIS = [
               f('groupId',R,'The group identifier'),
               f('clientId',R,'The company identifier'),
               f('EffectiveDate',R,'The date the change would take effect'),
-              f('IdentifierConflict',RO,'A reference for the conflict found'),
-              f('PreviousEffectiveDate/NextEffectiveDate',RO,'The dates of surrounding changes that conflict'),
-              f('approvedItems',RO,'Changes already approved that conflict'),
-              f('currentDateItems',RO,'Changes on the same date that conflict'),
-              f('futureDateItems',RO,'Future changes that conflict'),
             ]
           },
           {
@@ -3016,11 +2969,6 @@ const APIS = [
             fields:[
               f('groupId',R,'The group identifier'),
               f('clientId',R,'The company identifier'),
-              f('SclId',RO,'Internal ID for this record'),
-              f('LeaveDate',RO,'Date of leave relevant to this loan'),
-              f('IsHalfDay',RO,'Whether this is a half day adjustment'),
-              f('IsDeducted',RO,'Whether the deduction has been applied'),
-              f('NotificationDate',RO,'When the deduction was notified'),
             ]
           },
           {
@@ -3044,12 +2992,6 @@ const APIS = [
             fields:[
               f('groupId',R,'The group identifier'),
               f('clientId',R,'The company identifier'),
-              f('NeonatalAdmission/NeonatalDischarge',RO,'When the baby was admitted to and discharged from neonatal care'),
-              f('NeonatalLeaveWeeksAccrued/NeonatalLeeksTaken',RO,'Weeks of SNCP leave earned and taken'),
-              f('BabyDue/BabyBorn',RO,'Expected and actual birth dates'),
-              f('AverageEarnings',RO,'Weekly earnings used to calculate statutory pay'),
-              f('StillBirth',RO,'Whether this relates to a stillbirth'),
-              f('IsOverrideExclusion',RO,'Whether normal exclusion rules have been overridden'),
             ]
           },
           {
@@ -3075,10 +3017,6 @@ const APIS = [
               f('groupId',R,'The group identifier'),
               f('clientId',R,'The company identifier'),
               f('sppEmployeeId',R,'The SPP record identifier'),
-              f('Notified',RO,'When the employee notified the employer of paternity leave'),
-              f('Week1Start/Week2Start',RO,'Start dates of each week of paternity leave'),
-              f('BabyDue/BabyBorn',RO,'Expected and actual birth dates'),
-              f('AverageEarnings',RO,'Weekly earnings for statutory pay calculation'),
             ]
           },
           {
@@ -4970,7 +4908,6 @@ const RESPONSE_FIELDS = {
   'iq-hcm|Holiday request submitted':{note:'No direct HTTP response — triggered automatically by Azure Service Bus.',fields:[]},
   'iq-hcm|Holiday approved or rejected':{note:'No direct HTTP response — triggered automatically by Azure Service Bus.',fields:[]},
   'iq-hcm|Onboarding completed':{note:'No direct HTTP response — triggered automatically by Azure Service Bus.',fields:[]},
-  'iq-hcm|Check iQ enabled for group':{fields:[rf('IsEnabled','True/False','Whether iQ is enabled for this group')]},
 
   // ── iQ360 Events ──
   'iq360|Submit feature usage event':{fields:[rf('accepted','True/False','Whether the event was accepted'),rf('eventId','Text','Processed event ID'),rf('originalEventId','Text','Your original event ID'),rf('processedAt','Date','When it was processed'),rf('errorMessage','Text','Error message if rejected'),rf('errorCode','Text','Error code if rejected')]},
@@ -5001,7 +4938,7 @@ const RESPONSE_FIELDS = {
   'legacy-peoplesystem|Confirm effective date':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
   'legacy-peoplesystem|Student and council loan data':{note:'Returns a list.',fields:[rf('SclId','Integer','Record ID'),rf('LeaveDate','Date','Leave date'),rf('IsHalfDay','True/False','Half day adjustment'),rf('IsDeducted','True/False','Whether deducted'),rf('NotificationDate','Date','Notification date')]},
   'legacy-peoplesystem|Update loan record':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
-  'legacy-peoplesystem|Parental leave':{note:'Returns SNCP records.',fields:[rf('NeonatalAdmission / NeonatalDischarge','Date','Neonatal care dates'),rf('NeonatalLeaveWeeksAccrued / NeonatalLeeksTaken','Integer','Weeks earned and taken'),rf('BabyDue / BabyBorn','Date','Birth dates'),rf('AverageEarnings','Number','Weekly earnings for statutory pay')]},
+  'legacy-peoplesystem|Parental leave':{note:'Returns SNCP records.',fields:[rf('NeonatalAdmission / NeonatalDischarge','Date','Neonatal care dates'),rf('NeonatalLeaveWeeksAccrued / NeonatalLeaveWeeksTaken','Integer','Weeks earned and taken'),rf('BabyDue / BabyBorn','Date','Birth dates'),rf('AverageEarnings','Number','Weekly earnings for statutory pay')]},
   'legacy-peoplesystem|Create SNCP record':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
   'legacy-peoplesystem|Paternity pay record':{fields:[rf('SppEmployeeId','Integer','Record ID'),rf('Notified','Date','Notification date'),rf('Week1Start / Week2Start','Date','Leave week start dates'),rf('BabyDue / BabyBorn','Date','Birth dates'),rf('AverageEarnings','Number','Weekly earnings')]},
   'legacy-peoplesystem|RTI post-processing':{note:'HTTP 200 OK on success or error details on failure.',fields:[]},
