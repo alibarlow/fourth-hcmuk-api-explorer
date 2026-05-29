@@ -1441,10 +1441,13 @@ const APIS = [
           },
           {
             method:'GET',name:'Labour costs',
-            desc:'Actual, forecast, and approved labour cost data',
+            desc:'Actual labour cost data by location and date',
             path:'GET /organisations/{id}/LabourCost',
             fields:[
-              f('ShiftDate',R,'The date these costs relate to'),
+              f('locationid',O,'Location ID to filter to a specific location'),
+              f('locationcanonicalid',O,'Canonical location ID — alternative to locationid'),
+              f('grouping',O,'Grouping level for the results'),
+              f('datefrom',O,'Start date for the range — YYYY-MM-DD'),
             ]
           },
           {
@@ -1464,7 +1467,20 @@ const APIS = [
             desc:'Forecasted labour cost by location and date',
             path:'GET /organisations/{id}/LabourCost/Forecast',
             fields:[
-              f('locationid',R,'Location ID'),
+              f('locationid',O,'Location ID to filter to a specific location'),
+              f('locationcanonicalid',O,'Canonical location ID — alternative to locationid'),
+              f('datefrom',O,'Start date for the range — YYYY-MM-DD'),
+            ]
+          },
+          {
+            method:'GET',name:'Get approved labour cost',
+            desc:'Approved labour cost data by location and date',
+            path:'GET /organisations/{id}/LabourCost/Approved',
+            fields:[
+              f('locationid',O,'Location ID to filter to a specific location'),
+              f('locationcanonicalid',O,'Canonical location ID — alternative to locationid'),
+              f('grouping',O,'Grouping level for the results'),
+              f('datefrom',O,'Start date for the range — YYYY-MM-DD'),
             ]
           },
         ]
@@ -4882,11 +4898,7 @@ const RESPONSE_FIELDS = {
   'peoplesystem|Rotas':{note:'Returns a list.',fields:[rf('RotaID','Integer','Internal ID'),rf('RotaStartDate / RotaEndDate','Date','Rota dates'),rf('Status','Text','Open, Closed at Location, or Submitted'),rf('LocationName','Text','Location')]},
   'peoplesystem|Import logs':{note:'Returns a list.',fields:[rf('Id','Integer','Import log record ID'),rf('XmlType','Text','Type of data imported'),rf('ReferenceNumber','Text','Reference for this import'),rf('Status','Text','Whether succeeded or failed'),rf('DateCreatedUtc','Date','When submitted'),rf('Error','Text','Error message if failed'),rf('SubmissionID','Text','The submission reference'),rf('Result','Text','Outcome'),rf('Xml','Text','The raw XML payload that was imported'),rf('ClientID','Text','Client identifier')]},
   'peoplesystem|Validate employee data':{fields:[rf('IsValid','True/False','Whether the record passed validation'),rf('Errors','List','List of field-level validation errors with field names and messages')]},
-  'peoplesystem|List iQ settings for organisation':{note:'Returns configured iQ settings.',fields:[rf('SettingId','Text','Setting identifier'),rf('SettingName','Text','Setting name'),rf('IsEnabled','True/False','Whether enabled'),rf('Locations','List','Locations this setting applies to')]},
-  'peoplesystem|Is iQ enabled?':{fields:[rf('IsEnabled','True/False','Whether iQ is currently enabled for this organisation')]},
-  'peoplesystem|Locations for a setting':{note:'Returns configured iQ settings.',fields:[rf('SettingId','Text','Setting identifier'),rf('SettingName','Text','Setting name'),rf('IsEnabled','True/False','Whether enabled'),rf('Locations','List','Locations this setting applies to')]},
-  'peoplesystem|All settings for a location':{note:'Returns configured iQ settings.',fields:[rf('SettingId','Text','Setting identifier'),rf('SettingName','Text','Setting name'),rf('IsEnabled','True/False','Whether enabled'),rf('Locations','List','Locations this setting applies to')]},
-  'peoplesystem|Single setting for single location':{note:'Returns configured iQ settings.',fields:[rf('SettingId','Text','Setting identifier'),rf('SettingName','Text','Setting name'),rf('IsEnabled','True/False','Whether enabled'),rf('Locations','List','Locations this setting applies to')]},
+  'peoplesystem|iQ settings (wildcard proxy)':{note:'Response shape varies by sub-path. IsIQEnabled returns a single IsEnabled boolean. The listing and settings sub-paths return a list of setting objects.',fields:[rf('IsEnabled','True/False','Whether iQ is enabled — returned by the isiqenabled sub-path'),rf('SettingId','Text','Setting identifier — returned by listing and settings sub-paths'),rf('SettingName','Text','Setting name'),rf('IsEnabled (setting)','True/False','Whether this individual setting is enabled'),rf('Locations','List','Locations this setting applies to')]},
   'peoplesystem|Look up group ID':{fields:[rf('GroupID','Integer','The GroupID for the provided canonical ID')]},
   'peoplesystem|Approved hours':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('ElementName','Text','Pay element name'),rf('ElementLocalRef','Text','Element local reference'),rf('StartDateTime','Date','Start date and time'),rf('EndDateTime','Date','End date and time'),rf('Units','Number','Number of units'),rf('UnitType','Text','Type of unit e.g. hours'),rf('Rate','Number','Rate of pay'),rf('Value','Number','Total value'),rf('ActHours','Number','Actual hours worked'),rf('Reference','Text','Reference code'),rf('Department','Text','Department name'),rf('DepartmentDescription','Text','Department description'),rf('JobCode','Text','Job code'),rf('JobDescription','Text','Job description'),rf('SiteCode','Text','Site code'),rf('SiteDescription','Text','Site description'),rf('SubmittedToPayroll','Text','Whether submitted to payroll')]},
   'peoplesystem|Get employee birthdays':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('EmployeeCanonicalID','Text','Employee canonical identifier'),rf('EmployeeName','Text','Employee full name'),rf('EmployeeNumber','Text','Employee reference number'),rf('Location','Text','Work location'),rf('JobTitle','Text','Job title'),rf('BirthDate','Text','Date of birth'),rf('LocationCanonicalId','Text','Location canonical identifier')]},
@@ -4903,6 +4915,7 @@ const RESPONSE_FIELDS = {
   'peoplesystem|Work anniversaries':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('EmployeeCanonicalID','Text','Employee canonical identifier'),rf('EmployeeName','Text','Employee full name'),rf('EmployeeNumber','Text','Employee reference number'),rf('Location','Text','Work location'),rf('JobTitle','Text','Job title'),rf('StartDate','Date','Employment start date'),rf('NumberOfYearsEmployed','Integer','Years employed'),rf('LocationCanonicalId','Text','Location canonical identifier'),rf('CompanyName','Text','Company name')]},
   'peoplesystem|Get employer payments':{note:'Returns a list.',fields:[rf('EmployerPayTypeID','Integer','Employer payment type ID'),rf('PayTypeDescription','Text','Description of the payment type'),rf('PayBases','List','List of pay bases this payment type applies to — each with EmployerPayBasisID and PayBasisDescription')]},
   'peoplesystem|Get forecast labour cost':{note:'Returns a list.',fields:[rf('locationid','Integer','Location ID'),rf('shiftdate','Date','The date'),rf('forecastlabourcost','Number','Forecast labour cost for this date and location')]},
+  'peoplesystem|Get approved labour cost':{note:'Returns a list.',fields:[rf('locationid','Integer','Location ID'),rf('shiftdate','Date','The date'),rf('approvedlabourcost','Number','Approved labour cost for this date and location')]},
   'peoplesystem|Get passports':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('PassportText','Text','Passport description text'),rf('PassportReference','Text','Passport reference'),rf('PassportNumber','Text','Passport number'),rf('IssuingCountry','Text','Country that issued the passport'),rf('IssueDate','Date','Date issued'),rf('ExpiryDate','Date','Expiry date')]},
   'peoplesystem|Get payment details':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('PayMethod','Text','Payment method e.g. BACS'),rf('AccountDetails','Text','Account details summary'),rf('AccountName','Text','Account name'),rf('AccountNumber','Text','Account number'),rf('IBAN','Text','International bank account number'),rf('BranchCode','Text','Branch sort code'),rf('BICSwift','Text','BIC or SWIFT code'),rf('BranchName','Text','Bank branch name'),rf('Bank','Text','Bank name'),rf('AccountType','Text','Type of account'),rf('AccountCurrency','Text','Account currency'),rf('PaymentReference','Text','Payment reference'),rf('SplitPayment','Text','Whether pay is split'),rf('SplitType','Text','Type of split'),rf('SplitValue','Text','Split value'),rf('SplitOrder','Text','Order of split payments'),rf('BSocRollNumber','Text','Building society roll number')]},
   'peoplesystem|Get pay parts export':{note:'Returns a list.',fields:[rf('NominalCode','Text','Nominal ledger code'),rf('Amount','Number','Amount'),rf('Description','Text','Description of the pay part'),rf('LocationCode','Text','Location code'),rf('DivisionCode','Text','Division code'),rf('JobCode','Text','Job code'),rf('EmployeeNo','Text','Employee number')]},
