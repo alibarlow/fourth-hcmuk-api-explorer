@@ -763,15 +763,6 @@ const APIS = [
               f('showFormer',O,'Whether to include former employees'),
               f('delta',O,'Set to true to only return records changed since the last sync'),
               f('dateFrom / dateTo',O,'Date range to filter records'),
-              f('EmployeeID',RO,'Internal numeric employee ID'),
-              f('FAID',RO,'Fourth Account ID — unique 18-character identifier used across all Fourth systems'),
-              f('PayrollNumber',RO,'Payroll reference number'),
-              f('CompanyName / Paybasis',RO,'Which company and pay schedule'),
-              f('FirstName / LastName',RO,'Employee name'),
-              f('DateOfBirth / Gender',RO,'Personal details'),
-              f('NationalInsuranceNumber',RO,'NI number'),
-              f('IR35',RO,'Whether this employee falls within IR35 tax rules'),
-              f('EthnicOrigin / IsDisabled / Religion / SexualOrientation',RO,'Diversity data — only included where the employee has provided it'),
             ]
           },
           {
@@ -909,114 +900,43 @@ const APIS = [
             method:'GET',name:'Employment records',
             desc:'Full employment history and details',
             path:'GET /organisations/{id}/Employees/Employments',
-            fields:[
-              f('EmployeeID',RO,'Employee ID'),
-              f('EmploymentReference',RO,'Employment reference'),
-              f('EmploymentStartDate',RO,'Employment start date'),
-              f('EmploymentEndDate',RO,'Employment end date'),
-              f('AssignmentStartDate',RO,'Assignment start date'),
-              f('AssignmentEndDate',RO,'Assignment end date'),
-              f('TerminationReason',RO,'Reason for termination'),
-              f('Rehire',RO,'Whether eligible for rehire'),
-              f('EmploymentStatus',RO,'Current employment status'),
-              f('IsPermanent',RO,'Whether permanent employment'),
-              f('IsFulltime',RO,'Whether full time'),
-              f('IsForeignStudent',RO,'Whether a foreign student'),
-              f('IsLiveIn',RO,'Whether live-in employee'),
-              f('EmploymentType',RO,'Employment type'),
-              f('Department',RO,'Department name'),
-              f('DepartmentDescription',RO,'Department description'),
-              f('JobCode',RO,'Job code'),
-              f('JobDescription',RO,'Job title or description'),
-              f('ShiftType',RO,'Type of shift pattern'),
-              f('SiteCode',RO,'Site or location code'),
-              f('SiteDescription',RO,'Site or location description'),
-              f('RateOfPay',RO,'Rate of pay'),
-              f('RateOfPayEffectiveDate',RO,'Date rate of pay took effect'),
-              f('ContractedHours',RO,'Contracted hours'),
-              f('RateOfPayType',RO,'How pay rate is calculated'),
-              f('PayGroup',RO,'Pay group'),
-              f('WorkingPattern',RO,'Working pattern'),
-              f('JobGrade',RO,'Job grade'),
-              f('JobGradeDescription',RO,'Job grade description'),
-              f('SectionID',RO,'Section identifier'),
-              f('SectionDescription',RO,'Section description'),
-              f('UD_Group01–UD_Group10',RO,'User-defined grouping fields 01 to 10'),
-              f('IR35',RO,'Whether within IR35'),
-              f('ReportsTo',RO,'Manager name — max 99 characters'),
-              f('ReportsToEmployeeNumber',RO,'Manager employee number'),
-              f('ReportsToFAID',RO,'Manager Fourth Account ID'),
-              f('ContinuousServiceDate',RO,'Continuous service start date'),
-              f('Contract',RO,'Contract type or name'),
-              f('TUPE',RO,'Whether subject to Transfer of Undertakings'),
-            ]
+            fields:[]
           },
           {
             method:'GET',name:'Right to work',
             desc:'Verification documents and status',
             path:'GET /organisations/{id}/Employees/RightToWorkDetails',
-            fields:[
-              f('EmployeeNumber',RO,'Employee reference'),
-              f('PassportNumber / PassportExpiryDate',RO,'Passport details'),
-              f('SettledStatus / PreSettledStatus',RO,'UK immigration status'),
-              f('WorkPermit / WorkPermitType / WorkPermitExpiry',RO,'Work permit details'),
-              f('DocumentsSeenAndCopied',RO,'Whether original documents have been verified'),
-            ]
+            fields:[]
           },
           {
             method:'GET',name:'Probation periods',
             desc:'Track who is in their probation period',
             path:'GET /organisations/{id}/Employees/ProbationPeriod',
-            fields:[
-              f('EmployeeNumber',RO,'Employee reference'),
-              f('ProbationPeriodEnd',RO,'When probation ends'),
-              f('ProbationStatus',RO,'Current probation status'),
-            ]
+            fields:[]
           },
           {
             method:'GET',name:'Fixed term contracts',
             desc:'Contracts with a set end date',
             path:'GET /organisations/{id}/Employees/FixedTermContractEnd',
-            fields:[
-              f('EmployeeNumber',RO,'Employee reference'),
-              f('FixedTermContractEnd',RO,'When the contract ends'),
-              f('JobTitle / Location',RO,'Role and location'),
-            ]
+            fields:[]
           },
           {
             method:'GET',name:'Work anniversaries',
             desc:'When did each employee join?',
             path:'GET /organisations/{id}/Employees/WorkAnniversaries',
-            fields:[
-              f('EmployeeNumber',RO,'Employee reference'),
-              f('StartDate',RO,'Original start date'),
-              f('YearsEmployed',RO,'How many years they have been employed'),
-            ]
+            fields:[]
           },
           {
             method:'GET',name:'Addresses',
             desc:'Employee home and contact addresses',
             path:'GET /organisations/{id}/Employees/Addresses',
-            fields:[
-              f('EffectiveDate',RO,'When this address became current'),
-              f('AddressLine1–4',RO,'Street address'),
-              f('AddressTown / AddressCode',RO,'Town and postcode'),
-              f('AddressCountry',RO,'Country'),
-              f('EmailWork / EmailHome',RO,'Email addresses'),
-              f('TelephoneWork / TelephoneHome / TelephoneMobile',RO,'Phone numbers'),
-            ]
+            fields:[]
           },
           {
             method:'GET',name:'Next of kin',
             desc:'Emergency contact details',
             path:'GET /organisations/{id}/Employees/NextOfKin',
-            fields:[
-              f('Name',RO,'Contact name'),
-              f('Relationship',RO,'Relationship to employee'),
-              f('AddressLine1–3 / AddressTown / AddressCode',RO,'Contact address'),
-              f('TelephoneHome / TelephoneWork / TelephoneMobile',RO,'Contact phone numbers'),
-              f('EmailWork / EmailHome',RO,'Contact email addresses'),
-            ]
+            fields:[]
           },
           {
             method:'GET',name:'Get employee birthdays',
@@ -1189,52 +1109,19 @@ const APIS = [
             method:'GET',name:'Payslips',
             desc:'Employee payslips',
             path:'GET /organisations/{id}/Employees/Payslips',
-            fields:[
-              f('PayslipDate / PaymentDate',RO,'When the payslip was generated and when payment was made'),
-              f('ElementName / ElementCode',RO,'Name and code of each pay element'),
-              f('Units / Rate / Value',RO,'Quantity, rate, and amount for each element'),
-              f('JobDescription / SiteDescription / Department',RO,'Where the pay is attributed'),
-              f('SocialSecurityCategory',RO,'Social security category'),
-              f('SocialSecurityRate',RO,'Social security rate'),
-              f('JobGrade',RO,'Job grade'),
-              f('JobGradeDescription',RO,'Job grade description'),
-            ]
+            fields:[]
           },
           {
             method:'GET',name:'Payroll periods',
             desc:'Pay period definitions',
             path:'GET /organisations/{id}/PayrollPeriod',
-            fields:[
-              f('CompanyName',RO,'Which company'),
-              f('PeriodName / PeriodNumber',RO,'Name and number of the period'),
-              f('PeriodTaxYear',RO,'Which tax year'),
-              f('PayDate',RO,'When employees are paid'),
-              f('PeriodStartDate / PeriodEndDate',RO,'The dates this period covers'),
-              f('PaperworkSubmissionDueTime',RO,'Time paperwork submission is due'),
-              f('RotaSubmissionDueTime',RO,'Time rota submission is due'),
-              f('PreviewReadyTime',RO,'Time preview will be ready'),
-              f('NetFigureDueTime',RO,'Time net figures are due'),
-              f('PayrollApprovalTime',RO,'Time payroll approval is due'),
-              f('BACSOverrideDate',RO,'BACS override date if applicable'),
-              f('BACSPaymentOverrideDate',RO,'BACS payment override date if applicable'),
-              f('TRONCStartDate',RO,'TRONC scheme start date'),
-              f('TRONCEndDate',RO,'TRONC scheme end date'),
-              f('TaxPeriod',RO,'Tax period number'),
-              f('PayrunFrequency',RO,'How frequently payroll runs'),
-              f('DateCreated',RO,'When this diary entry was created'),
-              f('LastModified',RO,'When this entry was last modified'),
-            ]
+            fields:[]
           },
           {
             method:'GET',name:'Deductions',
             desc:'Payroll deductions such as pensions and loans',
             path:'GET /organisations/{id}/Employees/Deductions',
-            fields:[
-              f('ElementName',RO,'Name of the deduction e.g. pension, student loan'),
-              f('StartDateTime / EndDateTime',RO,'When this deduction applies'),
-              f('Units / Rate / Value',RO,'Quantity, rate, and amount'),
-              f('Reference',RO,'Reference number for this deduction'),
-            ]
+            fields:[]
           },
           {
             method:'GET',name:'Get pay parts',
@@ -1248,28 +1135,13 @@ const APIS = [
             path:'GET /organisations/{id}/LabourCost',
             fields:[
               f('ShiftDate',R,'The date these costs relate to'),
-              f('basicpaytotal',RO,'Total basic pay cost'),
-              f('totalpay',RO,'Total pay including all elements'),
-              f('holidaypay',RO,'Cost of holiday pay'),
-              f('overtime',RO,'Overtime cost'),
-              f('employersnationalinsurance',RO,'Employer NI contribution'),
-              f('wagecost',RO,'Total wage cost including NI and pension'),
-              f('totalacthrs',RO,'Total actual hours worked'),
-              f('metrics1–20',RO,'20 configurable fields for custom business metrics such as covers or revenue per head'),
             ]
           },
           {
             method:'GET',name:'Accrual data',
             desc:'Accrued pay and entitlement records',
             path:'GET /organisations/{id}/Employees/Accrual',
-            fields:[
-              f('ElementName',RO,'Usually Holiday Balance'),
-              f('Units',RO,'Days or hours accrued'),
-              f('UnitType',RO,'Whether measured in days or hours'),
-              f('IsFlexible',RO,'Whether this is a flexible entitlement — yes or no'),
-              f('AvgSummary',RO,'Average hours per day — used in calculations'),
-              f('DayRate',RO,'The daily rate for this accrual'),
-            ]
+            fields:[]
           },
           {
             method:'GET',name:'Get employer payments',
@@ -1294,46 +1166,25 @@ const APIS = [
             method:'GET',name:'Companies',
             desc:'Company and employer pay basis data (hidden from Swagger)',
             path:'GET /organisations/{id}/Company',
-            fields:[
-              f('CompanyName',RO,'The company name'),
-              f('Companyid',RO,'Internal company ID'),
-              f('EmployerPayBasisID',RO,'The pay basis identifier'),
-            ]
+            fields:[]
           },
           {
             method:'GET',name:'Locations',
             desc:'Work locations and sites',
             path:'GET /organisations/{id}/Locations',
-            fields:[
-              f('LocationID',RO,'Internal location ID'),
-              f('Description',RO,'Location name — max 50 characters'),
-              f('Country',RO,'UK, Ireland, or Jersey'),
-              f('Area',RO,'Area within the country if applicable'),
-              f('AccountingSystemCode',RO,'Code used in accounting system'),
-              f('LocationGUID',RO,'Globally unique location identifier'),
-            ]
+            fields:[]
           },
           {
             method:'GET',name:'Job titles',
             desc:'All job title definitions',
             path:'GET /organisations/{id}/JobTitles',
-            fields:[
-              f('JobTitleID / JobTitleName',RO,'ID and name of the job title'),
-              f('LocationName / DivisionName',RO,'Which location and division this title belongs to'),
-              f('PayMethod',RO,'How this role is paid'),
-              f('HourlyMinimum / HourlyMaximum',RO,'Hourly pay range if applicable'),
-              f('SalaryMinimum / SalaryMaximum',RO,'Salary range if applicable'),
-            ]
+            fields:[]
           },
           {
             method:'GET',name:'Divisions',
             desc:'Organisational divisions',
             path:'GET /organisations/{id}/Division',
-            fields:[
-              f('DivisionId / DivisionName',RO,'ID and name of the division — max 50 characters'),
-              f('AccountingSystemCode',RO,'Code used in the accounting system'),
-              f('DivisionGUID',RO,'Globally unique division identifier'),
-            ]
+            fields:[]
           },
         ]
       },
@@ -1344,37 +1195,19 @@ const APIS = [
             method:'GET',name:'Rotas',
             desc:'Work schedules and shift patterns',
             path:'GET /organisations/{id}/Rotas',
-            fields:[
-              f('RotaID',RO,'Internal rota ID'),
-              f('RotaStartDate / RotaEndDate',RO,'The dates this rota covers'),
-              f('Status',RO,'Whether the rota is Open, Closed at Location, or Submitted'),
-              f('LocationName / LocationCanonicalID',RO,'Which location this rota is for'),
-            ]
+            fields:[]
           },
           {
             method:'GET',name:'Approved hours',
             desc:'Hours that have been approved for payment',
             path:'GET /organisations/{id}/Employees/ApprovedHours',
-            fields:[
-              f('EmployeeNumber',RO,'Employee reference'),
-              f('ElementName',RO,'Type of hours e.g. basic, overtime'),
-              f('Units',RO,'Number of hours approved'),
-              f('Rate / Value',RO,'Pay rate and total value'),
-            ]
+            fields:[]
           },
           {
             method:'GET',name:'Import logs',
             desc:'A record of all data imports',
             path:'GET /organisations/{id}/ImportLogs',
-            fields:[
-              f('XmlType',RO,'What type of data was imported'),
-              f('ReferenceNumber',RO,'Reference for this import'),
-              f('Status',RO,'Whether the import succeeded or failed'),
-              f('DateCreatedUtc',RO,'When the import was submitted'),
-              f('Error',RO,'Error message if the import failed'),
-              f('SubmissionID',RO,'The submission reference'),
-              f('Result',RO,'The outcome of the import'),
-            ]
+            fields:[]
           },
         ]
       },
@@ -1465,7 +1298,6 @@ const APIS = [
             path:'GET /Organisations/Organisation',
             fields:[
               f('X-FourthCanonicalID',R,'Pass the canonical organisation ID in this header'),
-              f('GroupID',RO,'The GroupID that corresponds to this canonical ID'),
             ]
           },
         ]
@@ -4662,6 +4494,8 @@ const RESPONSE_FIELDS = {
   'ess|My documents':{note:'Returns a list.',fields:[rf('FileName','Text','Document filename'),rf('DocumentType','Text','Type of document')]},
 
   // ── PeopleSystem Integration ──
+  'peoplesystem|Employment records':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('EmploymentReference','Text','Employment reference'),rf('EmploymentStartDate / EmploymentEndDate','Date','Employment period'),rf('AssignmentStartDate / AssignmentEndDate','Date','Assignment period'),rf('TerminationReason','Text','Reason for termination'),rf('Rehire','Text','Whether eligible for rehire'),rf('EmploymentStatus','Text','Current employment status'),rf('IsPermanent','True/False','Whether permanent employment'),rf('IsFulltime','True/False','Whether full time'),rf('IsForeignStudent','True/False','Whether a foreign student'),rf('IsLiveIn','True/False','Whether live-in employee'),rf('EmploymentType','Text','Employment type'),rf('Department','Text','Department name'),rf('DepartmentDescription','Text','Department description'),rf('JobCode','Text','Job code'),rf('JobDescription','Text','Job title or description'),rf('ShiftType','Text','Shift pattern type'),rf('SiteCode','Text','Site or location code'),rf('SiteDescription','Text','Site name'),rf('RateOfPay','Number','Rate of pay'),rf('RateOfPayEffectiveDate','Date','Date rate took effect'),rf('ContractedHours','Number','Contracted hours'),rf('RateOfPayType','Text','How pay rate is calculated'),rf('PayGroup','Text','Pay group'),rf('WorkingPattern','Text','Working pattern'),rf('JobGrade','Text','Job grade'),rf('JobGradeDescription','Text','Job grade description'),rf('SectionID','Text','Section identifier'),rf('SectionDescription','Text','Section description'),rf('UD_Group01–UD_Group10','Text','User-defined grouping fields 01 to 10'),rf('IR35','True/False','Whether within IR35'),rf('ReportsTo','Text','Manager name'),rf('ReportsToEmployeeNumber','Text','Manager employee number'),rf('ReportsToFAID','Text','Manager Fourth Account ID'),rf('ContinuousServiceDate','Date','Continuous service start date'),rf('Contract','Text','Contract type or name'),rf('TUPE','True/False','Whether subject to Transfer of Undertakings')]},
+  'peoplesystem|Deductions':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('ElementName','Text','Name of the deduction e.g. pension, student loan'),rf('StartDateTime / EndDateTime','Date','When this deduction applies'),rf('Units','Number','Number of units'),rf('Rate','Number','Rate'),rf('Value','Number','Amount deducted'),rf('Reference','Text','Reference number for this deduction')]},
   'peoplesystem|Get employees':{note:'Returns a list of employees.',fields:[rf('EmployeeID','Integer','Internal ID'),rf('FAID','Text','Fourth Account ID — 18 character unique identifier'),rf('PayrollNumber','Text','Payroll reference'),rf('CompanyName','Text','Company'),rf('Paybasis','Text','Pay schedule'),rf('FirstName / LastName','Text','Name'),rf('DateOfBirth','Date','Date of birth'),rf('Gender','Text','Gender'),rf('NationalInsuranceNumber','Text','NI number'),rf('IR35','True/False','Whether within IR35'),rf('EthnicOrigin / Religion / SexualOrientation','Text','Diversity data where provided')]},
   'peoplesystem|Create employee':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
   'peoplesystem|Update employee':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
