@@ -305,6 +305,55 @@ const APIS = [
     ],
     groups:[
       {
+        name:'Brands',
+        endpoints:[
+          {
+            method:'GET',name:'Get all brands',
+            desc:'List all brands configured for an organisation',
+            path:'GET /Brand/GetAll',
+            fields:[f('orgAlias',R,'Short name identifying the organisation')]
+          },
+          {
+            method:'POST',name:'Create brand',
+            desc:'Set up a branded onboarding experience for a business unit',
+            path:'POST /Brand/{org}/Create',
+            fields:[
+              f('OrgAlias',R,'Short name identifying the organisation'),
+              f('BrandName',R,'Full display name shown to candidates'),
+              f('PrimaryColour',R,'Main brand colour used throughout onboarding'),
+              f('SmsSenderName',R,'Name that appears when SMS messages are sent to candidates'),
+              f('Logo',O,'URL or path to the brand logo image'),
+              f('IsActive',O,'Whether this brand is live and in use — defaults to active'),
+              f('BothEmergencyContactsMandatory',O,'Whether candidates must provide two emergency contacts'),
+              f('ReferencesMandatory',O,'How many references candidates must provide: 0, 1, or 2'),
+              f('IsDiversityandInclusionRequired',O,'Whether candidates must complete the diversity section'),
+            ]
+          },
+          {
+            method:'POST',name:'Update brand',
+            desc:'Update branding configuration for an organisation',
+            path:'POST /Brand/{org}/update',
+            fields:[
+              f('OrgAlias',R,'Short name identifying the organisation'),
+              f('BrandName',R,'Full display name shown to candidates'),
+              f('PrimaryColour',R,'Main brand colour used throughout onboarding'),
+              f('SmsSenderName',R,'Name that appears when SMS messages are sent to candidates'),
+              f('Logo',O,'URL or path to the brand logo image'),
+              f('IsActive',O,'Whether this brand is live and in use — defaults to active'),
+              f('BothEmergencyContactsMandatory',O,'Whether candidates must provide two emergency contacts'),
+              f('ReferencesMandatory',O,'How many references candidates must provide: 0, 1, or 2'),
+              f('IsDiversityandInclusionRequired',O,'Whether candidates must complete the diversity section'),
+            ]
+          },
+          {
+            method:'POST',name:'Upload brand logo',
+            desc:'Add or replace the logo image for a brand',
+            path:'POST /Brand/{org}/{alias}/UploadLogo',
+            fields:[f('file',R,'The logo image file to upload')]
+          },
+        ]
+      },
+      {
         name:'Requests',
         endpoints:[
           {
@@ -463,55 +512,6 @@ const APIS = [
               f('OrgAlias',R,'Short name identifying the organisation'),
               f('RequestId',R,'The onboarding request GUID whose documents should be deleted'),
             ]
-          },
-        ]
-      },
-      {
-        name:'Brands',
-        endpoints:[
-          {
-            method:'GET',name:'Get all brands',
-            desc:'List all brands configured for an organisation',
-            path:'GET /Brand/GetAll',
-            fields:[f('orgAlias',R,'Short name identifying the organisation')]
-          },
-          {
-            method:'POST',name:'Create brand',
-            desc:'Set up a branded onboarding experience for a business unit',
-            path:'POST /Brand/{org}/Create',
-            fields:[
-              f('OrgAlias',R,'Short name identifying the organisation'),
-              f('BrandName',R,'Full display name shown to candidates'),
-              f('PrimaryColour',R,'Main brand colour used throughout onboarding'),
-              f('SmsSenderName',R,'Name that appears when SMS messages are sent to candidates'),
-              f('Logo',O,'URL or path to the brand logo image'),
-              f('IsActive',O,'Whether this brand is live and in use — defaults to active'),
-              f('BothEmergencyContactsMandatory',O,'Whether candidates must provide two emergency contacts'),
-              f('ReferencesMandatory',O,'How many references candidates must provide: 0, 1, or 2'),
-              f('IsDiversityandInclusionRequired',O,'Whether candidates must complete the diversity section'),
-            ]
-          },
-          {
-            method:'POST',name:'Update brand',
-            desc:'Update branding configuration for an organisation',
-            path:'POST /Brand/{org}/update',
-            fields:[
-              f('OrgAlias',R,'Short name identifying the organisation'),
-              f('BrandName',R,'Full display name shown to candidates'),
-              f('PrimaryColour',R,'Main brand colour used throughout onboarding'),
-              f('SmsSenderName',R,'Name that appears when SMS messages are sent to candidates'),
-              f('Logo',O,'URL or path to the brand logo image'),
-              f('IsActive',O,'Whether this brand is live and in use — defaults to active'),
-              f('BothEmergencyContactsMandatory',O,'Whether candidates must provide two emergency contacts'),
-              f('ReferencesMandatory',O,'How many references candidates must provide: 0, 1, or 2'),
-              f('IsDiversityandInclusionRequired',O,'Whether candidates must complete the diversity section'),
-            ]
-          },
-          {
-            method:'POST',name:'Upload brand logo',
-            desc:'Add or replace the logo image for a brand',
-            path:'POST /Brand/{org}/{alias}/UploadLogo',
-            fields:[f('file',R,'The logo image file to upload')]
           },
         ]
       },
