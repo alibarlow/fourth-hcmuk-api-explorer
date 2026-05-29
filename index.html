@@ -1049,8 +1049,8 @@ const APIS = [
             fields:[]
           },
           {
-            method:'POST',name:'Import payment details',
-            desc:'Submit bank account and payment details for one or more employees',
+            method:'POST',name:'Update payment details',
+            desc:'Submit updated bank account and payment details for one or more employees',
             path:'POST /organisations/{id}/Employees/PaymentDetails',
             fields:[
               f('EmployeeNumber',R,'Which employee'),
@@ -1106,6 +1106,23 @@ const APIS = [
             fields:[
               f('EmployeeNumber',R,'Which employee'),
               f('ME_ID',O,'Multiple employment identifier'),
+              f('Location',O,'Work location'),
+              f('Division',O,'Division'),
+              f('Jobtitle',O,'Job title'),
+              f('StartDate',O,'Start date for this employment'),
+              f('EndDate',O,'End date for this employment'),
+              f('PayType',O,'How this employment is paid'),
+              f('PayAmount',O,'Pay amount'),
+              f('PaidByRota',O,'Whether pay is driven by rota — yes or no'),
+            ]
+          },
+          {
+            method:'PUT',name:'Update multiple employment',
+            desc:'Update an existing additional employment record — beta endpoint',
+            path:'PUT /organisations/{id}/Employees/MultipleEmployments',
+            fields:[
+              f('EmployeeNumber',R,'Which employee'),
+              f('ME_ID',R,'Identifier of the multiple employment record to update'),
               f('Location',O,'Work location'),
               f('Division',O,'Division'),
               f('Jobtitle',O,'Job title'),
@@ -4696,7 +4713,8 @@ const RESPONSE_FIELDS = {
   'peoplesystem|Get employee sources':{note:'Returns a list of customer-defined recruitment source values.',fields:[rf('SourceDescription','Text','Recruitment source label')]},
   'peoplesystem|Get multiple employments':{note:'Returns a list.',fields:[rf('EmployeeNumber','Text','Employee reference'),rf('ME_ID','Text','Multiple employment identifier'),rf('Location','Text','Work location'),rf('Division','Text','Division'),rf('Jobtitle','Text','Job title'),rf('StartDate','Date','Start date'),rf('EndDate','Date','End date'),rf('PayType','Text','How this employment is paid'),rf('PayAmount','Number','Pay amount'),rf('PaidByRota','Text','Whether pay is driven by rota')]},
   'peoplesystem|Create multiple employment':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
-  'peoplesystem|Import payment details':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
+  'peoplesystem|Update payment details':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
+  'peoplesystem|Update multiple employment':{note:'HTTP 202 Accepted.',fields:[rf('SubmissionID','GUID','Reference to track this submission')]},
   'peoplesystem|Get pay parts':{note:'Returns a list — one row per pay element per shift.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('ElementName','Text','Pay element name'),rf('ElementLocalRef','Text','Element local reference'),rf('StartDateTime','Date','Shift start date and time'),rf('EndDateTime','Date','Shift end date and time'),rf('Units','Number','Number of units'),rf('UnitType','Text','Type of unit'),rf('Rate','Number','Rate of pay'),rf('Value','Number','Total value'),rf('Reference','Text','Reference code'),rf('Department','Text','Department code'),rf('DepartmentDescription','Text','Department name'),rf('JobCode','Text','Job code'),rf('JobDescription','Text','Job title'),rf('JobGrade','Text','Job grade'),rf('JobGradeDescription','Text','Job grade description'),rf('SiteCode','Text','Site code'),rf('SiteDescription','Text','Site name'),rf('ShiftType','Text','Type of shift'),rf('IsCallIn','True/False','Whether this was a call-in shift')]},
   'peoplesystem|Addresses':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('Reference','Text','Address reference'),rf('EffectiveDate','Date','When this address became current'),rf('AddressLine1 / AddressLine2 / AddressLine3 / AddressLine4','Text','Street address'),rf('AddressTown','Text','Town or city'),rf('AddressCode','Text','Postcode'),rf('AddressCountry','Text','Country'),rf('AddressMunicipality','Text','Municipality if applicable'),rf('AddressDistrict','Text','District if applicable'),rf('AddressProvince','Text','Province if applicable'),rf('EmailWork / EmailHome','Text','Email addresses'),rf('TelephoneWork / TelephoneHome / TelephoneMobile','Text','Phone numbers')]},
   'peoplesystem|Next of kin':{note:'Returns a list.',fields:[rf('EmployeeID','Integer','Employee ID'),rf('NextOfKinReference','Text','Next of kin record reference'),rf('Name','Text','Contact full name'),rf('Relationship','Text','Relationship to employee'),rf('AddressReference','Text','Address record reference'),rf('AddressEffectiveDate','Date','When the address took effect'),rf('AddressLine1 / AddressLine2 / AddressLine3','Text','Street address'),rf('AddressTown','Text','Town or city'),rf('AddressCode','Text','Postcode'),rf('AddressMunicipality','Text','Municipality if applicable'),rf('AddressDistrict','Text','District if applicable'),rf('AddressProvince','Text','Province if applicable'),rf('TelephoneHome / TelephoneWork / TelephoneMobile','Text','Phone numbers'),rf('EmailWork / EmailHome','Text','Email addresses')]},
