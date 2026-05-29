@@ -860,10 +860,10 @@ const APIS = [
               f('DocumentsSeen',O,'Whether supporting documents have been seen'),
               f('DoctorsNote',O,'Whether a doctors note was provided'),
               f('DoctorsNoteStartDate / DoctorsNoteEndDate',O,'Date range covered by the doctors note'),
-              f('SubmissionID',O,'GUID for submission tracking'),
               section('QualifyingDays (object)'),
-              note('Day-of-week keys — used for SSP qualifying day calculations'),
-              sf('Monday / Tuesday / Wednesday / Thursday / Friday / Saturday / Sunday',O,'Whether the employee works this day'),
+              note('Day-of-week keys for SSP qualifying day calculations. SubmissionID also goes inside this object on create (not at the top level).'),
+              sf('Monday / Tuesday / Wednesday / Thursday / Friday / Saturday / Sunday',O,'Whether the employee works this day — Yes or No'),
+              sf('SubmissionID',O,'GUID for submission tracking — nested inside QualifyingDays on POST'),
             ]
           },
           {
@@ -1205,9 +1205,13 @@ const APIS = [
           },
           {
             method:'GET',name:'Import logs',
-            desc:'A record of all data imports',
+            desc:'A record of all data imports — also used to track the status of absence, employee, and other submissions by filtering with importtype',
             path:'GET /organisations/{id}/ImportLogs',
-            fields:[]
+            fields:[
+              f('importtype',O,'Filter by data type e.g. absence, employee'),
+              f('resourceid',O,'Filter by a specific resource identifier'),
+              f('submissionid',O,'Filter to a specific submission GUID — use this to check the outcome of a POST/PUT/DELETE'),
+            ]
           },
         ]
       },
