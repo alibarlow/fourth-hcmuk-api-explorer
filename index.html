@@ -845,7 +845,13 @@ const APIS = [
             method:'GET',name:'Get absences',
             desc:'Retrieve absence records created via the API — absences entered directly in PeopleSystem are not returned',
             path:'GET /organisations/{id}/Employees/Absences',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'POST',name:'Create absence',
@@ -900,73 +906,147 @@ const APIS = [
             method:'GET',name:'Employment records',
             desc:'Full employment history and details',
             path:'GET /organisations/{id}/Employees/Employments',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+              f('showFormer',O,'Whether to include former employees — defaults to true'),
+            ]
           },
           {
             method:'GET',name:'Right to work',
             desc:'Verification documents and status',
             path:'GET /organisations/{id}/Employees/RightToWorkDetails',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Probation periods',
             desc:'Track who is in their probation period',
             path:'GET /organisations/{id}/Employees/ProbationPeriod',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Fixed term contracts',
             desc:'Contracts with a set end date',
             path:'GET /organisations/{id}/Employees/FixedTermContractEnd',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Work anniversaries',
             desc:'When did each employee join?',
             path:'GET /organisations/{id}/Employees/WorkAnniversaries',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Addresses',
             desc:'Employee home and contact addresses',
             path:'GET /organisations/{id}/Employees/Addresses',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Next of kin',
             desc:'Emergency contact details',
             path:'GET /organisations/{id}/Employees/NextOfKin',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Get employee birthdays',
             desc:'Employee birthday dates',
             path:'GET /organisations/{id}/Employees/Birthdays',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Get country specific data',
             desc:'Country-specific property values per employee',
             path:'GET /organisations/{id}/Employees/CountrySpecific',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Get dependents',
             desc:'Dependent records linked to employees',
             path:'GET /organisations/{id}/Employees/Dependents',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Get passports',
             desc:'Passport details for employees',
             path:'GET /organisations/{id}/Employees/Passports',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Get payment details',
             desc:'Bank account and payment method details per employee',
             path:'GET /organisations/{id}/Employees/PaymentDetails',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+              f('showFormer',O,'Whether to include former employees — defaults to true'),
+            ]
           },
           {
             method:'POST',name:'Update payment details',
@@ -991,19 +1071,37 @@ const APIS = [
             method:'GET',name:'Get Trust ID details',
             desc:'Trust ID right to work check results per employee',
             path:'GET /organisations/{id}/Employees/TrustID',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Get ECR data',
             desc:'Employment change request records and approval workflow state',
             path:'GET /organisations/{id}/Employees/Ecr',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Get documents',
             desc:'Employee document records',
             path:'GET /organisations/{id}/Employees/Documents',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Get employee sources',
@@ -1109,25 +1207,48 @@ const APIS = [
             method:'GET',name:'Payslips',
             desc:'Employee payslips',
             path:'GET /organisations/{id}/Employees/Payslips',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+            ]
           },
           {
             method:'GET',name:'Payroll periods',
             desc:'Pay period definitions',
             path:'GET /organisations/{id}/PayrollPeriod',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Deductions',
             desc:'Payroll deductions such as pensions and loans',
             path:'GET /organisations/{id}/Employees/Deductions',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Get pay parts',
             desc:'Shift-level pay detail for the current pay period — individual pay elements per shift',
             path:'GET /organisations/{id}/Employees/PayParts',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Labour costs',
@@ -1195,13 +1316,25 @@ const APIS = [
             method:'GET',name:'Rotas',
             desc:'Work schedules and shift patterns',
             path:'GET /organisations/{id}/Rotas',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Approved hours',
             desc:'Hours that have been approved for payment',
             path:'GET /organisations/{id}/Employees/ApprovedHours',
-            fields:[]
+            fields:[
+              f('start',O,'Number of days back to begin the range e.g. "7d" — use with duration'),
+              f('duration',O,'Number of days to cover from start e.g. "7d" — use with start'),
+              f('dateFrom',O,'Specific start date YYYY-MM-DD — use with dateTo'),
+              f('dateTo',O,'Specific end date YYYY-MM-DD — use with dateFrom'),
+              f('delta',O,'Set to true to only return records changed since the last sync'),
+            ]
           },
           {
             method:'GET',name:'Import logs',
